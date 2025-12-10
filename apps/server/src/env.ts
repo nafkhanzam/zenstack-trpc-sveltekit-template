@@ -1,0 +1,34 @@
+import "dotenv/config";
+import { z } from "./lib.js";
+
+const envSchema = z.object({
+  // Server
+  NODE_ENV: z
+    .enum(["development", "test", "production"])
+    .default("development"),
+  PORT: z.coerce.number().int().positive().default(3000),
+
+  // Database
+  DATABASE_URL: z.url(),
+  DB_POOL_SIZE: z.coerce.number().int().positive().default(10),
+
+  // Authentication
+  JWT_ACCESS_KEY: z.string().min(32),
+  JWT_ACCESS_EXPIRES_IN: z.string().default("15m"),
+  JWT_REFRESH_KEY: z.string().min(32),
+  JWT_REFRESH_EXPIRES_IN: z.string().default("30d"),
+});
+
+// Parse and validate
+const parsed = envSchema.safeParse(process.env);
+
+if (!parsed.success) {
+  console.error("❌ Invalid environment variables:");
+  console.error(JSON.stringify(z.treeifyError(parsed.error), null, 2));
+  process.exit(1);
+}
+
+// Export type for use elsewhere
+export type Env = z.infer<typeof envSchema>;
+
+export const env: Env = parsed.data;

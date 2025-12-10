@@ -1,0 +1,31 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx watch src/main"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.24.0",
+  "devDependencies": {
+    "@types/cors": "2.8.19",
+    "@types/express": "5.0.6",
+    "@types/node": "24.10.2",
+    "@zenstackhq/cli": "3.0.0-beta.27",
+    "typescript": "5.9.3"
+  },
+  "dependencies": {
+    "@trpc/client": "11.7.2",
+    "@trpc/server": "11.7.2",
+    "@zenstackhq/orm": "3.0.0-beta.27",
+    "@zenstackhq/plugin-policy": "3.0.0-beta.27",
+    "@zenstackhq/tanstack-query": "3.0.0-beta.27",
+    "cors": "2.8.5",
+    "dotenv": "17.2.3",
+    "express": "5.2.1",
+    "zod": "4.1.13"
+  }
+}
