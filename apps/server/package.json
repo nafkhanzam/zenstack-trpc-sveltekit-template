@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "tsx watch src/main"
+    "dev": "tsx watch src/main",
+    "generate": "zen generate --schema src/zenstack/schema.zmodel",
+    "db:push": "zen db push",
+    "migrate:dev": "zen migrate dev",
+    "migrate:deploy": "zen migrate deploy"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +18,7 @@
     "@types/cors": "2.8.19",
     "@types/express": "5.0.6",
     "@types/node": "24.10.2",
+    "@types/pg": "8.15.6",
     "@zenstackhq/cli": "3.0.0-beta.27",
     "typescript": "5.9.3"
   },
@@ -22,10 +27,13 @@
     "@trpc/server": "11.7.2",
     "@zenstackhq/orm": "3.0.0-beta.27",
     "@zenstackhq/plugin-policy": "3.0.0-beta.27",
+    "@zenstackhq/server": "3.0.0-beta.27",
     "@zenstackhq/tanstack-query": "3.0.0-beta.27",
     "cors": "2.8.5",
     "dotenv": "17.2.3",
     "express": "5.2.1",
+    "kysely": "0.28.8",
+    "pg": "8.16.3",
     "zod": "4.1.13"
   }
 }

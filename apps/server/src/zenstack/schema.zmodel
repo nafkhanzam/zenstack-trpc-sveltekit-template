@@ -1,0 +1,32 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+plugin hooks {
+  provider = "@zenstackhq/tanstack-query"
+  target   = "svelte"
+  version  = "v5"
+  output   = "../web/src/lib/hooks"
+}
+
+plugin policy {
+  provider = "@zenstackhq/plugin-policy"
+}
+
+type ID {
+  id String @id @default(nanoid())
+}
+
+type Timestamps {
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+type Base with ID, Timestamps {
+}
+
+model User with Base {
+  studentId String @unique
+  name      String
+}

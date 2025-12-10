@@ -1,11 +1,17 @@
-import { createContext } from "./context.js";
+import { ZenStackMiddleware } from "@zenstackhq/server/express";
+import { RPCApiHandler } from "@zenstackhq/server/api";
+import { createContext, getClient } from "./context.js";
 import { env } from "./env.js";
 import { cors, express, trpcExpress } from "./lib.js";
 import { appRouter } from "./router.ts";
+import { schema } from "./zenstack/schema.ts";
 
 (async () => {
   // express implementation
   const app = express();
+
+  app.use(express.json());
+  app.use(cors());
 
   app.use((req, _res, next) => {
     // request logger
@@ -23,8 +29,6 @@ import { appRouter } from "./router.ts";
     next();
   });
 
-  app.use(cors());
-
   app.use(
     "/trpc",
     trpcExpress.createExpressMiddleware({
@@ -32,6 +36,16 @@ import { appRouter } from "./router.ts";
       createContext,
     }),
   );
+  app.use(
+    "/api/model",
+    ZenStackMiddleware({
+      apiHandler: new RPCApiHandler({ schema }),
+      // getSessionUser extracts the current session user from the request, its
+      // implementation depends on your auth solution
+      getClient,
+    }),
+  );
+  app.use("/api/model");
   app.get("/", (_req, res) => {
     res.send("hello");
   });
