@@ -39,6 +39,9 @@ importers:
         specifier: 4.1.13
         version: 4.1.13
     devDependencies:
+      '@tsconfig/node22':
+        specifier: 22.0.5
+        version: 22.0.5
       '@types/cors':
         specifier: 2.8.19
         version: 2.8.19
@@ -121,6 +124,9 @@ packages:
     resolution: {integrity: sha512-AgB26PXY69sckherIhCacKLY49rxE2XP5h38vr/KMZTbLCL1p8IuIoKPjALTcugC2kbyQ7Lbqo2JDVfRSmPmfQ==}
     peerDependencies:
       typescript: '>=5.7.2'
+
+  '@tsconfig/node22@22.0.5':
+    resolution: {integrity: sha512-hLf2ld+sYN/BtOJjHUWOk568dvjFQkHnLNa6zce25GIH+vxKfvTgm3qpaH6ToF5tu/NN0IH66s+Bb5wElHrLcw==}
 
   '@types/body-parser@1.19.6':
     resolution: {integrity: sha512-HLFeCYgz89uk22N5Qg3dvGvsv46B8GLvKKo1zKG4NybA8U2DiEO3w9lqGg29t/tfLRJpJ6iQxnVw4OnB7MoM9g==}
@@ -1076,6 +1082,8 @@ snapshots:
   '@trpc/server@11.7.2(typescript@5.9.3)':
     dependencies:
       typescript: 5.9.3
+
+  '@tsconfig/node22@22.0.5': {}
 
   '@types/body-parser@1.19.6':
     dependencies:

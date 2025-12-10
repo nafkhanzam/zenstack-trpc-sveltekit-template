@@ -10,8 +10,8 @@ import { schema } from "./zenstack/schema-lite";
   // express implementation
   const app = express();
 
+  app.use(cors({}));
   app.use(express.json());
-  app.use(cors());
 
   app.use((req, _res, next) => {
     // request logger
@@ -24,7 +24,7 @@ import { schema } from "./zenstack/schema-lite";
       }
       return "";
     })();
-    console.log("⬅️ ", req.method, req.path, body);
+    console.log("⬅️ ", req.method, req.path, JSON.parse(JSON.stringify(body)));
 
     next();
   });
@@ -39,7 +39,17 @@ import { schema } from "./zenstack/schema-lite";
   app.use(
     "/api/model",
     ZenStackMiddleware({
-      apiHandler: new RPCApiHandler({ schema }),
+      apiHandler: new RPCApiHandler({
+        schema,
+        log(level, message, error) {
+          if (level === "error") {
+            console.error(">>>>>>>>", error, message);
+            console.error(error);
+            console.error("<<<<<<<<");
+            console.error();
+          }
+        },
+      }),
       // getSessionUser extracts the current session user from the request, its
       // implementation depends on your auth solution
       getClient,
@@ -50,6 +60,9 @@ import { schema } from "./zenstack/schema-lite";
   });
   app.get("/ping", (_req, res) => {
     res.send("pong");
+  });
+  app.use((req, res, next) => {
+    res.status(404).send({ message: "Not found." });
   });
   app.listen(env.PORT, () => {
     console.log(`Listening on port ${env.PORT}...`);

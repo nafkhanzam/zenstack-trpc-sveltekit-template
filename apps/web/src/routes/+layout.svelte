@@ -7,23 +7,24 @@
   import { browser } from "$app/environment";
   import { toast } from "$lib";
   import { Toaster } from "svelte-french-toast";
+  import { env } from "$env/dynamic/public";
 
   let { children } = $props();
 
-    // custom fetch function that adds a custom header
-    const myFetch: FetchFn = (url, options) => {
-        options = options ?? {};
-        options.headers = {
-            ...options.headers,
-            'x-my-custom-header': 'hello world',
-        };
-        return fetch(url, options);
-    };
+  // custom fetch function that adds a custom header
+  const myFetch: FetchFn = (url, options) => {
+      options = options ?? {};
+      options.headers = {
+          ...options.headers,
+          // 'x-my-custom-header': 'hello world',
+      };
+      return fetch(url, options);
+  };
 
-    setQuerySettingsContext({
-        endpoint: '/api/model',
-        fetch: myFetch,
-    });
+  setQuerySettingsContext({
+      endpoint: `${env.PUBLIC_BACKEND_URL}/api/model`,
+      fetch: myFetch,
+  });
 
   const queryClient = new QueryClient({
     // queryCache: new QueryCache({}),
@@ -50,6 +51,7 @@
 
 <svelte:head>
   <link rel="icon" href={favicon} />
+  <title>NZExam</title>
 </svelte:head>
 
 <QueryClientProvider client={queryClient}>
