@@ -3,12 +3,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-plugin hooks {
-  provider = "@zenstackhq/tanstack-query"
-  target   = "svelte"
-  version  = "v5"
-  output   = "../web/src/lib/hooks"
-}
+// plugin hooks {
+//   provider = "@zenstackhq/tanstack-query"
+//   target   = "svelte"
+//   version  = "v5"
+//   output   = "../web/src/lib/hooks"
+// }
 
 plugin policy {
   provider = "@zenstackhq/plugin-policy"

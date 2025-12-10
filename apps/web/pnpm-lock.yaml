@@ -27,14 +27,20 @@ importers:
         specifier: 4.1.17
         version: 4.1.17(vite@7.2.7(jiti@2.6.1)(lightningcss@1.30.2))
       '@tanstack/svelte-query':
-        specifier: 6.0.10
-        version: 6.0.10(svelte@5.45.6)
+        specifier: 5.90.2
+        version: 5.90.2(svelte@5.45.6)
       '@tanstack/svelte-query-devtools':
-        specifier: 6.0.2
-        version: 6.0.2(@tanstack/svelte-query@6.0.10(svelte@5.45.6))(svelte@5.45.6)
+        specifier: 5.90.2
+        version: 5.90.2(@tanstack/svelte-query@5.90.2(svelte@5.45.6))(svelte@5.45.6)
+      '@trpc/client':
+        specifier: 11.7.2
+        version: 11.7.2(@trpc/server@11.7.2(typescript@5.9.3))(typescript@5.9.3)
+      '@zenstackhq/orm':
+        specifier: 3.0.0-beta.27
+        version: 3.0.0-beta.27(zod@4.1.13)
       '@zenstackhq/tanstack-query':
         specifier: 3.0.0-beta.27
-        version: 3.0.0-beta.27(@tanstack/svelte-query@6.0.10(svelte@5.45.6))(zod@4.1.13)
+        version: 3.0.0-beta.27(@tanstack/svelte-query@5.90.2(svelte@5.45.6))(zod@4.1.13)
       daisyui:
         specifier: 5.5.8
         version: 5.5.8
@@ -501,22 +507,33 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7
 
-  '@tanstack/query-core@5.90.12':
-    resolution: {integrity: sha512-T1/8t5DhV/SisWjDnaiU2drl6ySvsHj1bHBCWNXd+/T+Hh1cf6JodyEYMd5sgwm+b/mETT4EV3H+zCVczCU5hg==}
+  '@tanstack/query-core@5.90.2':
+    resolution: {integrity: sha512-k/TcR3YalnzibscALLwxeiLUub6jN5EDLwKDiO7q5f4ICEoptJ+n9+7vcEFy5/x/i6Q+Lb/tXrsKCggf5uQJXQ==}
 
-  '@tanstack/query-devtools@5.91.1':
-    resolution: {integrity: sha512-l8bxjk6BMsCaVQH6NzQEE/bEgFy1hAs5qbgXl0xhzezlaQbPk6Mgz9BqEg2vTLPOHD8N4k+w/gdgCbEzecGyNg==}
+  '@tanstack/query-devtools@5.90.1':
+    resolution: {integrity: sha512-GtINOPjPUH0OegJExZ70UahT9ykmAhmtNVcmtdnOZbxLwT7R5OmRztR5Ahe3/Cu7LArEmR6/588tAycuaWb1xQ==}
 
-  '@tanstack/svelte-query-devtools@6.0.2':
-    resolution: {integrity: sha512-UQdtAPsdJQ2HijMVy+W+/CHyrUZmCkubfAi/sqWsx+1fdY+g7ONa5xroBLiaebC+5jJxvk9kij61QMUHzzJgQA==}
+  '@tanstack/svelte-query-devtools@5.90.2':
+    resolution: {integrity: sha512-Mk6FWRz7rBr1zFlX2aBmRM8RIehCwE3VBE5/SX3L/pG5mFIBOCQqIUeyw+eNIW8RBbPvWDv9MrLohi/8cj9J4A==}
     peerDependencies:
-      '@tanstack/svelte-query': ^6.0.8
-      svelte: ^5.25.0
+      '@tanstack/svelte-query': ^5.90.2
+      svelte: ^3.54.0 || ^4.0.0 || ^5.0.0
 
-  '@tanstack/svelte-query@6.0.10':
-    resolution: {integrity: sha512-J0kM3JNvRcRCM6cbHLeICs73aLp98N/nsihdVEtiNo3MEN4pAnO45qZ2yxX70MrEZ9vffXaCXMCChwgXs1lZ/Q==}
+  '@tanstack/svelte-query@5.90.2':
+    resolution: {integrity: sha512-owjnp0w8sOXlMhLZhucHrsYvCjgjHrVyII/wlqMGefxKFyroZS3xCwTee+IUx7UHbL+QmKr/HQTeTqhgxmxPQw==}
     peerDependencies:
-      svelte: ^5.25.0
+      svelte: ^3.54.0 || ^4.0.0 || ^5.0.0
+
+  '@trpc/client@11.7.2':
+    resolution: {integrity: sha512-OQxqUMfpDvjcszo9dbnqWQXnW2L5IbrKSz2H7l8s+mVM3EvYw7ztQ/gjFIN3iy0NcamiQfd4eE6qjcb9Lm+63A==}
+    peerDependencies:
+      '@trpc/server': 11.7.2
+      typescript: '>=5.7.2'
+
+  '@trpc/server@11.7.2':
+    resolution: {integrity: sha512-AgB26PXY69sckherIhCacKLY49rxE2XP5h38vr/KMZTbLCL1p8IuIoKPjALTcugC2kbyQ7Lbqo2JDVfRSmPmfQ==}
+    peerDependencies:
+      typescript: '>=5.7.2'
 
   '@types/cookie@0.6.0':
     resolution: {integrity: sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA==}
@@ -1380,21 +1397,30 @@ snapshots:
       tailwindcss: 4.1.17
       vite: 7.2.7(jiti@2.6.1)(lightningcss@1.30.2)
 
-  '@tanstack/query-core@5.90.12': {}
+  '@tanstack/query-core@5.90.2': {}
 
-  '@tanstack/query-devtools@5.91.1': {}
+  '@tanstack/query-devtools@5.90.1': {}
 
-  '@tanstack/svelte-query-devtools@6.0.2(@tanstack/svelte-query@6.0.10(svelte@5.45.6))(svelte@5.45.6)':
+  '@tanstack/svelte-query-devtools@5.90.2(@tanstack/svelte-query@5.90.2(svelte@5.45.6))(svelte@5.45.6)':
     dependencies:
-      '@tanstack/query-devtools': 5.91.1
-      '@tanstack/svelte-query': 6.0.10(svelte@5.45.6)
+      '@tanstack/query-devtools': 5.90.1
+      '@tanstack/svelte-query': 5.90.2(svelte@5.45.6)
       esm-env: 1.2.2
       svelte: 5.45.6
 
-  '@tanstack/svelte-query@6.0.10(svelte@5.45.6)':
+  '@tanstack/svelte-query@5.90.2(svelte@5.45.6)':
     dependencies:
-      '@tanstack/query-core': 5.90.12
+      '@tanstack/query-core': 5.90.2
       svelte: 5.45.6
+
+  '@trpc/client@11.7.2(@trpc/server@11.7.2(typescript@5.9.3))(typescript@5.9.3)':
+    dependencies:
+      '@trpc/server': 11.7.2(typescript@5.9.3)
+      typescript: 5.9.3
+
+  '@trpc/server@11.7.2(typescript@5.9.3)':
+    dependencies:
+      typescript: 5.9.3
 
   '@types/cookie@0.6.0': {}
 
@@ -1422,7 +1448,7 @@ snapshots:
     dependencies:
       decimal.js: 10.6.0
 
-  '@zenstackhq/tanstack-query@3.0.0-beta.27(@tanstack/svelte-query@6.0.10(svelte@5.45.6))(zod@4.1.13)':
+  '@zenstackhq/tanstack-query@3.0.0-beta.27(@tanstack/svelte-query@5.90.2(svelte@5.45.6))(zod@4.1.13)':
     dependencies:
       '@zenstackhq/common-helpers': 3.0.0-beta.27
       '@zenstackhq/orm': 3.0.0-beta.27(zod@4.1.13)
@@ -1430,7 +1456,7 @@ snapshots:
       decimal.js: 10.6.0
       superjson: 2.2.6
     optionalDependencies:
-      '@tanstack/svelte-query': 6.0.10(svelte@5.45.6)
+      '@tanstack/svelte-query': 5.90.2(svelte@5.45.6)
     transitivePeerDependencies:
       - better-sqlite3
       - pg

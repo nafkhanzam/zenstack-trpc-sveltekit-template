@@ -18,26 +18,22 @@ const _schema = {
                     name: "id",
                     type: "String",
                     id: true,
-                    attributes: [{ name: "@id" }, { name: "@default", args: [{ name: "value", value: ExpressionUtils.call("nanoid") }] }],
                     default: ExpressionUtils.call("nanoid")
                 },
                 createdAt: {
                     name: "createdAt",
                     type: "DateTime",
-                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
                     default: ExpressionUtils.call("now")
                 },
                 updatedAt: {
                     name: "updatedAt",
                     type: "DateTime",
-                    updatedAt: true,
-                    attributes: [{ name: "@updatedAt" }]
+                    updatedAt: true
                 },
-                email: {
-                    name: "email",
+                studentId: {
+                    name: "studentId",
                     type: "String",
-                    unique: true,
-                    attributes: [{ name: "@unique" }]
+                    unique: true
                 },
                 name: {
                     name: "name",
@@ -47,7 +43,7 @@ const _schema = {
             idFields: ["id"],
             uniqueFields: {
                 id: { type: "String" },
-                email: { type: "String" }
+                studentId: { type: "String" }
             }
         }
     },
@@ -58,7 +54,6 @@ const _schema = {
                 id: {
                     name: "id",
                     type: "String",
-                    attributes: [{ name: "@id" }, { name: "@default", args: [{ name: "value", value: ExpressionUtils.call("nanoid") }] }],
                     default: ExpressionUtils.call("nanoid")
                 }
             }
@@ -69,14 +64,12 @@ const _schema = {
                 createdAt: {
                     name: "createdAt",
                     type: "DateTime",
-                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
                     default: ExpressionUtils.call("now")
                 },
                 updatedAt: {
                     name: "updatedAt",
                     type: "DateTime",
-                    updatedAt: true,
-                    attributes: [{ name: "@updatedAt" }]
+                    updatedAt: true
                 }
             }
         },
@@ -86,20 +79,17 @@ const _schema = {
                 id: {
                     name: "id",
                     type: "String",
-                    attributes: [{ name: "@id" }, { name: "@default", args: [{ name: "value", value: ExpressionUtils.call("nanoid") }] }],
                     default: ExpressionUtils.call("nanoid")
                 },
                 createdAt: {
                     name: "createdAt",
                     type: "DateTime",
-                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
                     default: ExpressionUtils.call("now")
                 },
                 updatedAt: {
                     name: "updatedAt",
                     type: "DateTime",
-                    updatedAt: true,
-                    attributes: [{ name: "@updatedAt" }]
+                    updatedAt: true
                 }
             }
         }

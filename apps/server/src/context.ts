@@ -1,6 +1,6 @@
 import type { ExpressMiddlewareOptions } from "@zenstackhq/server/express";
 import type { trpcExpress } from "./lib.js";
-import type { SchemaType } from "./zenstack/schema.js";
+import type { SchemaType } from "./zenstack/schema-lite";
 import { db } from "./db.js";
 
 const getUserFromToken = (token: string | undefined) => {

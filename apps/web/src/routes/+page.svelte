@@ -1,10 +1,16 @@
 <script lang="ts">
+  import Query from "$lib/components/Query.svelte";
   import { token } from "$lib/stores/token.svelte";
+  import { client } from "$lib/client.svelte";
 
+  const q = client.user.useFindMany({});
 </script>
-
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
 
 <p>Current token: {token.value}</p>
 <input type="text" bind:value={token.value} />
+
+<Query {q}>
+  {#snippet children(data)}
+    {data}
+  {/snippet}
+</Query>

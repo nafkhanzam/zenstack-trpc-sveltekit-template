@@ -4,7 +4,7 @@ import { createContext, getClient } from "./context.js";
 import { env } from "./env.js";
 import { cors, express, trpcExpress } from "./lib.js";
 import { appRouter } from "./router.ts";
-import { schema } from "./zenstack/schema.ts";
+import { schema } from "./zenstack/schema-lite";
 
 (async () => {
   // express implementation
@@ -45,7 +45,6 @@ import { schema } from "./zenstack/schema.ts";
       getClient,
     }),
   );
-  app.use("/api/model");
   app.get("/", (_req, res) => {
     res.send("hello");
   });
