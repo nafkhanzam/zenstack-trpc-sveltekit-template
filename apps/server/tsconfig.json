@@ -21,6 +21,7 @@
     "**/.*/",
     "dist",
     "**/*.spec.ts",
-    "**/*.test.ts"
+    "**/*.test.ts",
+    "src/zenstack/**/*"
   ]
 }

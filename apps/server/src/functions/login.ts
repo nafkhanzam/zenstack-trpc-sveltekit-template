@@ -14,7 +14,7 @@ export const login = t.procedure
       password: z.string().nonempty(),
     }),
   )
-  .mutation(async ({ ctx: { db, req }, input }) => {
+  .mutation(async ({ ctx: { db, req, auditLog }, input }) => {
     const user = await db.user.findFirst({
       where: {
         username: input.username,
@@ -34,17 +34,7 @@ export const login = t.procedure
       role: user.role,
     });
 
-    db.auditLog
-      .create({
-        data: {
-          action: `trpc.login`,
-          data: {
-            requestHeaders: req.headers,
-            user,
-          },
-        },
-      })
-      .then();
+    auditLog(`trpc.login`);
 
     return {
       token,

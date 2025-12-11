@@ -7,9 +7,19 @@
       "**/node_modules",
       "**/.git",
       "**/dist",
-      "**/.svelte-kit"
+      "**/.svelte-kit",
+      "**/node_modules/@zenstackhq/orm",
+      "**/node_modules/@zenstackhq/plugin-policy",
+      "**/node_modules/.pnpm/@zenstackhq+orm@*",
+      "**/node_modules/.pnpm/@zenstackhq+plugin-policy@*"
     ]
   },
+  "typescript.tsserver.excludeDirs": [
+    "**/node_modules/@zenstackhq/orm",
+    "**/node_modules/@zenstackhq/plugin-policy",
+    "**/node_modules/.pnpm/@zenstackhq+orm@*",
+    "**/node_modules/.pnpm/@zenstackhq+plugin-policy@*"
+  ],
   "search.exclude": {
     "**/node_modules": true,
     "**/dist": true,

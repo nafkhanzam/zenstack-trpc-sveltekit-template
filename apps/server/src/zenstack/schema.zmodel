@@ -44,6 +44,4 @@ model AuditLog {
 
   action    String
   data      Json
-
-  @@allow('all', true)
 }
