@@ -1,0 +1,27 @@
+{
+  "typescript.tsserver.maxTsServerMemory": 4096,
+  "typescript.tsserver.experimental.enableProjectDiagnostics": false,
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.tsserver.watchOptions": {
+    "excludeDirectories": [
+      "**/node_modules",
+      "**/.git",
+      "**/dist",
+      "**/.svelte-kit"
+    ]
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.svelte-kit": true
+  },
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/.svelte-kit/**": true
+  },
+  "typescript.preferences.autoImportFileExcludePatterns": [
+    "**/node_modules/@zenstackhq/**",
+    "**/node_modules/.pnpm/**"
+  ]
+}

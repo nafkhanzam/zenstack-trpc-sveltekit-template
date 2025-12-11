@@ -5,9 +5,12 @@
 
 /* eslint-disable */
 
-import { type SchemaType as $Schema } from "./schema-lite";
+import { schema as $schema, type SchemaType as $Schema } from "./schema-lite";
 import { type ModelResult as $ModelResult, type TypeDefResult as $TypeDefResult } from "@zenstackhq/orm";
 export type User = $ModelResult<$Schema, "User">;
+export type AuditLog = $ModelResult<$Schema, "AuditLog">;
 export type ID = $TypeDefResult<$Schema, "ID">;
 export type Timestamps = $TypeDefResult<$Schema, "Timestamps">;
 export type Base = $TypeDefResult<$Schema, "Base">;
+export const Role = $schema.enums.Role.values;
+export type Role = (typeof Role)[keyof typeof Role];

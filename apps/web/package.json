@@ -35,7 +35,7 @@
     "svelte-check": "4.3.4",
     "svelte-french-toast": "1.2.0",
     "tailwindcss": "4.1.17",
-    "typescript": "5.9.3",
+    "typescript": "6.0.0-dev.20251210",
     "vite": "7.2.7",
     "vite-plugin-node-polyfills": "^0.24.0"
   }

@@ -30,20 +30,51 @@ const _schema = {
                     type: "DateTime",
                     updatedAt: true
                 },
-                studentId: {
-                    name: "studentId",
+                username: {
+                    name: "username",
                     type: "String",
                     unique: true
+                },
+                passwordHash: {
+                    name: "passwordHash",
+                    type: "String"
                 },
                 name: {
                     name: "name",
                     type: "String"
+                },
+                role: {
+                    name: "role",
+                    type: "Role"
                 }
             },
             idFields: ["id"],
             uniqueFields: {
                 id: { type: "String" },
-                studentId: { type: "String" }
+                username: { type: "String" }
+            }
+        },
+        AuditLog: {
+            name: "AuditLog",
+            fields: {
+                timestamp: {
+                    name: "timestamp",
+                    type: "DateTime",
+                    id: true,
+                    default: ExpressionUtils.call("now")
+                },
+                action: {
+                    name: "action",
+                    type: "String"
+                },
+                data: {
+                    name: "data",
+                    type: "Json"
+                }
+            },
+            idFields: ["timestamp"],
+            uniqueFields: {
+                timestamp: { type: "DateTime" }
             }
         }
     },
@@ -91,6 +122,15 @@ const _schema = {
                     type: "DateTime",
                     updatedAt: true
                 }
+            }
+        }
+    },
+    enums: {
+        Role: {
+            values: {
+                SUPERADMIN: "SUPERADMIN",
+                ADMIN: "ADMIN",
+                USER: "USER"
             }
         }
     },

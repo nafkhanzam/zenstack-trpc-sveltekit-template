@@ -26,7 +26,24 @@ type Timestamps {
 type Base with ID, Timestamps {
 }
 
+enum Role {
+  SUPERADMIN
+  ADMIN
+  USER
+}
+
 model User with Base {
-  studentId String @unique
-  name      String
+  username     String @unique
+  passwordHash String
+  name         String
+  role         Role
+}
+
+model AuditLog {
+  timestamp DateTime @id @default(now())
+
+  action    String
+  data      Json
+
+  @@allow('all', true)
 }

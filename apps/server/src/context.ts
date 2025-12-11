@@ -3,29 +3,31 @@ import type { trpcExpress } from "./lib.js";
 import type { SchemaType } from "./zenstack/schema-lite";
 import { db } from "./db.js";
 
-const getUserFromToken = (token: string | undefined) => {
-  if (token !== "secret") {
+const getUserFromToken = async (token: string | undefined) => {
+  if (!token) {
     return null;
   }
   return {
-    name: "alex",
+    username: "alex",
   };
 };
 
-export const createContext = ({
+export const createContext = async ({
   req,
   res,
 }: trpcExpress.CreateExpressContextOptions) => {
+  const user = await getUserFromToken(req.headers.authorization);
+  const dbauth = db.$setAuth(user ?? undefined);
   return {
     req,
     res,
-    user: getUserFromToken(req.headers.authorization),
+    user,
+    db,
   };
 };
-export const getClient: ExpressMiddlewareOptions<SchemaType>["getClient"] = (
-  req,
-) => {
-  const user = getUserFromToken(req.headers.authorization);
-  return db.$setAuth(user ?? undefined);
-};
+export const getClient: ExpressMiddlewareOptions<SchemaType>["getClient"] =
+  async (req) => {
+    const user = await getUserFromToken(req.headers.authorization);
+    return db.$setAuth(user ?? undefined);
+  };
 export type Context = Awaited<ReturnType<typeof createContext>>;

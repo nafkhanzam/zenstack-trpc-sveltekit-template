@@ -1,16 +1,10 @@
-import { initTRPC } from "@trpc/server";
-import { z } from "zod";
-import type { Context } from "./context.ts";
-import { sleep } from "./lib.ts";
-
-const t = initTRPC.context<Context>().create();
+import { hello } from "./functions/hello.ts";
+import { login } from "./functions/login.js";
+import { t } from "./trpc.ts";
 
 export const appRouter = t.router({
-  hello: t.procedure.input(z.string().nullish()).query(async (opts) => {
-    await sleep(3000);
-    return `hello ${opts.input ?? opts.ctx.user?.name ?? "world"}`;
-  }),
-  // ...
+  hello,
+  login,
 });
 
 export type AppRouter = typeof appRouter;
