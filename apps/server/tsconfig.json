@@ -14,14 +14,5 @@
     "target": "esnext",
     "outDir": "dist",
     "disableSourceOfProjectReferenceRedirect": true
-  },
-  "include": ["src/**/*"],
-  "exclude": [
-    "**/node_modules",
-    "**/.*/",
-    "dist",
-    "**/*.spec.ts",
-    "**/*.test.ts",
-    "src/zenstack/**/*"
-  ]
+  }
 }

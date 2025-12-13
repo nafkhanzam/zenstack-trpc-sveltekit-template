@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "typecheck": "pnpm -r typecheck"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

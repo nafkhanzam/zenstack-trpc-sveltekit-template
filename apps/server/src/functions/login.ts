@@ -34,7 +34,7 @@ export const login = t.procedure
       role: user.role,
     });
 
-    auditLog(`trpc.login`);
+    auditLog(`trpc.login`, { token });
 
     return {
       token,

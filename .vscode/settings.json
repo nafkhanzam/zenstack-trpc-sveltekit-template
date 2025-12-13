@@ -1,37 +1,7 @@
 {
   "typescript.tsserver.maxTsServerMemory": 4096,
   "typescript.tsserver.experimental.enableProjectDiagnostics": false,
-  "typescript.enablePromptUseWorkspaceTsdk": true,
-  "typescript.tsserver.watchOptions": {
-    "excludeDirectories": [
-      "**/node_modules",
-      "**/.git",
-      "**/dist",
-      "**/.svelte-kit",
-      "**/node_modules/@zenstackhq/orm",
-      "**/node_modules/@zenstackhq/plugin-policy",
-      "**/node_modules/.pnpm/@zenstackhq+orm@*",
-      "**/node_modules/.pnpm/@zenstackhq+plugin-policy@*"
-    ]
-  },
-  "typescript.tsserver.excludeDirs": [
-    "**/node_modules/@zenstackhq/orm",
-    "**/node_modules/@zenstackhq/plugin-policy",
-    "**/node_modules/.pnpm/@zenstackhq+orm@*",
-    "**/node_modules/.pnpm/@zenstackhq+plugin-policy@*"
-  ],
-  "search.exclude": {
-    "**/node_modules": true,
-    "**/dist": true,
-    "**/.svelte-kit": true
-  },
-  "files.watcherExclude": {
-    "**/node_modules/**": true,
-    "**/dist/**": true,
-    "**/.svelte-kit/**": true
-  },
-  "typescript.preferences.autoImportFileExcludePatterns": [
-    "**/node_modules/@zenstackhq/**",
-    "**/node_modules/.pnpm/**"
-  ]
+  "typescript.tsserver.enableRegionDiagnostics": false,
+  "typescript.tsserver.web.projectWideIntellisense.enabled": false,
+  "typescript.tsserver.web.typeAcquisition.enabled": false
 }

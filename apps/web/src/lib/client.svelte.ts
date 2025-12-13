@@ -1,6 +1,6 @@
 //? tRPC
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
-import type { AppRouter } from "server/src/router";
+import type { AppRouter } from "../../../server/src/router";
 import { env } from "$env/dynamic/public";
 
 export const trpc = createTRPCClient<AppRouter>({

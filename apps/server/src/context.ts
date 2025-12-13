@@ -1,5 +1,5 @@
 import type { ExpressMiddlewareOptions } from "@zenstackhq/server/express";
-import { jwt, type trpcExpress } from "./lib.js";
+import { JsonObject, JsonValue, jwt, type trpcExpress } from "./lib.js";
 import type { SchemaType } from "./zenstack/schema-lite";
 import { db } from "./db.js";
 import { env } from "./env.js";
@@ -17,6 +17,9 @@ const getUserFromToken = async (token: string | undefined) => {
       id: jwtObject.id,
     },
   });
+  if (!user) {
+    return null;
+  }
   return {
     id: user.id,
     username: user.username,
@@ -24,21 +27,33 @@ const getUserFromToken = async (token: string | undefined) => {
   };
 };
 
+const headersToObject = (rawHeaders: string[]) => {
+  const headers: JsonObject = {};
+  for (let i = 0; i < rawHeaders.length; i += 2) {
+    const key = rawHeaders[i];
+    const value = rawHeaders.at(i + 1) ?? null;
+    headers[key] = value;
+  }
+  return headers;
+};
 export const createContext = async ({
   req,
   res,
 }: trpcExpress.CreateExpressContextOptions) => {
   const user = await getUserFromToken(req.headers.authorization);
   const dbauth = db.$setAuth(user ?? undefined);
-  const auditLog = async (action: string, data: unknown = null) => {
+  const auditLog = async (
+    action: string,
+    data: JsonValue | null | undefined = null,
+  ) => {
     return db.auditLog
       .create({
         data: {
           action,
           data: {
-            requestHeaders: Object.fromEntries(Object.entries(req.headers)),
+            requestHeaders: headersToObject(req.rawHeaders),
             user,
-            data: data as any,
+            data: data,
           },
         },
       })
