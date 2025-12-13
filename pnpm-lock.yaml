@@ -6,4 +6,19 @@ settings:
 
 importers:
 
-  .: {}
+  .:
+    devDependencies:
+      typescript:
+        specifier: 6.0.0-dev.20251210
+        version: 6.0.0-dev.20251210
+
+packages:
+
+  typescript@6.0.0-dev.20251210:
+    resolution: {integrity: sha512-IrJNDyAX7sgCsT+65JI8ymvq1Zm9bvioxnN8+F/LCtAQOpv3uWKVH7JbtLOEbi8+4W2HOut43A+z/MFn5m8F7A==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
+snapshots:
+
+  typescript@6.0.0-dev.20251210: {}

@@ -6,8 +6,8 @@
 /* eslint-disable */
 
 import { type SchemaType as $Schema } from "./schema-lite";
-import type { FindManyArgs as $FindManyArgs, FindUniqueArgs as $FindUniqueArgs, FindFirstArgs as $FindFirstArgs, CreateArgs as $CreateArgs, CreateManyArgs as $CreateManyArgs, CreateManyAndReturnArgs as $CreateManyAndReturnArgs, UpdateArgs as $UpdateArgs, UpdateManyArgs as $UpdateManyArgs, UpdateManyAndReturnArgs as $UpdateManyAndReturnArgs, UpsertArgs as $UpsertArgs, DeleteArgs as $DeleteArgs, DeleteManyArgs as $DeleteManyArgs, CountArgs as $CountArgs, AggregateArgs as $AggregateArgs, GroupByArgs as $GroupByArgs, WhereInput as $WhereInput, SelectInput as $SelectInput, IncludeInput as $IncludeInput, OmitInput as $OmitInput, ClientOptions as $ClientOptions } from "@zenstackhq/orm";
-import type { SimplifiedModelResult as $SimplifiedModelResult, SelectIncludeOmit as $SelectIncludeOmit } from "@zenstackhq/orm";
+import type { FindManyArgs as $FindManyArgs, FindUniqueArgs as $FindUniqueArgs, FindFirstArgs as $FindFirstArgs, CreateArgs as $CreateArgs, CreateManyArgs as $CreateManyArgs, CreateManyAndReturnArgs as $CreateManyAndReturnArgs, UpdateArgs as $UpdateArgs, UpdateManyArgs as $UpdateManyArgs, UpdateManyAndReturnArgs as $UpdateManyAndReturnArgs, UpsertArgs as $UpsertArgs, DeleteArgs as $DeleteArgs, DeleteManyArgs as $DeleteManyArgs, CountArgs as $CountArgs, AggregateArgs as $AggregateArgs, GroupByArgs as $GroupByArgs, WhereInput as $WhereInput, SelectInput as $SelectInput, IncludeInput as $IncludeInput, OmitInput as $OmitInput, QueryOptions as $QueryOptions } from "@zenstackhq/orm";
+import type { SimplifiedPlainResult as $Result, SelectIncludeOmit as $SelectIncludeOmit } from "@zenstackhq/orm";
 export type UserFindManyArgs = $FindManyArgs<$Schema, "User">;
 export type UserFindUniqueArgs = $FindUniqueArgs<$Schema, "User">;
 export type UserFindFirstArgs = $FindFirstArgs<$Schema, "User">;
@@ -27,7 +27,7 @@ export type UserWhereInput = $WhereInput<$Schema, "User">;
 export type UserSelect = $SelectInput<$Schema, "User">;
 export type UserInclude = $IncludeInput<$Schema, "User">;
 export type UserOmit = $OmitInput<$Schema, "User">;
-export type UserGetPayload<Args extends $SelectIncludeOmit<$Schema, "User", true>, Options extends $ClientOptions<$Schema> = $ClientOptions<$Schema>> = $SimplifiedModelResult<$Schema, "User", Options, Args>;
+export type UserGetPayload<Args extends $SelectIncludeOmit<$Schema, "User", true>, Options extends $QueryOptions<$Schema> = $QueryOptions<$Schema>> = $Result<$Schema, "User", Args, Options>;
 export type AuditLogFindManyArgs = $FindManyArgs<$Schema, "AuditLog">;
 export type AuditLogFindUniqueArgs = $FindUniqueArgs<$Schema, "AuditLog">;
 export type AuditLogFindFirstArgs = $FindFirstArgs<$Schema, "AuditLog">;
@@ -47,4 +47,4 @@ export type AuditLogWhereInput = $WhereInput<$Schema, "AuditLog">;
 export type AuditLogSelect = $SelectInput<$Schema, "AuditLog">;
 export type AuditLogInclude = $IncludeInput<$Schema, "AuditLog">;
 export type AuditLogOmit = $OmitInput<$Schema, "AuditLog">;
-export type AuditLogGetPayload<Args extends $SelectIncludeOmit<$Schema, "AuditLog", true>, Options extends $ClientOptions<$Schema> = $ClientOptions<$Schema>> = $SimplifiedModelResult<$Schema, "AuditLog", Options, Args>;
+export type AuditLogGetPayload<Args extends $SelectIncludeOmit<$Schema, "AuditLog", true>, Options extends $QueryOptions<$Schema> = $QueryOptions<$Schema>> = $Result<$Schema, "AuditLog", Args, Options>;

@@ -24,8 +24,9 @@
     "@tanstack/svelte-query": "5.90.2",
     "@tanstack/svelte-query-devtools": "5.90.2",
     "@trpc/client": "11.7.2",
-    "@zenstackhq/orm": "3.0.0-beta.27",
-    "@zenstackhq/tanstack-query": "3.0.0-beta.27",
+    "@trpc/server": "11.7.2",
+    "@zenstackhq/orm": "3.0.0-beta.29",
+    "@zenstackhq/tanstack-query": "3.0.0-beta.29",
     "buffer": "6.0.3",
     "daisyui": "5.5.8",
     "prettier": "3.7.4",
@@ -38,6 +39,7 @@
     "tailwindcss": "4.1.17",
     "typescript": "6.0.0-dev.20251210",
     "vite": "7.2.7",
-    "vite-plugin-node-polyfills": "^0.24.0"
+    "vite-plugin-node-polyfills": "^0.24.0",
+    "zod": "4.1.13"
   }
 }
