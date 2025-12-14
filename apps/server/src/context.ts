@@ -10,6 +10,9 @@ const getUserFromToken = async (token: string | undefined) => {
     return null;
   }
   const jwtObject = verifyAccessToken(token);
+  if (!jwtObject) {
+    return null;
+  }
   const user = await db.user.findUnique({
     where: {
       id: jwtObject.id,
@@ -75,5 +78,5 @@ export type Context = Awaited<ReturnType<typeof createContext>>;
 export const getClient: ExpressMiddlewareOptions<SchemaType>["getClient"] =
   async (req) => {
     const user = await getUserFromToken(req.headers.authorization);
-    return db.$setAuth(user ?? undefined);
+    return authDb.$setAuth(user ?? undefined);
   };

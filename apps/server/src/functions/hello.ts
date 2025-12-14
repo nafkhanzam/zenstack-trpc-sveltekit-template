@@ -5,7 +5,7 @@ import { t } from "../trpc.ts";
 export const hello = t.procedure
   .input(z.string().nullish())
   .query(async (opts) => {
-    await sleep(3000);
+    await sleep(1000);
     // throw new TRPCError({
     //   code: "INTERNAL_SERVER_ERROR",
     //   message: `Testing`,

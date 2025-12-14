@@ -1,5 +1,9 @@
 import { TRPCError } from "@trpc/server";
-import { buildAccessToken, buildRefreshToken } from "../common.js";
+import {
+  buildAccessToken,
+  buildRefreshToken,
+  generateTokensFromUser,
+} from "../common.js";
 import { bcrypt, z } from "../lib.js";
 import { t } from "../trpc.js";
 
@@ -28,15 +32,9 @@ export const login = t.procedure
       throw invalidCredentialsError;
     }
 
-    const accessToken = buildAccessToken({
-      id: user.id,
-      username: user.username,
-      role: user.role,
-    });
+    const tokens = await generateTokensFromUser(ctx, user);
 
-    const refreshToken = await buildRefreshToken(ctx, user.id);
+    auditLog(`trpc.login`, { tokens });
 
-    auditLog(`trpc.login`, { accessToken, refreshToken });
-
-    return { accessToken, refreshToken };
+    return tokens;
   });

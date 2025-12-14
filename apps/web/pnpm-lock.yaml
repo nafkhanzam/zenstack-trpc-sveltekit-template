@@ -1,7 +1,7 @@
 lockfileVersion: '9.0'
 
 settings:
-  autoInstallPeers: true
+  autoInstallPeers: false
   excludeLinksFromLockfile: false
 
 importers:
@@ -62,6 +62,9 @@ importers:
       server:
         specifier: link:../server
         version: link:../server
+      superjson:
+        specifier: 2.2.6
+        version: 2.2.6
       svelte:
         specifier: 5.45.6
         version: 5.45.6

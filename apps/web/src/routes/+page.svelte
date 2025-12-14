@@ -6,10 +6,20 @@
 
   const trpcQuery = createQuery({
     queryKey: [],
-    queryFn: async () => trpc.hello.query("Nafkhan"),
+    queryFn: async () => trpc.me.query(),
   });
 
   const zenstackQuery = client.user.useFindMany();
+
+  const onBtnClick = async () => {
+    const res = await trpc.register.mutate({
+      name: `Dummy Name`,
+      username: "dummy",
+      password: "dummy",
+    });
+    token.value = res.accessToken;
+    refresh.value = res.refreshToken;
+  }
 </script>
 
 <p>accessToken: {token.value}</p>
@@ -27,3 +37,5 @@
     {JSON.stringify(data)}
   {/snippet}
 </Query>
+
+<button class="btn btn-success" onclick={() => onBtnClick()}>Register!</button>

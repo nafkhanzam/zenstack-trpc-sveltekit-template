@@ -1,18 +1,29 @@
 //? tRPC
-import { createTRPCClient, httpBatchLink } from "@trpc/client";
+import {
+  createTRPCClient,
+  httpBatchLink,
+  httpSubscriptionLink,
+  loggerLink,
+  splitLink,
+} from "@trpc/client";
+import SuperJSON from "superjson";
 import type { AppRouter } from "../../../server/src/router";
 import { env } from "$env/dynamic/public";
 
 export const trpc = createTRPCClient<AppRouter>({
   links: [
-    httpBatchLink({
-      url: `${env.PUBLIC_BACKEND_URL}/trpc`,
-      fetch(url, options) {
-        return fetch(url, {
-          ...options,
-          // credentials: "include",
-        });
-      },
+    loggerLink({}),
+    splitLink({
+      // uses the httpSubscriptionLink for subscriptions
+      condition: (op) => op.type === "subscription",
+      true: httpSubscriptionLink({
+        transformer: SuperJSON,
+        url: `${env.PUBLIC_BACKEND_URL}/trpc`,
+      }),
+      false: httpBatchLink({
+        transformer: SuperJSON,
+        url: `${env.PUBLIC_BACKEND_URL}/trpc`,
+      }),
     }),
   ],
 });

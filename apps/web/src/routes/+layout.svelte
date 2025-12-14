@@ -8,12 +8,23 @@
   import { toast } from "$lib";
   import { Toaster } from "svelte-french-toast";
   import { env } from "$env/dynamic/public";
-  import { refresh, token } from "$lib/stores/token.svelte";
+  import { refresh, token, user } from "$lib/stores/token.svelte";
   import { trpc } from "$lib/client.svelte";
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
 
   let { children } = $props();
+
+  $effect(() => {
+    (async () => {
+      const jwtToken = token.value;
+      if (!jwtToken) {
+        user.data = null;
+      }
+      const me = await trpc.me.query();
+      user.data = me;
+    })()
+  });
 
   // custom fetch function that adds a custom header
   const myFetch = async (url: string, options?: RequestInit, refreshed = false): Promise<Response> => {

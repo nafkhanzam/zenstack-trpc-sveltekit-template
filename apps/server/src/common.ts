@@ -1,8 +1,9 @@
 import { TRPCError } from "@trpc/server";
-import { env } from "./env";
-import { jwtPayloadV, type JWTPayload } from "./jwt";
-import { bcrypt, jwt, z } from "./lib";
 import { Context } from "./context";
+import { env } from "./env";
+import { bcrypt, jwt, z } from "./lib";
+import { jwtPayloadV, type JWTPayload } from "./shared/jwt";
+import { User } from "./zenstack/models";
 
 export const unauthorizedError = new TRPCError({
   code: "UNAUTHORIZED",
@@ -21,10 +22,15 @@ export const buildAccessToken = (payload: JWTPayload): string => {
   return token;
 };
 
-export const verifyAccessToken = (token: string): JWTPayload => {
-  const payload = jwt.verify(token, env.JWT_ACCESS_KEY);
-  const jwtObject = jwtPayloadV.parse(payload);
-  return jwtObject;
+export const verifyAccessToken = (token: string): JWTPayload | null => {
+  try {
+    const payload = jwt.verify(token, env.JWT_ACCESS_KEY);
+    const jwtObject = jwtPayloadV.parse(payload);
+    return jwtObject;
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
 };
 
 export const buildRefreshToken = async (ctx: Context, userId: string) => {
@@ -50,4 +56,16 @@ const SALT_ROUNDS = 12;
 
 export const hashPassword = (password: string): string => {
   return bcrypt.hashSync(password, SALT_ROUNDS);
+};
+
+export const generateTokensFromUser = async (ctx: Context, user: User) => {
+  const accessToken = buildAccessToken({
+    id: user.id,
+    username: user.username,
+    role: user.role,
+  });
+
+  const refreshToken = await buildRefreshToken(ctx, user.id);
+
+  return { accessToken, refreshToken };
 };

@@ -43,17 +43,14 @@ import { schema } from "./zenstack/schema-lite";
         schema,
         log(level, message, error) {
           if (level === "error") {
-            console.error(">>>>>>>>", error, message);
             console.error(error);
-            console.error("<<<<<<<<");
-            console.error();
           }
         },
       }),
       // getSessionUser extracts the current session user from the request, its
       // implementation depends on your auth solution
       getClient,
-      sendResponse: false,
+      sendResponse: true,
     }),
   );
   app.get("/", (_req, res) => {
@@ -63,7 +60,11 @@ import { schema } from "./zenstack/schema-lite";
     res.send("pong");
   });
   app.use((req, res, next) => {
-    res.status(404).send({ message: "Not found." });
+    res.status(404).send({
+      error: {
+        message: "Not found.",
+      },
+    });
   });
 
   // Error handler middleware - must be defined after all routes
