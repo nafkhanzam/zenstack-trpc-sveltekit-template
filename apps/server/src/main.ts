@@ -5,6 +5,7 @@ import { env, prod } from "./env.js";
 import { cors, express, trpcExpress } from "./lib.js";
 import { appRouter } from "./router.ts";
 import { schema } from "./zenstack/schema-lite";
+import console from "console";
 
 (async () => {
   // express implementation
@@ -34,6 +35,10 @@ import { schema } from "./zenstack/schema-lite";
     trpcExpress.createExpressMiddleware({
       router: appRouter,
       createContext,
+      onError: ({ error }) => {
+        console.error(error.code, error.name, error.message);
+        console.error(error.stack);
+      },
     }),
   );
   app.use(

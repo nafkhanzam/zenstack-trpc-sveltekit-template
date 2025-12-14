@@ -9,11 +9,24 @@
     queryFn: async () => trpc.me.query(),
   });
 
-  const zenstackQuery = client.user.useFindMany();
+  const zenstackQuery = client.user.useFindUnique({
+    where: {
+      id: "123"
+    }
+  });
 
-  const onBtnClick = async () => {
+  const onRegisterClick = async () => {
     const res = await trpc.register.mutate({
       name: `Dummy Name`,
+      username: "dummy",
+      password: "dummy",
+    });
+    token.value = res.accessToken;
+    refresh.value = res.refreshToken;
+  }
+
+  const onLoginClick = async () => {
+    const res = await trpc.login.mutate({
       username: "dummy",
       password: "dummy",
     });
@@ -28,7 +41,7 @@
 
 <Query q={trpcQuery}>
   {#snippet children(data)}
-    {data}
+    {JSON.stringify(data)}
   {/snippet}
 </Query>
 
@@ -38,4 +51,5 @@
   {/snippet}
 </Query>
 
-<button class="btn btn-success" onclick={() => onBtnClick()}>Register!</button>
+<button class="btn btn-success" onclick={() => onRegisterClick()}>Register!</button>
+<button class="btn btn-primary" onclick={() => onLoginClick()}>Login!</button>

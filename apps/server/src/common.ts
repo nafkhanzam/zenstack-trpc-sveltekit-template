@@ -40,7 +40,7 @@ export const buildRefreshToken = async (ctx: Context, userId: string) => {
       userId,
     },
   });
-  const token = jwt.sign(refreshToken.id, env.JWT_REFRESH_KEY, {
+  const token = jwt.sign({ id: refreshToken.id }, env.JWT_REFRESH_KEY, {
     expiresIn: env.JWT_REFRESH_EXPIRES_IN as any,
   });
   return token;
@@ -48,7 +48,7 @@ export const buildRefreshToken = async (ctx: Context, userId: string) => {
 
 export const verifyRefreshToken = (token: string) => {
   const payload = jwt.verify(token, env.JWT_REFRESH_KEY);
-  const refreshTokenId = z.string().nonempty().parse(payload);
+  const refreshTokenId = z.object({ id: z.string().nonempty() }).parse(payload);
   return refreshTokenId;
 };
 

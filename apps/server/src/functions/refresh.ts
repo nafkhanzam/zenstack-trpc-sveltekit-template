@@ -17,7 +17,7 @@ export const refresh = t.procedure
     const payload = verifyRefreshToken(input.refreshToken);
     const refresh = await db.refreshToken.findUnique({
       where: {
-        id: payload,
+        id: payload.id,
       },
       include: {
         User: true,
