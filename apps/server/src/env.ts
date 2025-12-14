@@ -32,3 +32,5 @@ if (!parsed.success) {
 export type Env = z.infer<typeof envSchema>;
 
 export const env: Env = parsed.data;
+
+export const prod = () => env.NODE_ENV === "production";

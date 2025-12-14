@@ -3,7 +3,7 @@
   import ContentNotFound from "./ContentNotFound.svelte";
   import ErrorMessage from "./ErrorMessage.svelte";
   import Loading from "./Loading.svelte";
-  import { isTRPCClientError } from "$lib";
+  import { isServerError, isTRPCClientError } from "$lib";
   // import type {useModelQuery} from "@zenstackhq/tanstack-query/runtime-v5/svelte";
 
   const {
@@ -29,9 +29,14 @@
         if (data.httpStatus === 404 && notFound) {
           return notFound;
         }
-        return `[${data.httpStatus}] ${data.code}: ${error.message}`;
+        // return `[${data.httpStatus}] ${data.code}: ${error.message}`;
+        return `[${data.httpStatus}] ${error.message}`;
       }
       return error;
+    }
+
+    if (isServerError(error)) {
+      return `[${error.status}] ${error.info.message}`;
     }
 
     return error;

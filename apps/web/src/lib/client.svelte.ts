@@ -19,6 +19,6 @@ export const trpc = createTRPCClient<AppRouter>({
 
 //? Zenstack V3 RPC
 import { useClientQueries } from "@zenstackhq/tanstack-query/svelte";
-import { schema } from "./zenstack/schema-lite";
+import { schema } from "../../../server/src/zenstack/schema-lite";
 
 export const client = useClientQueries(schema);

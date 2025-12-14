@@ -1,7 +1,7 @@
 import { ZenStackMiddleware } from "@zenstackhq/server/express";
 import { RPCApiHandler } from "@zenstackhq/server/api";
 import { createContext, getClient } from "./context.js";
-import { env } from "./env.js";
+import { env, prod } from "./env.js";
 import { cors, express, trpcExpress } from "./lib.js";
 import { appRouter } from "./router.ts";
 import { schema } from "./zenstack/schema-lite";
@@ -53,6 +53,7 @@ import { schema } from "./zenstack/schema-lite";
       // getSessionUser extracts the current session user from the request, its
       // implementation depends on your auth solution
       getClient,
+      sendResponse: false,
     }),
   );
   app.get("/", (_req, res) => {
@@ -64,6 +65,25 @@ import { schema } from "./zenstack/schema-lite";
   app.use((req, res, next) => {
     res.status(404).send({ message: "Not found." });
   });
+
+  // Error handler middleware - must be defined after all routes
+  app.use((err: any, req: any, res: any, next: any) => {
+    console.error("Uncaught error:", err);
+
+    const statusCode = err.statusCode || err.status || 500;
+    const message = err.message || "Internal server error";
+
+    res.status(statusCode).json({
+      error: {
+        message,
+        ...(!prod() && {
+          stack: err.stack,
+          details: err,
+        }),
+      },
+    });
+  });
+
   app.listen(env.PORT, () => {
     console.log(`Listening on port ${env.PORT}...`);
   });

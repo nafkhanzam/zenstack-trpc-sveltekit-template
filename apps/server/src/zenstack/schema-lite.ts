@@ -46,6 +46,12 @@ export class SchemaType implements SchemaDef {
                 role: {
                     name: "role",
                     type: "Role"
+                },
+                RefreshToken: {
+                    name: "RefreshToken",
+                    type: "RefreshToken",
+                    array: true,
+                    relation: { opposite: "User" }
                 }
             },
             idFields: ["id"],
@@ -75,6 +81,48 @@ export class SchemaType implements SchemaDef {
             idFields: ["timestamp"],
             uniqueFields: {
                 timestamp: { type: "DateTime" }
+            }
+        },
+        RefreshToken: {
+            name: "RefreshToken",
+            fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    id: true,
+                    default: ExpressionUtils.call("nanoid")
+                },
+                createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    default: ExpressionUtils.call("now")
+                },
+                updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    updatedAt: true
+                },
+                userId: {
+                    name: "userId",
+                    type: "String",
+                    foreignKeyFor: [
+                        "User"
+                    ]
+                },
+                User: {
+                    name: "User",
+                    type: "User",
+                    relation: { opposite: "RefreshToken", fields: ["userId"], references: ["id"] }
+                },
+                revoked: {
+                    name: "revoked",
+                    type: "Boolean",
+                    default: false
+                }
+            },
+            idFields: ["id"],
+            uniqueFields: {
+                id: { type: "String" }
             }
         }
     } as const;

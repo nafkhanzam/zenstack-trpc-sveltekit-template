@@ -9,6 +9,7 @@ import { schema as $schema, type SchemaType as $Schema } from "./schema-lite";
 import { type ModelResult as $ModelResult, type TypeDefResult as $TypeDefResult } from "@zenstackhq/orm";
 export type User = $ModelResult<$Schema, "User">;
 export type AuditLog = $ModelResult<$Schema, "AuditLog">;
+export type RefreshToken = $ModelResult<$Schema, "RefreshToken">;
 export type ID = $TypeDefResult<$Schema, "ID">;
 export type Timestamps = $TypeDefResult<$Schema, "Timestamps">;
 export type Base = $TypeDefResult<$Schema, "Base">;

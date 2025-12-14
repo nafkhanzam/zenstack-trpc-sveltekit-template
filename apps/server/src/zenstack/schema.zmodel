@@ -33,10 +33,12 @@ enum Role {
 }
 
 model User with Base {
-  username     String @unique
+  username     String         @unique
   passwordHash String
   name         String
   role         Role
+
+  RefreshToken RefreshToken[]
 }
 
 model AuditLog {
@@ -44,4 +46,11 @@ model AuditLog {
 
   action    String
   data      Json
+}
+
+model RefreshToken with Base {
+  userId  String
+  User    User    @relation(fields: [userId], references: [id])
+
+  revoked Boolean @default(false)
 }

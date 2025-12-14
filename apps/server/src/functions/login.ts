@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
-import { t } from "../trpc.js";
+import { buildAccessToken, buildRefreshToken } from "../common.js";
 import { bcrypt, z } from "../lib.js";
-import { buildToken } from "../common.js";
+import { t } from "../trpc.js";
 
 const invalidCredentialsError = new TRPCError({
   code: "UNAUTHORIZED",
@@ -14,8 +14,8 @@ export const login = t.procedure
       password: z.string().nonempty(),
     }),
   )
-  .mutation(async ({ ctx: { db, req, auditLog }, input }) => {
-    const user = await db.user.findFirst({
+  .mutation(async ({ ctx, ctx: { db, auditLog }, input }) => {
+    const user = await db.user.findUnique({
       where: {
         username: input.username,
       },
@@ -28,15 +28,15 @@ export const login = t.procedure
       throw invalidCredentialsError;
     }
 
-    const token = buildToken("access", {
+    const accessToken = buildAccessToken({
       id: user.id,
       username: user.username,
       role: user.role,
     });
 
-    auditLog(`trpc.login`, { token });
+    const refreshToken = await buildRefreshToken(ctx, user.id);
 
-    return {
-      token,
-    };
+    auditLog(`trpc.login`, { accessToken, refreshToken });
+
+    return { accessToken, refreshToken };
   });

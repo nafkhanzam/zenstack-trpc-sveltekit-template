@@ -1,17 +1,15 @@
 import type { ExpressMiddlewareOptions } from "@zenstackhq/server/express";
 import { JsonObject, JsonValue, jwt, type trpcExpress } from "./lib.js";
 import type { SchemaType } from "./zenstack/schema-lite";
-import { db } from "./db.js";
-import { env } from "./env.js";
+import { authDb, db } from "./db.js";
+import { verifyAccessToken } from "./common.js";
+import { prod } from "./env.js";
 
 const getUserFromToken = async (token: string | undefined) => {
   if (!token) {
     return null;
   }
-  const jwtObject = jwt.verify(token, env.JWT_ACCESS_KEY);
-  if (typeof jwtObject === "string") {
-    return null;
-  }
+  const jwtObject = verifyAccessToken(token);
   const user = await db.user.findUnique({
     where: {
       id: jwtObject.id,
@@ -41,20 +39,24 @@ export const createContext = async ({
   res,
 }: trpcExpress.CreateExpressContextOptions) => {
   const user = await getUserFromToken(req.headers.authorization);
-  const dbauth = db.$setAuth(user ?? undefined);
+  const userDb = authDb.$setAuth(user ?? undefined);
   const auditLog = async (
     action: string,
-    data: JsonValue | null | undefined = null,
+    rawData: JsonValue | null | undefined = null,
   ) => {
+    const data = {
+      requestHeaders: headersToObject(req.rawHeaders),
+      user,
+      data: rawData,
+    };
+    if (!prod()) {
+      console.log(action, data);
+    }
     return db.auditLog
       .create({
         data: {
           action,
-          data: {
-            requestHeaders: headersToObject(req.rawHeaders),
-            user,
-            data: data,
-          },
+          data,
         },
       })
       .then();
@@ -64,7 +66,7 @@ export const createContext = async ({
     res,
     user,
     db,
-    dbauth,
+    userDb,
     auditLog,
   };
 };

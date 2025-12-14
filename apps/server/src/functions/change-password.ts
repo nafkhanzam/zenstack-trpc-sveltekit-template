@@ -42,7 +42,7 @@ export const changePassword = tuser
     const newHashed = hashPassword(input.newPassword);
     await db.user.update({
       where: { username: found.username },
-      data: { password: newHashed },
+      data: { passwordHash: newHashed },
     });
 
     auditLog(`changePassword`, {
