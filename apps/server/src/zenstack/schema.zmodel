@@ -32,6 +32,12 @@ enum Role {
   USER
 }
 
+enum FileStatus {
+  PENDING
+  UPLOADED
+  FAILED
+}
+
 model User with Base {
   username     String         @unique
   passwordHash String
@@ -39,6 +45,22 @@ model User with Base {
   role         Role
 
   RefreshToken RefreshToken[]
+  File         File[]
+}
+
+model File with Timestamps {
+  key              String     @id
+
+  userId           String
+  User             User       @relation(fields: [userId], references: [id])
+
+  originalFilename String
+  filename         String
+  contentType      String
+  size             Int?
+  status           FileStatus
+
+  @@allow('all', auth() == User)
 }
 
 model AuditLog {
@@ -52,5 +74,5 @@ model RefreshToken with Base {
   userId  String
   User    User    @relation(fields: [userId], references: [id])
 
-  revoked Boolean @default(false)
+  revoked Boolean
 }

@@ -30,6 +30,13 @@ export const refresh = t.procedure
       });
     }
 
+    if (refresh.revoked) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Invalid or expired token.",
+      });
+    }
+
     const { User: user } = refresh;
     const accessToken = buildAccessToken({
       id: user.id,

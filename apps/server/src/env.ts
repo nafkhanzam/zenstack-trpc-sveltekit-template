@@ -17,6 +17,14 @@ const envSchema = z.object({
   JWT_ACCESS_EXPIRES_IN: z.string().default("15m"),
   JWT_REFRESH_KEY: z.string().min(32),
   JWT_REFRESH_EXPIRES_IN: z.string().default("30d"),
+
+  // AWS S3
+  AWS_REGION: z.string().default("us-east-1"),
+  AWS_ACCESS_KEY_ID: z.string(),
+  AWS_SECRET_ACCESS_KEY: z.string(),
+  AWS_S3_BUCKET: z.string(),
+  AWS_S3_ENDPOINT: z.string().optional(),
+  // PUBLIC_S3_ENDPOINT: z.string(),
 });
 
 // Parse and validate

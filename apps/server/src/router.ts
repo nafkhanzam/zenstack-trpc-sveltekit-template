@@ -1,4 +1,5 @@
 import { changePassword } from "./functions/change-password.ts";
+import { confirmUpload, getUploadUrl } from "./functions/file-upload.ts";
 import { hello } from "./functions/hello.ts";
 import { login } from "./functions/login.js";
 import { me } from "./functions/me.ts";
@@ -13,6 +14,8 @@ export const appRouter = t.router({
   me,
   refresh,
   changePassword,
+  getUploadUrl,
+  confirmUpload,
 });
 
 export type AppRouter = typeof appRouter;

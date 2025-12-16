@@ -38,6 +38,7 @@ export const buildRefreshToken = async (ctx: Context, userId: string) => {
   const refreshToken = await db.refreshToken.create({
     data: {
       userId,
+      revoked: false,
     },
   });
   const token = jwt.sign({ id: refreshToken.id }, env.JWT_REFRESH_KEY, {

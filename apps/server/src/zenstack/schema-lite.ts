@@ -52,12 +52,75 @@ export class SchemaType implements SchemaDef {
                     type: "RefreshToken",
                     array: true,
                     relation: { opposite: "User" }
+                },
+                File: {
+                    name: "File",
+                    type: "File",
+                    array: true,
+                    relation: { opposite: "User" }
                 }
             },
             idFields: ["id"],
             uniqueFields: {
                 id: { type: "String" },
                 username: { type: "String" }
+            }
+        },
+        File: {
+            name: "File",
+            fields: {
+                createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    default: ExpressionUtils.call("now")
+                },
+                updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    updatedAt: true
+                },
+                key: {
+                    name: "key",
+                    type: "String",
+                    id: true
+                },
+                userId: {
+                    name: "userId",
+                    type: "String",
+                    foreignKeyFor: [
+                        "User"
+                    ]
+                },
+                User: {
+                    name: "User",
+                    type: "User",
+                    relation: { opposite: "File", fields: ["userId"], references: ["id"] }
+                },
+                originalFilename: {
+                    name: "originalFilename",
+                    type: "String"
+                },
+                filename: {
+                    name: "filename",
+                    type: "String"
+                },
+                contentType: {
+                    name: "contentType",
+                    type: "String"
+                },
+                size: {
+                    name: "size",
+                    type: "Int",
+                    optional: true
+                },
+                status: {
+                    name: "status",
+                    type: "FileStatus"
+                }
+            },
+            idFields: ["key"],
+            uniqueFields: {
+                key: { type: "String" }
             }
         },
         AuditLog: {
@@ -116,8 +179,7 @@ export class SchemaType implements SchemaDef {
                 },
                 revoked: {
                     name: "revoked",
-                    type: "Boolean",
-                    default: false
+                    type: "Boolean"
                 }
             },
             idFields: ["id"],
@@ -179,6 +241,13 @@ export class SchemaType implements SchemaDef {
                 SUPERADMIN: "SUPERADMIN",
                 ADMIN: "ADMIN",
                 USER: "USER"
+            }
+        },
+        FileStatus: {
+            values: {
+                PENDING: "PENDING",
+                UPLOADED: "UPLOADED",
+                FAILED: "FAILED"
             }
         }
     } as const;

@@ -1,9 +1,10 @@
 import type { ExpressMiddlewareOptions } from "@zenstackhq/server/express";
-import { JsonObject, JsonValue, jwt, type trpcExpress } from "./lib.js";
-import type { SchemaType } from "./zenstack/schema-lite";
-import { authDb, db } from "./db.js";
 import { verifyAccessToken } from "./common.js";
+import { authDb, db } from "./db.js";
 import { prod } from "./env.js";
+import { JsonObject, JsonValue, type trpcExpress } from "./lib.js";
+import { s3 } from "./s3.js";
+import type { SchemaType } from "./zenstack/schema-lite";
 
 const getUserFromToken = async (token: string | undefined) => {
   if (!token) {
@@ -70,6 +71,7 @@ export const createContext = async ({
     user,
     db,
     userDb,
+    s3,
     auditLog,
   };
 };
