@@ -1,3 +1,4 @@
+import { env } from "$env/dynamic/public";
 import { TRPCClientError } from "@trpc/client";
 import toast from "svelte-french-toast";
 export { toast };
@@ -21,3 +22,6 @@ export function isServerError(cause: unknown): cause is ServerError {
   const safe = serverErrorV.safeParse(cause);
   return safe.success;
 }
+export const getFileUrl = (key: string): string => {
+  return `${env.PUBLIC_S3_ENDPOINT}/${key}`;
+};

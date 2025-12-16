@@ -23,14 +23,7 @@ export const refresh = t.procedure
         User: true,
       },
     });
-    if (!refresh) {
-      throw new TRPCError({
-        code: "UNAUTHORIZED",
-        message: "Invalid or expired token.",
-      });
-    }
-
-    if (refresh.revoked) {
+    if (!refresh || refresh.revoked) {
       throw new TRPCError({
         code: "UNAUTHORIZED",
         message: "Invalid or expired token.",
@@ -45,6 +38,11 @@ export const refresh = t.procedure
     });
 
     const refreshToken = await buildRefreshToken(ctx, user.id);
+    await db.refreshToken.delete({
+      where: {
+        id: payload.id,
+      },
+    });
 
     auditLog(`trpc.refresh`, { accessToken, refreshToken });
 

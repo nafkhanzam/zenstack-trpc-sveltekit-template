@@ -26,6 +26,14 @@ type Timestamps {
 type Base with ID, Timestamps {
 }
 
+type AuthInfo {
+  id       String
+  username String
+  role     Role
+
+  @@auth
+}
+
 enum Role {
   SUPERADMIN
   ADMIN
@@ -46,6 +54,9 @@ model User with Base {
 
   RefreshToken RefreshToken[]
   File         File[]
+  Post         Post[]
+
+  @@allow('all', auth().id == id)
 }
 
 model File with Timestamps {
@@ -60,7 +71,9 @@ model File with Timestamps {
   size             Int?
   status           FileStatus
 
-  @@allow('all', auth() == User)
+  Post             Post[]
+
+  @@allow('all', auth().id == userId)
 }
 
 model AuditLog {
@@ -68,6 +81,8 @@ model AuditLog {
 
   action    String
   data      Json
+
+  @@deny('all', true)
 }
 
 model RefreshToken with Base {
@@ -75,4 +90,19 @@ model RefreshToken with Base {
   User    User    @relation(fields: [userId], references: [id])
 
   revoked Boolean
+
+  @@deny('all', true)
+}
+
+model Post with Base {
+  userId   String
+  User     User    @relation(fields: [userId], references: [id])
+
+  content  String
+  imageKey String?
+  Image    File?   @relation(fields: [imageKey], references: [key])
+
+  @@allow('read', true)
+  @@allow('create', auth().id == userId && (!Image || auth().id == Image.userId))
+  @@allow('update,delete', auth().id == userId)
 }

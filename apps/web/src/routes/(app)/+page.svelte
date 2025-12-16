@@ -1,0 +1,223 @@
+<script lang="ts">
+  import { getFileUrl, toast } from "$lib";
+  import { client, trpc } from "$lib/client.svelte";
+  import Query from "$lib/components/Query.svelte";
+  import { refresh, token } from "$lib/stores/token.svelte";
+    import { user } from "$lib/stores/user.svelte";
+  import { createQuery } from "@tanstack/svelte-query";
+
+  const trpcQuery = createQuery({
+    queryKey: [],
+    queryFn: async () => trpc.me.query(),
+  });
+
+  const zenstackQuery = client.user.useFindUnique({
+    where: {
+      id: "123"
+    }
+  });
+
+  const onRegisterClick = async () => {
+    const res = await trpc.register.mutate({
+      name: `Dummy Name`,
+      username: "dummy",
+      password: "dummy",
+    });
+    token.value = res.accessToken;
+    refresh.value = res.refreshToken;
+  }
+
+  const onLoginClick = async () => {
+    const res = await trpc.login.mutate({
+      username: "dummy",
+      password: "dummy",
+    });
+    token.value = res.accessToken;
+    refresh.value = res.refreshToken;
+  }
+
+  const postsQ = client.post.useFindMany({
+    where: {},
+    include: {
+      User: true,
+      Image: true,
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  let postContent = $state("");
+  let postImage: File | null = $state(null);
+  let isSubmitting = $state(false);
+
+  const postCreateQ = client.post.useCreate();
+
+  const onPostSubmit = async () => {
+    if (!postContent.trim()) {
+      toast.error("Post content is required");
+      return;
+    }
+
+    isSubmitting = true;
+    try {
+      let imageKey: string | undefined;
+
+      // Upload image if provided
+      if (postImage) {
+        // Get presigned upload URL
+        const { uploadUrl, key } = await trpc.getUploadUrl.mutate({
+          filename: postImage.name,
+          contentType: postImage.type,
+          prefix: "posts",
+        });
+
+        // Upload file to S3
+        const uploadResponse = await fetch(uploadUrl, {
+          method: "PUT",
+          body: postImage,
+          headers: {
+            "Content-Type": postImage.type,
+          },
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error("Failed to upload image");
+        }
+
+        // Confirm upload
+        await trpc.confirmUpload.mutate({
+          key,
+          size: postImage.size,
+        });
+
+        imageKey = key;
+      }
+
+      // Create post
+      await $postCreateQ.mutateAsync({
+        data: {
+          userId: user().id,
+          content: postContent,
+          imageKey,
+        },
+      });
+
+      // Reset form
+      postContent = "";
+      postImage = null;
+
+      toast.success("Post created successfully!");
+      $postsQ.refetch();
+    } catch (error) {
+      console.error("Error creating post:", error);
+      toast.error("Failed to create post");
+    } finally {
+      isSubmitting = false;
+    }
+  };
+
+  const handleFileChange = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    if (target.files && target.files.length > 0) {
+      postImage = target.files[0];
+    }
+  };
+</script>
+
+<p>accessToken: {token.value}</p>
+<p>refreshToken: {refresh.value}</p>
+<input type="text" bind:value={token.value} />
+
+<Query q={trpcQuery}>
+  {#snippet children(data)}
+    {JSON.stringify(data)}
+  {/snippet}
+</Query>
+
+<Query q={zenstackQuery}>
+  {#snippet children(data)}
+    {JSON.stringify(data)}
+  {/snippet}
+</Query>
+
+<button class="btn btn-success" onclick={() => onRegisterClick()}>Register!</button>
+<button class="btn btn-primary" onclick={() => onLoginClick()}>Login!</button>
+
+<div class="card bg-base-100 shadow-xl my-4">
+  <div class="card-body">
+    <h2 class="card-title">Create a Post</h2>
+    <textarea
+      class="textarea textarea-bordered w-full"
+      placeholder="What's on your mind?"
+      bind:value={postContent}
+      rows="3"
+    ></textarea>
+
+    <div class="form-control">
+      <label class="label">
+        <span class="label-text">Add an image (optional)</span>
+      </label>
+      <input
+        type="file"
+        class="file-input file-input-bordered w-full"
+        accept="image/*"
+        onchange={handleFileChange}
+      />
+      {#if postImage}
+        <label class="label">
+          <span class="label-text-alt">Selected: {postImage.name}</span>
+        </label>
+      {/if}
+    </div>
+
+    <div class="card-actions justify-end">
+      <button
+        class="btn btn-primary"
+        onclick={onPostSubmit}
+        disabled={isSubmitting || !postContent.trim()}
+      >
+        {isSubmitting ? "Posting..." : "Post"}
+      </button>
+    </div>
+  </div>
+</div>
+
+<Query q={postsQ}>
+  {#snippet children(data)}
+    <div class="space-y-4">
+      <h2 class="text-2xl font-bold">Posts</h2>
+      {#if data.length === 0}
+        <div class="alert">
+          <span>No posts yet. Be the first to post!</span>
+        </div>
+      {:else}
+        {#each data as post}
+          <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="font-semibold">{post.User.name}</span>
+                <span class="text-sm text-gray-500">
+                  @{post.User.username}
+                </span>
+                <span class="text-sm text-gray-400">
+                  {new Date(post.createdAt).toLocaleDateString()}
+                </span>
+              </div>
+              <p class="whitespace-pre-wrap">{post.content}</p>
+              {#if post.Image}
+                <figure class="mt-4">
+                  <img
+                    src={getFileUrl(post.Image.key)}
+                    alt="Post"
+                    class="rounded-lg max-w-full h-auto"
+                  />
+                </figure>
+              {/if}
+            </div>
+          </div>
+        {/each}
+      {/if}
+    </div>
+  {/snippet}
+</Query>

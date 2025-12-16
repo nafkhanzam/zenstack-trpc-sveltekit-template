@@ -24,7 +24,7 @@ export const myFetch = async (
       token.value = null;
       refresh.value = null;
       // TODO: Change to login.
-      goto(resolve("/"));
+      // goto(resolve("/"));
       return new Error(`Token expired.`);
     }
     try {

@@ -5,28 +5,30 @@ import { prod } from "./env.js";
 import { JsonObject, JsonValue, type trpcExpress } from "./lib.js";
 import { s3 } from "./s3.js";
 import type { SchemaType } from "./zenstack/schema-lite";
+import { JWTPayload } from "./shared/jwt.js";
 
-const getUserFromToken = async (token: string | undefined) => {
+const getUserFromToken = (token: string | undefined): JWTPayload | null => {
   if (!token) {
     return null;
   }
   const jwtObject = verifyAccessToken(token);
-  if (!jwtObject) {
-    return null;
-  }
-  const user = await db.user.findUnique({
-    where: {
-      id: jwtObject.id,
-    },
-  });
-  if (!user) {
-    return null;
-  }
-  return {
-    id: user.id,
-    username: user.username,
-    role: user.role,
-  };
+  return jwtObject;
+  // if (!jwtObject) {
+  //   return null;
+  // }
+  // const user = await db.user.findUnique({
+  //   where: {
+  //     id: jwtObject.id,
+  //   },
+  // });
+  // if (!user) {
+  //   return null;
+  // }
+  // return {
+  //   id: user.id,
+  //   username: user.username,
+  //   role: user.role,
+  // };
 };
 
 const headersToObject = (rawHeaders: string[]) => {
@@ -42,7 +44,7 @@ export const createContext = async ({
   req,
   res,
 }: trpcExpress.CreateExpressContextOptions) => {
-  const user = await getUserFromToken(req.headers.authorization);
+  const user = getUserFromToken(req.headers.authorization);
   const userDb = authDb.$setAuth(user ?? undefined);
   const auditLog = async (
     action: string,
@@ -79,6 +81,6 @@ export type Context = Awaited<ReturnType<typeof createContext>>;
 
 export const getClient: ExpressMiddlewareOptions<SchemaType>["getClient"] =
   async (req) => {
-    const user = await getUserFromToken(req.headers.authorization);
+    const user = getUserFromToken(req.headers.authorization);
     return authDb.$setAuth(user ?? undefined);
   };

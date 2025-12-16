@@ -1,0 +1,2 @@
+- Fix: failed because of duplicate stops the server.
+- Auth Policy Plugin is still failing.

@@ -58,6 +58,12 @@ export class SchemaType implements SchemaDef {
                     type: "File",
                     array: true,
                     relation: { opposite: "User" }
+                },
+                Post: {
+                    name: "Post",
+                    type: "Post",
+                    array: true,
+                    relation: { opposite: "User" }
                 }
             },
             idFields: ["id"],
@@ -116,6 +122,12 @@ export class SchemaType implements SchemaDef {
                 status: {
                     name: "status",
                     type: "FileStatus"
+                },
+                Post: {
+                    name: "Post",
+                    type: "Post",
+                    array: true,
+                    relation: { opposite: "Image" }
                 }
             },
             idFields: ["key"],
@@ -186,6 +198,61 @@ export class SchemaType implements SchemaDef {
             uniqueFields: {
                 id: { type: "String" }
             }
+        },
+        Post: {
+            name: "Post",
+            fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    id: true,
+                    default: ExpressionUtils.call("nanoid")
+                },
+                createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    default: ExpressionUtils.call("now")
+                },
+                updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    updatedAt: true
+                },
+                userId: {
+                    name: "userId",
+                    type: "String",
+                    foreignKeyFor: [
+                        "User"
+                    ]
+                },
+                User: {
+                    name: "User",
+                    type: "User",
+                    relation: { opposite: "Post", fields: ["userId"], references: ["id"] }
+                },
+                content: {
+                    name: "content",
+                    type: "String"
+                },
+                imageKey: {
+                    name: "imageKey",
+                    type: "String",
+                    optional: true,
+                    foreignKeyFor: [
+                        "Image"
+                    ]
+                },
+                Image: {
+                    name: "Image",
+                    type: "File",
+                    optional: true,
+                    relation: { opposite: "Post", fields: ["imageKey"], references: ["key"] }
+                }
+            },
+            idFields: ["id"],
+            uniqueFields: {
+                id: { type: "String" }
+            }
         }
     } as const;
     typeDefs = {
@@ -233,6 +300,26 @@ export class SchemaType implements SchemaDef {
                     updatedAt: true
                 }
             }
+        },
+        AuthInfo: {
+            name: "AuthInfo",
+            fields: {
+                id: {
+                    name: "id",
+                    type: "String"
+                },
+                username: {
+                    name: "username",
+                    type: "String"
+                },
+                role: {
+                    name: "role",
+                    type: "Role"
+                }
+            },
+            attributes: [
+                { name: "@@auth" }
+            ]
         }
     } as const;
     enums = {
@@ -251,7 +338,7 @@ export class SchemaType implements SchemaDef {
             }
         }
     } as const;
-    authType = "User" as const;
+    authType = "AuthInfo" as const;
     plugins = {};
 }
 export const schema = new SchemaType();
