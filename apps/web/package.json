@@ -40,7 +40,7 @@
     "tailwindcss": "4.1.17",
     "typescript": "6.0.0-dev.20251210",
     "vite": "7.2.7",
-    "vite-plugin-node-polyfills": "^0.24.0",
+    "vite-plugin-node-polyfills": "0.24.0",
     "zod": "4.1.13"
   }
 }
