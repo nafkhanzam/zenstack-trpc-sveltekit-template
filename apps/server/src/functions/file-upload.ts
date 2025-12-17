@@ -96,7 +96,7 @@ export const confirmUpload = tuser
       data: {
         status: "UPLOADED",
         size,
-        ...(contentType && { contentType }),
+        contentType,
       },
     });
 
@@ -105,6 +105,7 @@ export const confirmUpload = tuser
       key: file.key,
       filename: file.filename,
       size,
+      contentType,
     });
 
     return {

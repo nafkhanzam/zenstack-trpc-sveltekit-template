@@ -80,7 +80,7 @@ export const getFileUrl = (key: string): string => {
  */
 export const getFileSize = async (
   key: string,
-): Promise<{ size: number; contentType?: string }> => {
+): Promise<{ size: number; contentType: string }> => {
   try {
     const headCommand = new HeadObjectCommand({
       Bucket: env.AWS_S3_BUCKET,
@@ -91,6 +91,12 @@ export const getFileSize = async (
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: `File with key ${key} does not have Content-Length.`,
+      });
+    }
+    if (!res.ContentType) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: `File with key ${key} does not have Content-Type.`,
       });
     }
     return {
