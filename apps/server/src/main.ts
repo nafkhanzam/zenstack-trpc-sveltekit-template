@@ -7,6 +7,18 @@ import { appRouter } from "./router.ts";
 import { schema } from "./zenstack/schema";
 import console from "console";
 
+// Handle unhandled promise rejections
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  // Don't exit the process, just log the error
+});
+
+// Handle uncaught exceptions
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught Exception:", error);
+  // Don't exit the process, just log the error
+});
+
 (async () => {
   // express implementation
   const app = express();
@@ -73,7 +85,7 @@ import console from "console";
   });
 
   // Error handler middleware - must be defined after all routes
-  app.use((err: any, req: any, res: any, next: any) => {
+  app.use((err: any, _req: any, res: any, _next: any) => {
     console.error("Uncaught error:", err);
 
     const statusCode = err.statusCode || err.status || 500;
@@ -88,7 +100,6 @@ import console from "console";
         }),
       },
     });
-    next();
   });
 
   app.listen(env.PORT, () => {
