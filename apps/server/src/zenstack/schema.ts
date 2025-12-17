@@ -18,22 +18,26 @@ export class SchemaType implements SchemaDef {
                     name: "id",
                     type: "String",
                     id: true,
+                    attributes: [{ name: "@id" }, { name: "@default", args: [{ name: "value", value: ExpressionUtils.call("nanoid") }] }],
                     default: ExpressionUtils.call("nanoid")
                 },
                 createdAt: {
                     name: "createdAt",
                     type: "DateTime",
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
                     default: ExpressionUtils.call("now")
                 },
                 updatedAt: {
                     name: "updatedAt",
                     type: "DateTime",
-                    updatedAt: true
+                    updatedAt: true,
+                    attributes: [{ name: "@updatedAt" }]
                 },
                 username: {
                     name: "username",
                     type: "String",
-                    unique: true
+                    unique: true,
+                    attributes: [{ name: "@unique" }]
                 },
                 passwordHash: {
                     name: "passwordHash",
@@ -66,6 +70,9 @@ export class SchemaType implements SchemaDef {
                     relation: { opposite: "User" }
                 }
             },
+            attributes: [
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("all") }, { name: "condition", value: ExpressionUtils.literal(true) }] }
+            ],
             idFields: ["id"],
             uniqueFields: {
                 id: { type: "String" },
@@ -78,17 +85,20 @@ export class SchemaType implements SchemaDef {
                 createdAt: {
                     name: "createdAt",
                     type: "DateTime",
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
                     default: ExpressionUtils.call("now")
                 },
                 updatedAt: {
                     name: "updatedAt",
                     type: "DateTime",
-                    updatedAt: true
+                    updatedAt: true,
+                    attributes: [{ name: "@updatedAt" }]
                 },
                 key: {
                     name: "key",
                     type: "String",
-                    id: true
+                    id: true,
+                    attributes: [{ name: "@id" }]
                 },
                 userId: {
                     name: "userId",
@@ -100,6 +110,7 @@ export class SchemaType implements SchemaDef {
                 User: {
                     name: "User",
                     type: "User",
+                    attributes: [{ name: "@relation", args: [{ name: "fields", value: ExpressionUtils.array([ExpressionUtils.field("userId")]) }, { name: "references", value: ExpressionUtils.array([ExpressionUtils.field("id")]) }] }],
                     relation: { opposite: "File", fields: ["userId"], references: ["id"] }
                 },
                 originalFilename: {
@@ -130,6 +141,9 @@ export class SchemaType implements SchemaDef {
                     relation: { opposite: "Image" }
                 }
             },
+            attributes: [
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("all") }, { name: "condition", value: ExpressionUtils.literal(true) }] }
+            ],
             idFields: ["key"],
             uniqueFields: {
                 key: { type: "String" }
@@ -142,6 +156,7 @@ export class SchemaType implements SchemaDef {
                     name: "timestamp",
                     type: "DateTime",
                     id: true,
+                    attributes: [{ name: "@id" }, { name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
                     default: ExpressionUtils.call("now")
                 },
                 action: {
@@ -153,6 +168,9 @@ export class SchemaType implements SchemaDef {
                     type: "Json"
                 }
             },
+            attributes: [
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("all") }, { name: "condition", value: ExpressionUtils.literal(true) }] }
+            ],
             idFields: ["timestamp"],
             uniqueFields: {
                 timestamp: { type: "DateTime" }
@@ -165,17 +183,20 @@ export class SchemaType implements SchemaDef {
                     name: "id",
                     type: "String",
                     id: true,
+                    attributes: [{ name: "@id" }, { name: "@default", args: [{ name: "value", value: ExpressionUtils.call("nanoid") }] }],
                     default: ExpressionUtils.call("nanoid")
                 },
                 createdAt: {
                     name: "createdAt",
                     type: "DateTime",
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
                     default: ExpressionUtils.call("now")
                 },
                 updatedAt: {
                     name: "updatedAt",
                     type: "DateTime",
-                    updatedAt: true
+                    updatedAt: true,
+                    attributes: [{ name: "@updatedAt" }]
                 },
                 userId: {
                     name: "userId",
@@ -187,6 +208,7 @@ export class SchemaType implements SchemaDef {
                 User: {
                     name: "User",
                     type: "User",
+                    attributes: [{ name: "@relation", args: [{ name: "fields", value: ExpressionUtils.array([ExpressionUtils.field("userId")]) }, { name: "references", value: ExpressionUtils.array([ExpressionUtils.field("id")]) }] }],
                     relation: { opposite: "RefreshToken", fields: ["userId"], references: ["id"] }
                 },
                 revoked: {
@@ -194,6 +216,9 @@ export class SchemaType implements SchemaDef {
                     type: "Boolean"
                 }
             },
+            attributes: [
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("all") }, { name: "condition", value: ExpressionUtils.literal(true) }] }
+            ],
             idFields: ["id"],
             uniqueFields: {
                 id: { type: "String" }
@@ -206,17 +231,20 @@ export class SchemaType implements SchemaDef {
                     name: "id",
                     type: "String",
                     id: true,
+                    attributes: [{ name: "@id" }, { name: "@default", args: [{ name: "value", value: ExpressionUtils.call("nanoid") }] }],
                     default: ExpressionUtils.call("nanoid")
                 },
                 createdAt: {
                     name: "createdAt",
                     type: "DateTime",
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
                     default: ExpressionUtils.call("now")
                 },
                 updatedAt: {
                     name: "updatedAt",
                     type: "DateTime",
-                    updatedAt: true
+                    updatedAt: true,
+                    attributes: [{ name: "@updatedAt" }]
                 },
                 userId: {
                     name: "userId",
@@ -228,6 +256,7 @@ export class SchemaType implements SchemaDef {
                 User: {
                     name: "User",
                     type: "User",
+                    attributes: [{ name: "@relation", args: [{ name: "fields", value: ExpressionUtils.array([ExpressionUtils.field("userId")]) }, { name: "references", value: ExpressionUtils.array([ExpressionUtils.field("id")]) }] }],
                     relation: { opposite: "Post", fields: ["userId"], references: ["id"] }
                 },
                 content: {
@@ -246,9 +275,13 @@ export class SchemaType implements SchemaDef {
                     name: "Image",
                     type: "File",
                     optional: true,
+                    attributes: [{ name: "@relation", args: [{ name: "fields", value: ExpressionUtils.array([ExpressionUtils.field("imageKey")]) }, { name: "references", value: ExpressionUtils.array([ExpressionUtils.field("key")]) }] }],
                     relation: { opposite: "Post", fields: ["imageKey"], references: ["key"] }
                 }
             },
+            attributes: [
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("all") }, { name: "condition", value: ExpressionUtils.literal(true) }] }
+            ],
             idFields: ["id"],
             uniqueFields: {
                 id: { type: "String" }
@@ -262,6 +295,7 @@ export class SchemaType implements SchemaDef {
                 id: {
                     name: "id",
                     type: "String",
+                    attributes: [{ name: "@id" }, { name: "@default", args: [{ name: "value", value: ExpressionUtils.call("nanoid") }] }],
                     default: ExpressionUtils.call("nanoid")
                 }
             }
@@ -272,12 +306,14 @@ export class SchemaType implements SchemaDef {
                 createdAt: {
                     name: "createdAt",
                     type: "DateTime",
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
                     default: ExpressionUtils.call("now")
                 },
                 updatedAt: {
                     name: "updatedAt",
                     type: "DateTime",
-                    updatedAt: true
+                    updatedAt: true,
+                    attributes: [{ name: "@updatedAt" }]
                 }
             }
         },
@@ -287,17 +323,20 @@ export class SchemaType implements SchemaDef {
                 id: {
                     name: "id",
                     type: "String",
+                    attributes: [{ name: "@id" }, { name: "@default", args: [{ name: "value", value: ExpressionUtils.call("nanoid") }] }],
                     default: ExpressionUtils.call("nanoid")
                 },
                 createdAt: {
                     name: "createdAt",
                     type: "DateTime",
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
                     default: ExpressionUtils.call("now")
                 },
                 updatedAt: {
                     name: "updatedAt",
                     type: "DateTime",
-                    updatedAt: true
+                    updatedAt: true,
+                    attributes: [{ name: "@updatedAt" }]
                 }
             }
         },

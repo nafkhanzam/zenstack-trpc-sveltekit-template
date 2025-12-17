@@ -4,7 +4,7 @@ import { authDb, db } from "./db.js";
 import { prod } from "./env.js";
 import { JsonObject, JsonValue, type trpcExpress } from "./lib.js";
 import { s3 } from "./s3.js";
-import type { SchemaType } from "./zenstack/schema-lite";
+import type { SchemaType } from "./zenstack/schema";
 import { JWTPayload } from "./shared/jwt.js";
 
 const getUserFromToken = (token: string | undefined): JWTPayload | null => {

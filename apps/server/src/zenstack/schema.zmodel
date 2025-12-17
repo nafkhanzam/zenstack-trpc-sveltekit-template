@@ -3,13 +3,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// plugin hooks {
-//   provider = "@zenstackhq/tanstack-query"
-//   target   = "svelte"
-//   version  = "v5"
-//   output   = "../web/src/lib/hooks"
-// }
-
 plugin policy {
   provider = "@zenstackhq/plugin-policy"
 }
@@ -55,8 +48,8 @@ model User with Base {
   RefreshToken RefreshToken[]
   File         File[]
   Post         Post[]
-
-  @@allow('all', auth().id == id)
+  @@allow('all', true)
+  // @@allow('all', auth().id == id)
 }
 
 model File with Timestamps {
@@ -72,8 +65,8 @@ model File with Timestamps {
   status           FileStatus
 
   Post             Post[]
-
-  @@allow('all', auth().id == userId)
+  @@allow('all', true)
+  // @@allow('all', auth().id == userId)
 }
 
 model AuditLog {
@@ -81,8 +74,8 @@ model AuditLog {
 
   action    String
   data      Json
-
-  @@deny('all', true)
+  @@allow('all', true)
+  // @@deny('all', true)
 }
 
 model RefreshToken with Base {
@@ -90,8 +83,8 @@ model RefreshToken with Base {
   User    User    @relation(fields: [userId], references: [id])
 
   revoked Boolean
-
-  @@deny('all', true)
+  @@allow('all', true)
+  // @@deny('all', true)
 }
 
 model Post with Base {
@@ -101,8 +94,8 @@ model Post with Base {
   content  String
   imageKey String?
   Image    File?   @relation(fields: [imageKey], references: [key])
-
-  @@allow('read', true)
-  @@allow('create', auth().id == userId && (!Image || auth().id == Image.userId))
-  @@allow('update,delete', auth().id == userId)
+  @@allow('all', true)
+  // @@allow('read', true)
+  // @@allow('create', auth().id == userId && (Image == null || auth().id == Image.userId))
+  // @@allow('update,delete', auth().id == userId)
 }

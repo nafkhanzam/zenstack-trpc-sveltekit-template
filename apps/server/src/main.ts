@@ -4,7 +4,7 @@ import { createContext, getClient } from "./context.js";
 import { env, prod } from "./env.js";
 import { cors, express, trpcExpress } from "./lib.js";
 import { appRouter } from "./router.ts";
-import { schema } from "./zenstack/schema-lite";
+import { schema } from "./zenstack/schema";
 import console from "console";
 
 (async () => {
@@ -88,6 +88,7 @@ import console from "console";
         }),
       },
     });
+    next();
   });
 
   app.listen(env.PORT, () => {

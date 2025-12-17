@@ -39,7 +39,7 @@ export const trpc = createTRPCClient<AppRouter>({
 
 //? Zenstack V3 RPC
 import { useClientQueries } from "@zenstackhq/tanstack-query/svelte";
-import { schema } from "../../../server/src/zenstack/schema-lite";
+import { schema } from "../../../server/src/zenstack/schema";
 import { token } from "./stores/token.svelte";
 import { myFetch } from "./my-fetch.svelte";
 

@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "tsx watch src/main",
     "build": "tsc -b",
-    "generate": "zen generate --lite-only",
+    "generate": "zen generate",
     "db:push": "zen db push",
     "migrate:dev": "zen migrate dev",
     "migrate:deploy": "zen migrate deploy",
