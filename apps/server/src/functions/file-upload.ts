@@ -4,6 +4,7 @@ import {
   generatePresignedUploadUrl,
   generateFileKey,
   getFileUrl,
+  getFileSize,
 } from "../s3.ts";
 
 /**
@@ -79,25 +80,28 @@ export const confirmUpload = tuser
   .input(
     z.object({
       key: z.string().min(1),
-      size: z.number().int().positive().nullable(),
     }),
   )
-  .mutation(async ({ input, ctx }) => {
-    const { key, size } = input;
+  .mutation(async ({ input, ctx: { userDb, auditLog } }) => {
+    const { key } = input;
+
+    // Check if file exists in S3 and get its size
+    const { size, contentType } = await getFileSize(key);
 
     // Update File record status to UPLOADED
-    const file = await ctx.userDb.file.update({
+    const file = await userDb.file.update({
       where: {
         key,
       },
       data: {
         status: "UPLOADED",
         size,
+        ...(contentType && { contentType }),
       },
     });
 
     // Log the successful upload
-    ctx.auditLog("file-upload:confirmed", {
+    auditLog("file-upload:confirmed", {
       key: file.key,
       filename: file.filename,
       size,

@@ -1,5 +1,10 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  S3Client,
+  PutObjectCommand,
+  HeadObjectCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { TRPCError } from "@trpc/server";
 import { env } from "./env.js";
 
 // Initialize S3 Client
@@ -68,4 +73,34 @@ export const getFileUrl = (key: string): string => {
   }
   // For AWS S3
   return `https://${env.AWS_S3_BUCKET}.s3.${env.AWS_REGION}.amazonaws.com/${key}`;
+};
+
+/**
+ * Check if file exists in S3 and get its size and content type
+ */
+export const getFileSize = async (
+  key: string,
+): Promise<{ size: number; contentType?: string }> => {
+  try {
+    const headCommand = new HeadObjectCommand({
+      Bucket: env.AWS_S3_BUCKET,
+      Key: key,
+    });
+    const res = await s3.send(headCommand);
+    if (res.ContentLength === undefined) {
+      throw new TRPCError({
+        code: "BAD_REQUEST",
+        message: `File with key ${key} does not have Content-Length.`,
+      });
+    }
+    return {
+      size: res.ContentLength,
+      contentType: res.ContentType,
+    };
+  } catch (error) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: `File with key ${key} does not exist in S3`,
+    });
+  }
 };
