@@ -48,8 +48,8 @@ model User with Base {
   RefreshToken RefreshToken[]
   File         File[]
   Post         Post[]
-  @@allow('all', true)
-  // @@allow('all', auth().id == id)
+
+  @@allow('all', auth().id == id)
 }
 
 model File with Timestamps {
@@ -65,8 +65,8 @@ model File with Timestamps {
   status           FileStatus
 
   Post             Post[]
-  @@allow('all', true)
-  // @@allow('all', auth().id == userId)
+
+  @@allow('all', auth().id == userId)
 }
 
 model AuditLog {
@@ -74,8 +74,8 @@ model AuditLog {
 
   action    String
   data      Json
-  @@allow('all', true)
-  // @@deny('all', true)
+
+  @@deny('all', true)
 }
 
 model RefreshToken with Base {
@@ -83,8 +83,8 @@ model RefreshToken with Base {
   User    User    @relation(fields: [userId], references: [id])
 
   revoked Boolean
-  @@allow('all', true)
-  // @@deny('all', true)
+
+  @@deny('all', true)
 }
 
 model Post with Base {
@@ -94,8 +94,8 @@ model Post with Base {
   content  String
   imageKey String?
   Image    File?   @relation(fields: [imageKey], references: [key])
-  @@allow('all', true)
-  // @@allow('read', true)
-  // @@allow('create', auth().id == userId && (Image == null || auth().id == Image.userId))
-  // @@allow('update,delete', auth().id == userId)
+
+  @@allow('read', true)
+  @@allow('create', auth().id == userId && (Image == null || auth().id == Image.userId))
+  @@allow('update,delete', auth().id == userId)
 }
