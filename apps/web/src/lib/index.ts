@@ -25,3 +25,5 @@ export function isServerError(cause: unknown): cause is ServerError {
 export const getFileUrl = (key: string): string => {
   return `${env.PUBLIC_S3_ENDPOINT}/${key}`;
 };
+
+export { uploadFile, uploadFiles } from "./upload";

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { getFileUrl, toast } from "$lib";
+  import { getFileUrl, toast, uploadFile } from "$lib";
   import { client, trpc } from "$lib/client.svelte";
   import Query from "$lib/components/Query.svelte";
   import { refresh, token } from "$lib/stores/token.svelte";
@@ -65,33 +65,11 @@
 
       // Upload image if provided
       if (postImage) {
-        // Get presigned upload URL
-        const { uploadUrl, key } = await trpc.getUploadUrl.mutate({
-          filename: postImage.name,
-          contentType: postImage.type,
+        const result = await uploadFile({
+          file: postImage,
           prefix: "posts",
         });
-
-        // Upload file to S3
-        const uploadResponse = await fetch(uploadUrl, {
-          method: "PUT",
-          body: postImage,
-          headers: {
-            "Content-Type": postImage.type,
-          },
-        });
-
-        if (!uploadResponse.ok) {
-          throw new Error("Failed to upload image");
-        }
-
-        // Confirm upload
-        await trpc.confirmUpload.mutate({
-          key,
-          size: postImage.size,
-        });
-
-        imageKey = key;
+        imageKey = result.key;
       }
 
       // Create post
