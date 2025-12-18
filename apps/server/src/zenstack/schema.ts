@@ -71,7 +71,8 @@ export class SchemaType implements SchemaDef {
                 }
             },
             attributes: [
-                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("all") }, { name: "condition", value: ExpressionUtils.literal(true) }] }
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("read") }, { name: "condition", value: ExpressionUtils.literal(true) }] },
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("all") }, { name: "condition", value: ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["id"]), "==", ExpressionUtils.field("id")) }] }
             ],
             idFields: ["id"],
             uniqueFields: {
@@ -142,7 +143,7 @@ export class SchemaType implements SchemaDef {
                 }
             },
             attributes: [
-                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("all") }, { name: "condition", value: ExpressionUtils.literal(true) }] }
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("all") }, { name: "condition", value: ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["id"]), "==", ExpressionUtils.field("userId")) }] }
             ],
             idFields: ["key"],
             uniqueFields: {
@@ -156,8 +157,15 @@ export class SchemaType implements SchemaDef {
                     name: "timestamp",
                     type: "DateTime",
                     id: true,
-                    attributes: [{ name: "@id" }, { name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
                     default: ExpressionUtils.call("now")
+                },
+                cuid: {
+                    name: "cuid",
+                    type: "String",
+                    id: true,
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("cuid") }] }],
+                    default: ExpressionUtils.call("cuid")
                 },
                 action: {
                     name: "action",
@@ -169,11 +177,12 @@ export class SchemaType implements SchemaDef {
                 }
             },
             attributes: [
-                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("all") }, { name: "condition", value: ExpressionUtils.literal(true) }] }
+                { name: "@@id", args: [{ name: "fields", value: ExpressionUtils.array([ExpressionUtils.field("timestamp"), ExpressionUtils.field("cuid")]) }] },
+                { name: "@@deny", args: [{ name: "operation", value: ExpressionUtils.literal("all") }, { name: "condition", value: ExpressionUtils.literal(true) }] }
             ],
-            idFields: ["timestamp"],
+            idFields: ["timestamp", "cuid"],
             uniqueFields: {
-                timestamp: { type: "DateTime" }
+                timestamp_cuid: { timestamp: { type: "DateTime" }, cuid: { type: "String" } }
             }
         },
         RefreshToken: {
@@ -217,7 +226,7 @@ export class SchemaType implements SchemaDef {
                 }
             },
             attributes: [
-                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("all") }, { name: "condition", value: ExpressionUtils.literal(true) }] }
+                { name: "@@deny", args: [{ name: "operation", value: ExpressionUtils.literal("all") }, { name: "condition", value: ExpressionUtils.literal(true) }] }
             ],
             idFields: ["id"],
             uniqueFields: {
@@ -280,7 +289,9 @@ export class SchemaType implements SchemaDef {
                 }
             },
             attributes: [
-                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("all") }, { name: "condition", value: ExpressionUtils.literal(true) }] }
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("read") }, { name: "condition", value: ExpressionUtils.literal(true) }] },
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("create") }, { name: "condition", value: ExpressionUtils.binary(ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["id"]), "==", ExpressionUtils.field("userId")), "&&", ExpressionUtils.binary(ExpressionUtils.binary(ExpressionUtils.field("Image"), "==", ExpressionUtils._null()), "||", ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["id"]), "==", ExpressionUtils.member(ExpressionUtils.field("Image"), ["userId"])))) }] },
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("update,delete") }, { name: "condition", value: ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["id"]), "==", ExpressionUtils.field("userId")) }] }
             ],
             idFields: ["id"],
             uniqueFields: {

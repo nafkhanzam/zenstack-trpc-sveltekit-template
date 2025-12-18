@@ -10,37 +10,41 @@ import {
 import SuperJSON from "superjson";
 import type { AppRouter } from "../../../server/src/router";
 import { env } from "$env/dynamic/public";
+import { token } from "./stores/token.svelte";
+import { myFetch, myFetchNoRefresh } from "./my-fetch.svelte";
 
-export const trpc = createTRPCClient<AppRouter>({
-  links: [
-    loggerLink({}),
-    splitLink({
-      // uses the httpSubscriptionLink for subscriptions
-      condition: (op) => op.type === "subscription",
-      true: httpSubscriptionLink({
-        transformer: SuperJSON,
-        url: `${env.PUBLIC_BACKEND_URL}/trpc`,
+const createTRPC = (fetch?: Parameters<typeof httpBatchLink>[0]["fetch"]) =>
+  createTRPCClient<AppRouter>({
+    links: [
+      loggerLink({}),
+      splitLink({
+        // uses the httpSubscriptionLink for subscriptions
+        condition: (op) => op.type === "subscription",
+        true: httpSubscriptionLink({
+          transformer: SuperJSON,
+          url: `${env.PUBLIC_BACKEND_URL}/trpc`,
+        }),
+        false: httpBatchLink({
+          transformer: SuperJSON,
+          url: `${env.PUBLIC_BACKEND_URL}/trpc`,
+          headers: () => {
+            const res: HTTPHeaders = {};
+            if (token.value) {
+              res.Authorization = token.value;
+            }
+            return res;
+          },
+          fetch,
+        }),
       }),
-      false: httpBatchLink({
-        transformer: SuperJSON,
-        url: `${env.PUBLIC_BACKEND_URL}/trpc`,
-        headers: () => {
-          const res: HTTPHeaders = {};
-          if (token.value) {
-            res.Authorization = token.value;
-          }
-          return res;
-        },
-        fetch: myFetch,
-      }),
-    }),
-  ],
-});
+    ],
+  });
+
+export const trpc = createTRPC(myFetch);
+export const trpc_ = createTRPC(myFetchNoRefresh);
 
 //? Zenstack V3 RPC
 import { useClientQueries } from "@zenstackhq/tanstack-query/svelte";
 import { schema } from "../../../server/src/zenstack/schema";
-import { token } from "./stores/token.svelte";
-import { myFetch } from "./my-fetch.svelte";
 
 export const client = useClientQueries(schema);

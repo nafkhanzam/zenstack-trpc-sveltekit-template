@@ -1,12 +1,11 @@
 import { goto } from "$app/navigation";
 import { resolve } from "$app/paths";
-import { trpc } from "./client.svelte";
-import { token, refresh } from "./stores/token.svelte";
+import { trpc_ } from "./client.svelte";
+import { refresh, token, userState } from "./stores/token.svelte";
 
-export const myFetch = async (
+export const myFetchNoRefresh = async (
   url: URL | RequestInfo,
   options?: RequestInit,
-  refreshed = false,
 ): Promise<Response> => {
   options = options ?? {};
   options.headers = {
@@ -19,19 +18,30 @@ export const myFetch = async (
     };
   }
   const res = await fetch(url, options);
+  return res;
+};
+
+export const myFetch = async (
+  url: URL | RequestInfo,
+  options?: RequestInit,
+  refreshed = false,
+): Promise<Response> => {
+  const res = await myFetchNoRefresh(url, options);
   if (res.status === 401 && !refreshed) {
     function getLoginError() {
       token.value = null;
       refresh.value = null;
       // TODO: Change to login.
-      // goto(resolve("/"));
+      // goto(resolve("/login"));
+      console.log("userState.tokenInvalid = true;");
+      userState.tokenInvalid = true;
       return new Error(`Token expired.`);
     }
     try {
       if (!refresh.value) {
         throw getLoginError();
       }
-      const { accessToken, refreshToken } = await trpc.refresh.mutate({
+      const { accessToken, refreshToken } = await trpc_.refresh.mutate({
         refreshToken: refresh.value,
       });
       token.value = accessToken;
@@ -40,6 +50,7 @@ export const myFetch = async (
       // Retry original request with new token
       return myFetch(url, options, true);
     } catch (error) {
+      console.error(error);
       throw getLoginError();
     }
   }

@@ -3,7 +3,7 @@ import { localStore } from "./store.svelte";
 
 export const token = localStore<string | null>("token", null);
 export const refresh = localStore<string | null>("refresh", null);
-//! Manually make sure!
-export const userState = $state<{ data: JWTPayload | null }>({
+export const userState = $state<{ data: JWTPayload | null; tokenInvalid: boolean }>({
   data: null,
+  tokenInvalid: false,
 });

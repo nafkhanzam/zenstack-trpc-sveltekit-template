@@ -19,6 +19,9 @@
       const jwtToken = token.value;
       if (!jwtToken) {
         userState.data = null;
+        userState.tokenInvalid = true;
+        console.log("Canceled.");
+        return;
       }
       const me = await trpc.me.query();
       userState.data = me;

@@ -1,2 +1,2 @@
-- Fix: failed because of duplicate stops the server.
-- Auth Policy Plugin is still failing.
+- auditlog change id as it can conflict
+- sveltekit should catch any error on toast

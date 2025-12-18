@@ -49,6 +49,7 @@ model User with Base {
   File         File[]
   Post         Post[]
 
+  @@allow('read', true)
   @@allow('all', auth().id == id)
 }
 
@@ -70,11 +71,13 @@ model File with Timestamps {
 }
 
 model AuditLog {
-  timestamp DateTime @id @default(now())
+  timestamp DateTime @default(now())
+  cuid      String   @default(cuid())
 
   action    String
   data      Json
 
+  @@id([timestamp, cuid])
   @@deny('all', true)
 }
 
