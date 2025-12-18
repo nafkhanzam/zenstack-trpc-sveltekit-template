@@ -31,9 +31,7 @@ export const myFetch = async (
     function getLoginError() {
       token.value = null;
       refresh.value = null;
-      // TODO: Change to login.
-      // goto(resolve("/login"));
-      console.log("userState.tokenInvalid = true;");
+      // console.log("userState.tokenInvalid = true;");
       userState.tokenInvalid = true;
       return new Error(`Token expired.`);
     }

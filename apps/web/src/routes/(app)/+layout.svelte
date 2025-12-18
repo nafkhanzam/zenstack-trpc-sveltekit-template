@@ -7,7 +7,7 @@ import { goto } from '$app/navigation';
 
   $effect(() => {
     if (userState.tokenInvalid) {
-      console.log(`goto(resolve("/login"));`)
+      // console.log(`goto(resolve("/login"));`)
       window.location.href = resolve("/login") + `?redirect=${window.location.toString()}`;
     }
   })
