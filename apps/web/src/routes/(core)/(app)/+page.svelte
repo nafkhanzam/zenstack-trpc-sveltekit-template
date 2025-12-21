@@ -4,7 +4,7 @@
   import Query from "$lib/components/Query.svelte";
   import { user } from "$lib/stores/user.svelte";
   import toast from "svelte-french-toast";
-    import Container from "./_/Container.svelte";
+  import Container from "$lib/components/Container.svelte";
 
   const postsQ = client.post.useFindMany({
     where: {},
