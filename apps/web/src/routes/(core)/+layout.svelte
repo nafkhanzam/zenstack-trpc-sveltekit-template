@@ -1,8 +1,6 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
   import { userState } from '$lib/stores/token.svelte';
-  import Footer from "./_/Footer.svelte";
-  import Navbar from './_/Navbar.svelte';
 
   let {children} = $props();
 
@@ -14,10 +12,4 @@
   })
 </script>
 
-<Navbar />
-
-<main class="min-h-screen">
-  {@render children()}
-</main>
-
-<Footer />
+{@render children()}

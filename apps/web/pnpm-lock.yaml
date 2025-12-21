@@ -68,6 +68,9 @@ importers:
       superjson:
         specifier: 2.2.6
         version: 2.2.6
+      svelecte:
+        specifier: 5.3.0
+        version: 5.3.0(svelte@5.45.6)
       svelte:
         specifier: 5.45.6
         version: 5.45.6
@@ -1376,6 +1379,11 @@ packages:
   supports-preserve-symlinks-flag@1.0.0:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
+
+  svelecte@5.3.0:
+    resolution: {integrity: sha512-9WKD6KxPf31CweyZtObTetGtkq1TncBA2E+aSHcT+bfjALgP+LUGMMQUU+2qhlfSoGpw9JYmLfxphGjb0q350g==}
+    peerDependencies:
+      svelte: ^5.2.7
 
   svelte-check@4.3.4:
     resolution: {integrity: sha512-DVWvxhBrDsd+0hHWKfjP99lsSXASeOhHJYyuKOFYJcP7ThfSCKgjVarE8XfuMWpS5JV3AlDf+iK1YGGo2TACdw==}
@@ -2750,6 +2758,10 @@ snapshots:
       copy-anything: 4.0.5
 
   supports-preserve-symlinks-flag@1.0.0: {}
+
+  svelecte@5.3.0(svelte@5.45.6):
+    dependencies:
+      svelte: 5.45.6
 
   svelte-check@4.3.4(picomatch@4.0.3)(svelte@5.45.6)(typescript@6.0.0-dev.20251210):
     dependencies:
