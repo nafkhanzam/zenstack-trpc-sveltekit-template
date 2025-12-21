@@ -2,7 +2,7 @@
   import { resolve } from "$app/paths";
   import Icon from "@iconify/svelte";
   import { constants, type NavItem, type NavSingle } from "./constants";
-  // import ThemeToggle from "$lib/components/ThemeToggle.svelte";
+  import ThemeToggle from "$lib/components/ThemeToggle.svelte";
 
   // Props
   const {brandName} = constants;
@@ -86,7 +86,7 @@
 
     <div class="navbar-end gap-2">
       <!-- Theme toggle button -->
-      <!-- <ThemeToggle /> -->
+      <ThemeToggle />
 
       <!-- Account dropdown -->
       <div class="dropdown dropdown-end">
