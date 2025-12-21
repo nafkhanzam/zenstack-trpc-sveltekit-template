@@ -42,11 +42,11 @@ importers:
         specifier: 11.7.2
         version: 11.7.2(typescript@6.0.0-dev.20251210)
       '@zenstackhq/orm':
-        specifier: 3.0.0-beta.32
-        version: 3.0.0-beta.32(zod@4.1.13)
+        specifier: 3.0.0-beta.34
+        version: 3.0.0-beta.34(zod@4.1.13)
       '@zenstackhq/tanstack-query':
-        specifier: 3.0.0-beta.32
-        version: 3.0.0-beta.32(@tanstack/svelte-query@5.90.2(svelte@5.45.6))(zod@4.1.13)
+        specifier: 3.0.0-beta.34
+        version: 3.0.0-beta.34(@tanstack/svelte-query@5.90.2(svelte@5.45.6))(zod@4.1.13)
       buffer:
         specifier: 6.0.3
         version: 6.0.3
@@ -588,11 +588,11 @@ packages:
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
 
-  '@zenstackhq/common-helpers@3.0.0-beta.32':
-    resolution: {integrity: sha512-Dj5p+A1PjxAzvoydnrLKWw72QBtL/V6SSvtZJedw22Sne5I9ckbWGZX8Wj1Bl+Y3uHc3k8nYodopXiI6BVcC8g==}
+  '@zenstackhq/common-helpers@3.0.0-beta.34':
+    resolution: {integrity: sha512-GIQVNTYMczqu5J9Q6uWsOFBjCfp5pw3ok1JZo8aacR1tqvm8+/w6BrHRhS7fmSAK5WBrlKde51fLbNtb2TZdow==}
 
-  '@zenstackhq/orm@3.0.0-beta.32':
-    resolution: {integrity: sha512-D09Bt0OItcStzvziph0t0tZ+i8z+ClLNXqMSidCn4ktauDkxjmKRBO5nmqnb0snGjrCH/hnB6mRY7t+GyQH1yw==}
+  '@zenstackhq/orm@3.0.0-beta.34':
+    resolution: {integrity: sha512-1Iry8pqtOr9rZ53bJfStq9uUbIl/5B6aVSW/nqg4L8BgF5dK3EBMeeOwj/Ncz0EpK2mB9Gc8Ba8+6R0uQSiOVg==}
     peerDependencies:
       better-sqlite3: ^12.5.0
       pg: ^8.13.1
@@ -606,11 +606,11 @@ packages:
       sql.js:
         optional: true
 
-  '@zenstackhq/schema@3.0.0-beta.32':
-    resolution: {integrity: sha512-yP7hxXd67plaabGZdH7Y6gPN2EasK7aJApk3pz3M3hFRvRZY5uP2mTyRMicbyAdOyEGg22DyqJPkqGzuGUF3OQ==}
+  '@zenstackhq/schema@3.0.0-beta.34':
+    resolution: {integrity: sha512-BIlNSTW1gmvlyjQtKWEDvhkqXa8vurB8u9X8uFm/itHvCi4/vxN75G2KpFleZ5d2xD55OHWT7k/+X+smvSoqeA==}
 
-  '@zenstackhq/tanstack-query@3.0.0-beta.32':
-    resolution: {integrity: sha512-CXj+kBgkt+vG4VoBWBU+YGafGysYDJaRWqzweBBsk0QFVmCjnBvJvDkLzuNjCoC6hNFq8gCg4HW7vw5uIrR2wQ==}
+  '@zenstackhq/tanstack-query@3.0.0-beta.34':
+    resolution: {integrity: sha512-4A7uTZHErnWXouieozzJQoturahiUEaiCJ3se3FUYGLIPA5zWGtgFh1gTDZ5OkQF5AssjK2nI/AdRbj6d0igyQ==}
     peerDependencies:
       '@tanstack/react-query': ^5.0.0
       '@tanstack/svelte-query': ^5.0.0
@@ -1891,13 +1891,13 @@ snapshots:
 
   '@types/estree@1.0.8': {}
 
-  '@zenstackhq/common-helpers@3.0.0-beta.32': {}
+  '@zenstackhq/common-helpers@3.0.0-beta.34': {}
 
-  '@zenstackhq/orm@3.0.0-beta.32(zod@4.1.13)':
+  '@zenstackhq/orm@3.0.0-beta.34(zod@4.1.13)':
     dependencies:
       '@paralleldrive/cuid2': 2.3.1
-      '@zenstackhq/common-helpers': 3.0.0-beta.32
-      '@zenstackhq/schema': 3.0.0-beta.32
+      '@zenstackhq/common-helpers': 3.0.0-beta.34
+      '@zenstackhq/schema': 3.0.0-beta.34
       decimal.js: 10.6.0
       json-stable-stringify: 1.3.0
       kysely: 0.28.8
@@ -1909,15 +1909,15 @@ snapshots:
       zod: 4.1.13
       zod-validation-error: 4.0.2(zod@4.1.13)
 
-  '@zenstackhq/schema@3.0.0-beta.32':
+  '@zenstackhq/schema@3.0.0-beta.34':
     dependencies:
       decimal.js: 10.6.0
 
-  '@zenstackhq/tanstack-query@3.0.0-beta.32(@tanstack/svelte-query@5.90.2(svelte@5.45.6))(zod@4.1.13)':
+  '@zenstackhq/tanstack-query@3.0.0-beta.34(@tanstack/svelte-query@5.90.2(svelte@5.45.6))(zod@4.1.13)':
     dependencies:
-      '@zenstackhq/common-helpers': 3.0.0-beta.32
-      '@zenstackhq/orm': 3.0.0-beta.32(zod@4.1.13)
-      '@zenstackhq/schema': 3.0.0-beta.32
+      '@zenstackhq/common-helpers': 3.0.0-beta.34
+      '@zenstackhq/orm': 3.0.0-beta.34(zod@4.1.13)
+      '@zenstackhq/schema': 3.0.0-beta.34
       decimal.js: 10.6.0
       superjson: 2.2.6
     optionalDependencies:

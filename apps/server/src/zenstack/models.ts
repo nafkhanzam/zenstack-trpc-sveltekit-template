@@ -5,18 +5,5 @@
 
 /* eslint-disable */
 
-import { schema as $schema, type SchemaType as $Schema } from "./schema";
-import { type ModelResult as $ModelResult, type TypeDefResult as $TypeDefResult } from "@zenstackhq/orm";
-export type User = $ModelResult<$Schema, "User">;
-export type File = $ModelResult<$Schema, "File">;
-export type AuditLog = $ModelResult<$Schema, "AuditLog">;
-export type RefreshToken = $ModelResult<$Schema, "RefreshToken">;
-export type Post = $ModelResult<$Schema, "Post">;
-export type ID = $TypeDefResult<$Schema, "ID">;
-export type Timestamps = $TypeDefResult<$Schema, "Timestamps">;
-export type Base = $TypeDefResult<$Schema, "Base">;
-export type AuthInfo = $TypeDefResult<$Schema, "AuthInfo">;
-export const Role = $schema.enums.Role.values;
-export type Role = (typeof Role)[keyof typeof Role];
-export const FileStatus = $schema.enums.FileStatus.values;
-export type FileStatus = (typeof FileStatus)[keyof typeof FileStatus];
+import { type SchemaType as $Schema } from "./schema";
+import { type ModelResult as $ModelResult } from "@zenstackhq/orm";
