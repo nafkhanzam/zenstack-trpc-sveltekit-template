@@ -12,3 +12,143 @@ model Post with Base {
   @@allow('create,update', auth().id == userId && (Image == null || auth().id == Image.userId))
   @@allow('delete', auth().id == userId)
 }
+
+model Major with Base {
+  name   String
+
+  Course Course[]
+}
+
+enum CourseType {
+  REQUIRED // Wajib
+  ELECTIVE // Pilihan
+}
+
+model Course with Base {
+  code    String
+  name    String
+  type    CourseType
+  sks     Int
+  majorId String
+  Major   Major      @relation(fields: [majorId], references: [id])
+
+  cloList String[]
+}
+
+enum BKPStatus {
+  PROPOSAL
+  WAITING_PROPOSAL_APPROVAL
+  REGISTRATION
+  WAITING_REGISTRATION_APPROVAL
+  WEEKLY_REPORTING
+  UPLOADING_FIELD_ASSESSMENT
+  GRADING
+  COMPLETED
+
+  DELETED
+}
+
+type BKPProposal {
+  // Company & Position Info
+  companyName    String?
+  position       String?
+  jobDescription String?
+  jobLink        String?
+
+  // BKP Classification
+  bkpType        String? // e.g., "Magang Berdampak", "Lomba", etc.
+  period         String? // e.g., "2023/2024-02"
+
+  // Duration
+  monthDuration  Int?
+  startDate      DateTime?
+  endDate        DateTime?
+
+  studentNotes   String?
+
+  submittedAt    DateTime?
+}
+
+type BKPProposalApproval {
+  reviewedAt    DateTime?
+  reviewerNotes String?
+}
+
+type BKPRegistrationAdditionalDocument {
+  name  String?
+  notes String?
+  key   String?
+}
+
+type BKPRegistration {
+  pksKey                       String?
+  integrityTreatyKey           String?
+  acceptanceProofKey           String?
+  parentsApprovalKey           String?
+  implementationArrangementKey String?
+  additionalDocuments          BKPRegistrationAdditionalDocument[]
+
+  studentNotes                 String?
+}
+
+type BKPRegistrationApproval {
+  reviewedAt    DateTime?
+  reviewerNotes String?
+}
+
+type WeeklyReport {
+  week Int?
+  from DateTime?
+  to   DateTime?
+}
+
+type WeeklyReports {
+  WeeklyReportList WeeklyReport[]
+}
+
+type FieldAssessment {
+  assessmentKey String?
+}
+
+type ComponentGrading {
+  courseId       String?
+  score          Int?
+  grade          String?
+  gradedAt       DateTime?
+  graderComments String?
+}
+
+type Grading {
+  components ComponentGrading[]
+}
+
+model BKP with Base {
+  userId                                  String
+  User                                    User                     @relation(fields: [userId], references: [id])
+  status                                  BKPStatus
+
+  Proposal                                BKPProposal?             @json
+
+  ProposalApproval                        BKPProposalApproval?     @json
+  ProposalApproval__reviewedBy_UserId     String?
+  ProposalApproval__reviewedBy_User       User?                    @relation("ProposalApproval", fields: [ProposalApproval__reviewedBy_UserId], references: [id])
+
+  BKPRegistration                         BKPRegistration          @json
+
+  RegistrationApproval                    BKPRegistrationApproval? @json
+  RegistrationApproval__reviewedBy_UserId String?
+  RegistrationApproval__reviewedBy_User   User?                    @relation("RegistrationApproval", fields: [RegistrationApproval__reviewedBy_UserId], references: [id])
+
+  WeeklyReports                           WeeklyReports            @json
+  FieldAssessment                         FieldAssessment          @json
+
+  Grading                                 Grading                  @json
+  Grading__UserId                         String?
+  Grading__User                           User?                    @relation("Grading", fields: [Grading__UserId], references: [id])
+
+  @@allow(
+    'all',
+    auth().role == "ADMIN" ||
+    auth().role == "SUPERADMIN"
+  )
+}

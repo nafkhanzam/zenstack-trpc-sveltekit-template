@@ -5,12 +5,897 @@
 
 /* eslint-disable */
 
-import { type SchemaDef } from "@zenstackhq/orm/schema";
+import { type SchemaDef, ExpressionUtils } from "@zenstackhq/orm/schema";
 export class SchemaType implements SchemaDef {
     provider = {
         type: "postgresql"
     } as const;
-    models = {} as const;
+    models = {
+        User: {
+            name: "User",
+            fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    id: true,
+                    attributes: [{ name: "@id" }, { name: "@default", args: [{ name: "value", value: ExpressionUtils.call("nanoid") }] }],
+                    default: ExpressionUtils.call("nanoid")
+                },
+                createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
+                    default: ExpressionUtils.call("now")
+                },
+                updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    updatedAt: true,
+                    attributes: [{ name: "@updatedAt" }]
+                },
+                username: {
+                    name: "username",
+                    type: "String",
+                    unique: true,
+                    attributes: [{ name: "@unique" }]
+                },
+                passwordHash: {
+                    name: "passwordHash",
+                    type: "String"
+                },
+                name: {
+                    name: "name",
+                    type: "String"
+                },
+                role: {
+                    name: "role",
+                    type: "Role"
+                },
+                RefreshToken: {
+                    name: "RefreshToken",
+                    type: "RefreshToken",
+                    array: true,
+                    relation: { opposite: "User" }
+                },
+                File: {
+                    name: "File",
+                    type: "File",
+                    array: true,
+                    relation: { opposite: "User" }
+                },
+                Post: {
+                    name: "Post",
+                    type: "Post",
+                    array: true,
+                    relation: { opposite: "User" }
+                },
+                BKP: {
+                    name: "BKP",
+                    type: "BKP",
+                    array: true,
+                    relation: { opposite: "User" }
+                },
+                BKP__ProposalApproval__reviewedBy: {
+                    name: "BKP__ProposalApproval__reviewedBy",
+                    type: "BKP",
+                    array: true,
+                    attributes: [{ name: "@relation", args: [{ name: "name", value: ExpressionUtils.literal("ProposalApproval") }] }],
+                    relation: { opposite: "ProposalApproval__reviewedBy_User", name: "ProposalApproval" }
+                },
+                BKP__RegistrationApproval__reviewedBy: {
+                    name: "BKP__RegistrationApproval__reviewedBy",
+                    type: "BKP",
+                    array: true,
+                    attributes: [{ name: "@relation", args: [{ name: "name", value: ExpressionUtils.literal("RegistrationApproval") }] }],
+                    relation: { opposite: "RegistrationApproval__reviewedBy_User", name: "RegistrationApproval" }
+                },
+                BKP__Grading: {
+                    name: "BKP__Grading",
+                    type: "BKP",
+                    array: true,
+                    attributes: [{ name: "@relation", args: [{ name: "name", value: ExpressionUtils.literal("Grading") }] }],
+                    relation: { opposite: "Grading__User", name: "Grading" }
+                }
+            },
+            attributes: [
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("read") }, { name: "condition", value: ExpressionUtils.literal(true) }] },
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("all") }, { name: "condition", value: ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["id"]), "==", ExpressionUtils.field("id")) }] }
+            ],
+            idFields: ["id"],
+            uniqueFields: {
+                id: { type: "String" },
+                username: { type: "String" }
+            }
+        },
+        File: {
+            name: "File",
+            fields: {
+                createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
+                    default: ExpressionUtils.call("now")
+                },
+                updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    updatedAt: true,
+                    attributes: [{ name: "@updatedAt" }]
+                },
+                key: {
+                    name: "key",
+                    type: "String",
+                    id: true,
+                    attributes: [{ name: "@id" }]
+                },
+                userId: {
+                    name: "userId",
+                    type: "String",
+                    foreignKeyFor: [
+                        "User"
+                    ]
+                },
+                User: {
+                    name: "User",
+                    type: "User",
+                    attributes: [{ name: "@relation", args: [{ name: "fields", value: ExpressionUtils.array([ExpressionUtils.field("userId")]) }, { name: "references", value: ExpressionUtils.array([ExpressionUtils.field("id")]) }] }],
+                    relation: { opposite: "File", fields: ["userId"], references: ["id"] }
+                },
+                originalFilename: {
+                    name: "originalFilename",
+                    type: "String"
+                },
+                filename: {
+                    name: "filename",
+                    type: "String"
+                },
+                contentType: {
+                    name: "contentType",
+                    type: "String"
+                },
+                size: {
+                    name: "size",
+                    type: "Int",
+                    optional: true
+                },
+                status: {
+                    name: "status",
+                    type: "FileStatus"
+                },
+                Post: {
+                    name: "Post",
+                    type: "Post",
+                    array: true,
+                    relation: { opposite: "Image" }
+                }
+            },
+            attributes: [
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("all") }, { name: "condition", value: ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["id"]), "==", ExpressionUtils.field("userId")) }] }
+            ],
+            idFields: ["key"],
+            uniqueFields: {
+                key: { type: "String" }
+            }
+        },
+        AuditLog: {
+            name: "AuditLog",
+            fields: {
+                timestamp: {
+                    name: "timestamp",
+                    type: "DateTime",
+                    id: true,
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
+                    default: ExpressionUtils.call("now")
+                },
+                cuid: {
+                    name: "cuid",
+                    type: "String",
+                    id: true,
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("cuid") }] }],
+                    default: ExpressionUtils.call("cuid")
+                },
+                action: {
+                    name: "action",
+                    type: "String"
+                },
+                data: {
+                    name: "data",
+                    type: "Json"
+                }
+            },
+            attributes: [
+                { name: "@@id", args: [{ name: "fields", value: ExpressionUtils.array([ExpressionUtils.field("timestamp"), ExpressionUtils.field("cuid")]) }] },
+                { name: "@@deny", args: [{ name: "operation", value: ExpressionUtils.literal("all") }, { name: "condition", value: ExpressionUtils.literal(true) }] }
+            ],
+            idFields: ["timestamp", "cuid"],
+            uniqueFields: {
+                timestamp_cuid: { timestamp: { type: "DateTime" }, cuid: { type: "String" } }
+            }
+        },
+        RefreshToken: {
+            name: "RefreshToken",
+            fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    id: true,
+                    attributes: [{ name: "@id" }, { name: "@default", args: [{ name: "value", value: ExpressionUtils.call("nanoid") }] }],
+                    default: ExpressionUtils.call("nanoid")
+                },
+                createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
+                    default: ExpressionUtils.call("now")
+                },
+                updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    updatedAt: true,
+                    attributes: [{ name: "@updatedAt" }]
+                },
+                userId: {
+                    name: "userId",
+                    type: "String",
+                    foreignKeyFor: [
+                        "User"
+                    ]
+                },
+                User: {
+                    name: "User",
+                    type: "User",
+                    attributes: [{ name: "@relation", args: [{ name: "fields", value: ExpressionUtils.array([ExpressionUtils.field("userId")]) }, { name: "references", value: ExpressionUtils.array([ExpressionUtils.field("id")]) }] }],
+                    relation: { opposite: "RefreshToken", fields: ["userId"], references: ["id"] }
+                },
+                revoked: {
+                    name: "revoked",
+                    type: "Boolean"
+                }
+            },
+            attributes: [
+                { name: "@@deny", args: [{ name: "operation", value: ExpressionUtils.literal("all") }, { name: "condition", value: ExpressionUtils.literal(true) }] }
+            ],
+            idFields: ["id"],
+            uniqueFields: {
+                id: { type: "String" }
+            }
+        },
+        Post: {
+            name: "Post",
+            fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    id: true,
+                    attributes: [{ name: "@id" }, { name: "@default", args: [{ name: "value", value: ExpressionUtils.call("nanoid") }] }],
+                    default: ExpressionUtils.call("nanoid")
+                },
+                createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
+                    default: ExpressionUtils.call("now")
+                },
+                updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    updatedAt: true,
+                    attributes: [{ name: "@updatedAt" }]
+                },
+                userId: {
+                    name: "userId",
+                    type: "String",
+                    foreignKeyFor: [
+                        "User"
+                    ]
+                },
+                User: {
+                    name: "User",
+                    type: "User",
+                    attributes: [{ name: "@relation", args: [{ name: "fields", value: ExpressionUtils.array([ExpressionUtils.field("userId")]) }, { name: "references", value: ExpressionUtils.array([ExpressionUtils.field("id")]) }] }],
+                    relation: { opposite: "Post", fields: ["userId"], references: ["id"] }
+                },
+                content: {
+                    name: "content",
+                    type: "String"
+                },
+                imageKey: {
+                    name: "imageKey",
+                    type: "String",
+                    optional: true,
+                    foreignKeyFor: [
+                        "Image"
+                    ]
+                },
+                Image: {
+                    name: "Image",
+                    type: "File",
+                    optional: true,
+                    attributes: [{ name: "@relation", args: [{ name: "fields", value: ExpressionUtils.array([ExpressionUtils.field("imageKey")]) }, { name: "references", value: ExpressionUtils.array([ExpressionUtils.field("key")]) }] }],
+                    relation: { opposite: "Post", fields: ["imageKey"], references: ["key"] }
+                }
+            },
+            attributes: [
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("read") }, { name: "condition", value: ExpressionUtils.literal(true) }] },
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("create,update") }, { name: "condition", value: ExpressionUtils.binary(ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["id"]), "==", ExpressionUtils.field("userId")), "&&", ExpressionUtils.binary(ExpressionUtils.binary(ExpressionUtils.field("Image"), "==", ExpressionUtils._null()), "||", ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["id"]), "==", ExpressionUtils.member(ExpressionUtils.field("Image"), ["userId"])))) }] },
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("delete") }, { name: "condition", value: ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["id"]), "==", ExpressionUtils.field("userId")) }] }
+            ],
+            idFields: ["id"],
+            uniqueFields: {
+                id: { type: "String" }
+            }
+        },
+        Major: {
+            name: "Major",
+            fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    id: true,
+                    attributes: [{ name: "@id" }, { name: "@default", args: [{ name: "value", value: ExpressionUtils.call("nanoid") }] }],
+                    default: ExpressionUtils.call("nanoid")
+                },
+                createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
+                    default: ExpressionUtils.call("now")
+                },
+                updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    updatedAt: true,
+                    attributes: [{ name: "@updatedAt" }]
+                },
+                name: {
+                    name: "name",
+                    type: "String"
+                },
+                Course: {
+                    name: "Course",
+                    type: "Course",
+                    array: true,
+                    relation: { opposite: "Major" }
+                }
+            },
+            idFields: ["id"],
+            uniqueFields: {
+                id: { type: "String" }
+            }
+        },
+        Course: {
+            name: "Course",
+            fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    id: true,
+                    attributes: [{ name: "@id" }, { name: "@default", args: [{ name: "value", value: ExpressionUtils.call("nanoid") }] }],
+                    default: ExpressionUtils.call("nanoid")
+                },
+                createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
+                    default: ExpressionUtils.call("now")
+                },
+                updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    updatedAt: true,
+                    attributes: [{ name: "@updatedAt" }]
+                },
+                code: {
+                    name: "code",
+                    type: "String"
+                },
+                name: {
+                    name: "name",
+                    type: "String"
+                },
+                type: {
+                    name: "type",
+                    type: "CourseType"
+                },
+                sks: {
+                    name: "sks",
+                    type: "Int"
+                },
+                majorId: {
+                    name: "majorId",
+                    type: "String",
+                    foreignKeyFor: [
+                        "Major"
+                    ]
+                },
+                Major: {
+                    name: "Major",
+                    type: "Major",
+                    attributes: [{ name: "@relation", args: [{ name: "fields", value: ExpressionUtils.array([ExpressionUtils.field("majorId")]) }, { name: "references", value: ExpressionUtils.array([ExpressionUtils.field("id")]) }] }],
+                    relation: { opposite: "Course", fields: ["majorId"], references: ["id"] }
+                },
+                cloList: {
+                    name: "cloList",
+                    type: "String",
+                    array: true
+                }
+            },
+            idFields: ["id"],
+            uniqueFields: {
+                id: { type: "String" }
+            }
+        },
+        BKP: {
+            name: "BKP",
+            fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    id: true,
+                    attributes: [{ name: "@id" }, { name: "@default", args: [{ name: "value", value: ExpressionUtils.call("nanoid") }] }],
+                    default: ExpressionUtils.call("nanoid")
+                },
+                createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
+                    default: ExpressionUtils.call("now")
+                },
+                updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    updatedAt: true,
+                    attributes: [{ name: "@updatedAt" }]
+                },
+                userId: {
+                    name: "userId",
+                    type: "String",
+                    foreignKeyFor: [
+                        "User"
+                    ]
+                },
+                User: {
+                    name: "User",
+                    type: "User",
+                    attributes: [{ name: "@relation", args: [{ name: "fields", value: ExpressionUtils.array([ExpressionUtils.field("userId")]) }, { name: "references", value: ExpressionUtils.array([ExpressionUtils.field("id")]) }] }],
+                    relation: { opposite: "BKP", fields: ["userId"], references: ["id"] }
+                },
+                status: {
+                    name: "status",
+                    type: "BKPStatus"
+                },
+                Proposal: {
+                    name: "Proposal",
+                    type: "BKPProposal",
+                    optional: true,
+                    attributes: [{ name: "@json" }]
+                },
+                ProposalApproval: {
+                    name: "ProposalApproval",
+                    type: "BKPProposalApproval",
+                    optional: true,
+                    attributes: [{ name: "@json" }]
+                },
+                ProposalApproval__reviewedBy_UserId: {
+                    name: "ProposalApproval__reviewedBy_UserId",
+                    type: "String",
+                    optional: true,
+                    foreignKeyFor: [
+                        "ProposalApproval__reviewedBy_User"
+                    ]
+                },
+                ProposalApproval__reviewedBy_User: {
+                    name: "ProposalApproval__reviewedBy_User",
+                    type: "User",
+                    optional: true,
+                    attributes: [{ name: "@relation", args: [{ name: "name", value: ExpressionUtils.literal("ProposalApproval") }, { name: "fields", value: ExpressionUtils.array([ExpressionUtils.field("ProposalApproval__reviewedBy_UserId")]) }, { name: "references", value: ExpressionUtils.array([ExpressionUtils.field("id")]) }] }],
+                    relation: { opposite: "BKP__ProposalApproval__reviewedBy", name: "ProposalApproval", fields: ["ProposalApproval__reviewedBy_UserId"], references: ["id"] }
+                },
+                BKPRegistration: {
+                    name: "BKPRegistration",
+                    type: "BKPRegistration",
+                    attributes: [{ name: "@json" }]
+                },
+                RegistrationApproval: {
+                    name: "RegistrationApproval",
+                    type: "BKPRegistrationApproval",
+                    optional: true,
+                    attributes: [{ name: "@json" }]
+                },
+                RegistrationApproval__reviewedBy_UserId: {
+                    name: "RegistrationApproval__reviewedBy_UserId",
+                    type: "String",
+                    optional: true,
+                    foreignKeyFor: [
+                        "RegistrationApproval__reviewedBy_User"
+                    ]
+                },
+                RegistrationApproval__reviewedBy_User: {
+                    name: "RegistrationApproval__reviewedBy_User",
+                    type: "User",
+                    optional: true,
+                    attributes: [{ name: "@relation", args: [{ name: "name", value: ExpressionUtils.literal("RegistrationApproval") }, { name: "fields", value: ExpressionUtils.array([ExpressionUtils.field("RegistrationApproval__reviewedBy_UserId")]) }, { name: "references", value: ExpressionUtils.array([ExpressionUtils.field("id")]) }] }],
+                    relation: { opposite: "BKP__RegistrationApproval__reviewedBy", name: "RegistrationApproval", fields: ["RegistrationApproval__reviewedBy_UserId"], references: ["id"] }
+                },
+                WeeklyReports: {
+                    name: "WeeklyReports",
+                    type: "WeeklyReports",
+                    attributes: [{ name: "@json" }]
+                },
+                FieldAssessment: {
+                    name: "FieldAssessment",
+                    type: "FieldAssessment",
+                    attributes: [{ name: "@json" }]
+                },
+                Grading: {
+                    name: "Grading",
+                    type: "Grading",
+                    attributes: [{ name: "@json" }]
+                },
+                Grading__UserId: {
+                    name: "Grading__UserId",
+                    type: "String",
+                    optional: true,
+                    foreignKeyFor: [
+                        "Grading__User"
+                    ]
+                },
+                Grading__User: {
+                    name: "Grading__User",
+                    type: "User",
+                    optional: true,
+                    attributes: [{ name: "@relation", args: [{ name: "name", value: ExpressionUtils.literal("Grading") }, { name: "fields", value: ExpressionUtils.array([ExpressionUtils.field("Grading__UserId")]) }, { name: "references", value: ExpressionUtils.array([ExpressionUtils.field("id")]) }] }],
+                    relation: { opposite: "BKP__Grading", name: "Grading", fields: ["Grading__UserId"], references: ["id"] }
+                }
+            },
+            attributes: [
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("all") }, { name: "condition", value: ExpressionUtils.binary(ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["role"]), "==", ExpressionUtils.literal("ADMIN")), "||", ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["role"]), "==", ExpressionUtils.literal("SUPERADMIN"))) }] }
+            ],
+            idFields: ["id"],
+            uniqueFields: {
+                id: { type: "String" }
+            }
+        }
+    } as const;
+    typeDefs = {
+        ID: {
+            name: "ID",
+            fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    attributes: [{ name: "@id" }, { name: "@default", args: [{ name: "value", value: ExpressionUtils.call("nanoid") }] }],
+                    default: ExpressionUtils.call("nanoid")
+                }
+            }
+        },
+        Timestamps: {
+            name: "Timestamps",
+            fields: {
+                createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
+                    default: ExpressionUtils.call("now")
+                },
+                updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    updatedAt: true,
+                    attributes: [{ name: "@updatedAt" }]
+                }
+            }
+        },
+        Base: {
+            name: "Base",
+            fields: {
+                id: {
+                    name: "id",
+                    type: "String",
+                    attributes: [{ name: "@id" }, { name: "@default", args: [{ name: "value", value: ExpressionUtils.call("nanoid") }] }],
+                    default: ExpressionUtils.call("nanoid")
+                },
+                createdAt: {
+                    name: "createdAt",
+                    type: "DateTime",
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.call("now") }] }],
+                    default: ExpressionUtils.call("now")
+                },
+                updatedAt: {
+                    name: "updatedAt",
+                    type: "DateTime",
+                    updatedAt: true,
+                    attributes: [{ name: "@updatedAt" }]
+                }
+            }
+        },
+        AuthInfo: {
+            name: "AuthInfo",
+            fields: {
+                id: {
+                    name: "id",
+                    type: "String"
+                },
+                username: {
+                    name: "username",
+                    type: "String"
+                },
+                role: {
+                    name: "role",
+                    type: "Role"
+                }
+            },
+            attributes: [
+                { name: "@@auth" }
+            ]
+        },
+        BKPProposal: {
+            name: "BKPProposal",
+            fields: {
+                companyName: {
+                    name: "companyName",
+                    type: "String",
+                    optional: true
+                },
+                position: {
+                    name: "position",
+                    type: "String",
+                    optional: true
+                },
+                jobDescription: {
+                    name: "jobDescription",
+                    type: "String",
+                    optional: true
+                },
+                jobLink: {
+                    name: "jobLink",
+                    type: "String",
+                    optional: true
+                },
+                bkpType: {
+                    name: "bkpType",
+                    type: "String",
+                    optional: true
+                },
+                period: {
+                    name: "period",
+                    type: "String",
+                    optional: true
+                },
+                monthDuration: {
+                    name: "monthDuration",
+                    type: "Int",
+                    optional: true
+                },
+                startDate: {
+                    name: "startDate",
+                    type: "DateTime",
+                    optional: true
+                },
+                endDate: {
+                    name: "endDate",
+                    type: "DateTime",
+                    optional: true
+                },
+                studentNotes: {
+                    name: "studentNotes",
+                    type: "String",
+                    optional: true
+                },
+                submittedAt: {
+                    name: "submittedAt",
+                    type: "DateTime",
+                    optional: true
+                }
+            }
+        },
+        BKPProposalApproval: {
+            name: "BKPProposalApproval",
+            fields: {
+                reviewedAt: {
+                    name: "reviewedAt",
+                    type: "DateTime",
+                    optional: true
+                },
+                reviewerNotes: {
+                    name: "reviewerNotes",
+                    type: "String",
+                    optional: true
+                }
+            }
+        },
+        BKPRegistrationAdditionalDocument: {
+            name: "BKPRegistrationAdditionalDocument",
+            fields: {
+                name: {
+                    name: "name",
+                    type: "String",
+                    optional: true
+                },
+                notes: {
+                    name: "notes",
+                    type: "String",
+                    optional: true
+                },
+                key: {
+                    name: "key",
+                    type: "String",
+                    optional: true
+                }
+            }
+        },
+        BKPRegistration: {
+            name: "BKPRegistration",
+            fields: {
+                pksKey: {
+                    name: "pksKey",
+                    type: "String",
+                    optional: true
+                },
+                integrityTreatyKey: {
+                    name: "integrityTreatyKey",
+                    type: "String",
+                    optional: true
+                },
+                acceptanceProofKey: {
+                    name: "acceptanceProofKey",
+                    type: "String",
+                    optional: true
+                },
+                parentsApprovalKey: {
+                    name: "parentsApprovalKey",
+                    type: "String",
+                    optional: true
+                },
+                implementationArrangementKey: {
+                    name: "implementationArrangementKey",
+                    type: "String",
+                    optional: true
+                },
+                additionalDocuments: {
+                    name: "additionalDocuments",
+                    type: "BKPRegistrationAdditionalDocument",
+                    array: true
+                },
+                studentNotes: {
+                    name: "studentNotes",
+                    type: "String",
+                    optional: true
+                }
+            }
+        },
+        BKPRegistrationApproval: {
+            name: "BKPRegistrationApproval",
+            fields: {
+                reviewedAt: {
+                    name: "reviewedAt",
+                    type: "DateTime",
+                    optional: true
+                },
+                reviewerNotes: {
+                    name: "reviewerNotes",
+                    type: "String",
+                    optional: true
+                }
+            }
+        },
+        WeeklyReport: {
+            name: "WeeklyReport",
+            fields: {
+                week: {
+                    name: "week",
+                    type: "Int",
+                    optional: true
+                },
+                from: {
+                    name: "from",
+                    type: "DateTime",
+                    optional: true
+                },
+                to: {
+                    name: "to",
+                    type: "DateTime",
+                    optional: true
+                }
+            }
+        },
+        WeeklyReports: {
+            name: "WeeklyReports",
+            fields: {
+                WeeklyReportList: {
+                    name: "WeeklyReportList",
+                    type: "WeeklyReport",
+                    array: true
+                }
+            }
+        },
+        FieldAssessment: {
+            name: "FieldAssessment",
+            fields: {
+                assessmentKey: {
+                    name: "assessmentKey",
+                    type: "String",
+                    optional: true
+                }
+            }
+        },
+        ComponentGrading: {
+            name: "ComponentGrading",
+            fields: {
+                courseId: {
+                    name: "courseId",
+                    type: "String",
+                    optional: true
+                },
+                score: {
+                    name: "score",
+                    type: "Int",
+                    optional: true
+                },
+                grade: {
+                    name: "grade",
+                    type: "String",
+                    optional: true
+                },
+                gradedAt: {
+                    name: "gradedAt",
+                    type: "DateTime",
+                    optional: true
+                },
+                graderComments: {
+                    name: "graderComments",
+                    type: "String",
+                    optional: true
+                }
+            }
+        },
+        Grading: {
+            name: "Grading",
+            fields: {
+                components: {
+                    name: "components",
+                    type: "ComponentGrading",
+                    array: true
+                }
+            }
+        }
+    } as const;
+    enums = {
+        Role: {
+            values: {
+                SUPERADMIN: "SUPERADMIN",
+                ADMIN: "ADMIN",
+                USER: "USER"
+            }
+        },
+        FileStatus: {
+            values: {
+                PENDING: "PENDING",
+                UPLOADED: "UPLOADED",
+                FAILED: "FAILED"
+            }
+        },
+        CourseType: {
+            values: {
+                REQUIRED: "REQUIRED",
+                ELECTIVE: "ELECTIVE"
+            }
+        },
+        BKPStatus: {
+            values: {
+                PROPOSAL: "PROPOSAL",
+                WAITING_PROPOSAL_APPROVAL: "WAITING_PROPOSAL_APPROVAL",
+                REGISTRATION: "REGISTRATION",
+                WAITING_REGISTRATION_APPROVAL: "WAITING_REGISTRATION_APPROVAL",
+                WEEKLY_REPORTING: "WEEKLY_REPORTING",
+                UPLOADING_FIELD_ASSESSMENT: "UPLOADING_FIELD_ASSESSMENT",
+                GRADING: "GRADING",
+                COMPLETED: "COMPLETED",
+                DELETED: "DELETED"
+            }
+        }
+    } as const;
+    authType = "AuthInfo" as const;
     plugins = {};
 }
 export const schema = new SchemaType();

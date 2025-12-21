@@ -33,14 +33,18 @@ enum FileStatus {
 }
 
 model User with Base {
-  username     String         @unique
-  passwordHash String
-  name         String
-  role         Role
+  username                              String         @unique
+  passwordHash                          String
+  name                                  String
+  role                                  Role
 
-  RefreshToken RefreshToken[]
-  File         File[]
-  Post         Post[]
+  RefreshToken                          RefreshToken[]
+  File                                  File[]
+  Post                                  Post[]
+  BKP                                   BKP[]
+  BKP__ProposalApproval__reviewedBy     BKP[]          @relation("ProposalApproval")
+  BKP__RegistrationApproval__reviewedBy BKP[]          @relation("RegistrationApproval")
+  BKP__Grading                          BKP[]          @relation("Grading")
 
   @@allow('read', true)
   @@allow('all', auth().id == id)

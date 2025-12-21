@@ -5,5 +5,35 @@
 
 /* eslint-disable */
 
-import { type SchemaType as $Schema } from "./schema";
-import { type ModelResult as $ModelResult } from "@zenstackhq/orm";
+import { schema as $schema, type SchemaType as $Schema } from "./schema";
+import { type ModelResult as $ModelResult, type TypeDefResult as $TypeDefResult } from "@zenstackhq/orm";
+export type User = $ModelResult<$Schema, "User">;
+export type File = $ModelResult<$Schema, "File">;
+export type AuditLog = $ModelResult<$Schema, "AuditLog">;
+export type RefreshToken = $ModelResult<$Schema, "RefreshToken">;
+export type Post = $ModelResult<$Schema, "Post">;
+export type Major = $ModelResult<$Schema, "Major">;
+export type Course = $ModelResult<$Schema, "Course">;
+export type BKP = $ModelResult<$Schema, "BKP">;
+export type ID = $TypeDefResult<$Schema, "ID">;
+export type Timestamps = $TypeDefResult<$Schema, "Timestamps">;
+export type Base = $TypeDefResult<$Schema, "Base">;
+export type AuthInfo = $TypeDefResult<$Schema, "AuthInfo">;
+export type BKPProposal = $TypeDefResult<$Schema, "BKPProposal">;
+export type BKPProposalApproval = $TypeDefResult<$Schema, "BKPProposalApproval">;
+export type BKPRegistrationAdditionalDocument = $TypeDefResult<$Schema, "BKPRegistrationAdditionalDocument">;
+export type BKPRegistration = $TypeDefResult<$Schema, "BKPRegistration">;
+export type BKPRegistrationApproval = $TypeDefResult<$Schema, "BKPRegistrationApproval">;
+export type WeeklyReport = $TypeDefResult<$Schema, "WeeklyReport">;
+export type WeeklyReports = $TypeDefResult<$Schema, "WeeklyReports">;
+export type FieldAssessment = $TypeDefResult<$Schema, "FieldAssessment">;
+export type ComponentGrading = $TypeDefResult<$Schema, "ComponentGrading">;
+export type Grading = $TypeDefResult<$Schema, "Grading">;
+export const Role = $schema.enums.Role.values;
+export type Role = (typeof Role)[keyof typeof Role];
+export const FileStatus = $schema.enums.FileStatus.values;
+export type FileStatus = (typeof FileStatus)[keyof typeof FileStatus];
+export const CourseType = $schema.enums.CourseType.values;
+export type CourseType = (typeof CourseType)[keyof typeof CourseType];
+export const BKPStatus = $schema.enums.BKPStatus.values;
+export type BKPStatus = (typeof BKPStatus)[keyof typeof BKPStatus];
