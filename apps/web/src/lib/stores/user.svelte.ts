@@ -1,4 +1,11 @@
 import type { JWTPayload } from "$lib/shared/jwt";
 import { userState } from "./token.svelte";
 
-export const user = () => userState.data as JWTPayload;
+export const user = (): JWTPayload =>
+  // userState.data ?? {
+  //   id: "",
+  //   role: "USER",
+  //   name: "Loading...",
+  //   username: "Loading...",
+  // };
+  userState.data as JWTPayload;

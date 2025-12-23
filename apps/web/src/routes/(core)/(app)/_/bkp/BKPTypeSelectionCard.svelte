@@ -33,7 +33,7 @@
     <p class="mb-4 text-sm text-base-content/70">{description}</p>
     <div class="card-actions justify-end">
       {#if detailsHref}
-        <a href={resolve(detailsHref)} class="btn btn-sm btn-ghost">
+        <a href={detailsHref} class="btn btn-sm btn-ghost">
           Details
           <Icon icon="heroicons:information-circle" class="h-4 w-4" />
         </a>

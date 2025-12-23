@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { page } from "$app/stores";
+  import { page } from "$app/state";
   import Icon from "@iconify/svelte";
   import { resolve } from "$app/paths";
   import { client } from "$lib/client.svelte";
@@ -10,7 +10,7 @@
     setActiveStep(STEP_LABELS.R_APPROVAL);
   });
 
-  const bkpId = $page.params.id;
+  const bkpId = page.params.id;
 
   // Fetch BKP data with registration approval info
   const bkpQ = client.bKP.useFindUnique({

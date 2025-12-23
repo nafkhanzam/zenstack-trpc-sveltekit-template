@@ -28,12 +28,12 @@ export const myFetch = async (
 ): Promise<Response> => {
   const res = await myFetchNoRefresh(url, options);
   if (res.status === 401 && !refreshed) {
-    function getLoginError() {
+    function getLoginError(err?: any) {
       token.value = null;
       refresh.value = null;
       // console.log("userState.tokenInvalid = true;");
       userState.tokenInvalid = true;
-      return new Error(`Token expired.`);
+      return err ?? new Error(`Token expired.`);
     }
     try {
       if (!refresh.value) {
@@ -49,7 +49,7 @@ export const myFetch = async (
       return myFetch(url, options, true);
     } catch (error) {
       console.error(error);
-      throw getLoginError();
+      throw getLoginError(error);
     }
   }
   return res;

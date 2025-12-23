@@ -1,17 +1,17 @@
 <script lang="ts">
-  import { page } from "$app/stores";
-  import { resolve } from "$app/paths";
   import { client } from "$lib/client.svelte";
   import Query from "$lib/components/Query.svelte";
   import { toast } from "$lib";
   import Icon from "@iconify/svelte";
   import { setActiveStep, STEP_LABELS } from "../bkp-step.svelte";
+  import type { WeeklyReport } from "$lib/zenstack/models";
+  import { page } from "$app/state";
 
   $effect(() => {
     setActiveStep(STEP_LABELS.WEEKLY_REPORTS);
   });
 
-  const bkpId = $page.params.id;
+  const bkpId = page.params.id;
 
   // Fetch BKP data
   const bkpQ = client.bKP.useFindUnique({
@@ -23,12 +23,6 @@
 
   // Update mutation
   const updateBKPMutation = client.bKP.useUpdate();
-
-  interface WeeklyReport {
-    week: number;
-    from: Date;
-    to: Date;
-  }
 
   // Modal state
   let viewModal: HTMLDialogElement | null = $state(null);
@@ -111,7 +105,7 @@
 
       toast.success("Weekly report added successfully!");
       addModal?.close();
-      bkpQ?.refetch();
+      $bkpQ.refetch();
     } catch (error) {
       console.error("Error adding weekly report:", error);
       toast.error("Failed to add weekly report");
@@ -157,7 +151,7 @@
 
       toast.success("Weekly report updated successfully!");
       editModal?.close();
-      bkpQ?.refetch();
+      $bkpQ.refetch();
     } catch (error) {
       console.error("Error updating weekly report:", error);
       toast.error("Failed to update weekly report");
@@ -191,7 +185,7 @@
 
       toast.success("Weekly report deleted successfully!");
       deleteModal?.close();
-      bkpQ?.refetch();
+      $bkpQ.refetch();
     } catch (error) {
       console.error("Error deleting weekly report:", error);
       toast.error("Failed to delete weekly report");
@@ -214,9 +208,7 @@
       <!-- Header -->
       <div class="mb-6">
         <h1 class="mb-2 text-xl font-bold">Weekly Reports</h1>
-        <p class="text-xs text-base-content/70">
-          Submit and track your weekly activity reports
-        </p>
+        <p class="text-xs text-base-content/70">Submit and track your weekly activity reports</p>
       </div>
 
       <!-- Progress Overview -->
@@ -239,10 +231,7 @@
             </span>
           </div>
 
-          <progress
-            class="progress w-full progress-primary"
-            value={submittedCount}
-            max={totalWeeks}
+          <progress class="progress w-full progress-primary" value={submittedCount} max={totalWeeks}
           ></progress>
 
           <div class="mt-3 grid grid-cols-2 gap-4 text-xs">
@@ -298,10 +287,7 @@
 
               {#if canEdit}
                 <div class="card-actions justify-end">
-                  <button
-                    class="btn gap-2 btn-outline btn-sm"
-                    onclick={() => openViewModal(index)}
-                  >
+                  <button class="btn gap-2 btn-outline btn-sm" onclick={() => openViewModal(index)}>
                     <Icon icon="mdi:eye-outline" class="h-4 w-4" />
                     View
                   </button>
@@ -322,10 +308,7 @@
                 </div>
               {:else}
                 <div class="card-actions justify-end">
-                  <button
-                    class="btn gap-2 btn-outline btn-sm"
-                    onclick={() => openViewModal(index)}
-                  >
+                  <button class="btn gap-2 btn-outline btn-sm" onclick={() => openViewModal(index)}>
                     <Icon icon="mdi:eye-outline" class="h-4 w-4" />
                     View
                   </button>
@@ -427,12 +410,7 @@
             <label class="label">
               <span class="label-text">Start Date</span>
             </label>
-            <input
-              type="date"
-              class="input-bordered input"
-              bind:value={formData.from}
-              required
-            />
+            <input type="date" class="input-bordered input" bind:value={formData.from} required />
           </div>
 
           <div class="form-control">
@@ -447,11 +425,7 @@
           <form method="dialog">
             <button class="btn btn-ghost">Cancel</button>
           </form>
-          <button
-            class="btn btn-primary"
-            onclick={() => handleAdd(bkp)}
-            disabled={isSubmitting}
-          >
+          <button class="btn btn-primary" onclick={() => handleAdd(bkp)} disabled={isSubmitting}>
             {isSubmitting ? "Adding..." : "Add Report"}
           </button>
         </div>
@@ -492,12 +466,7 @@
               <label class="label">
                 <span class="label-text">Start Date</span>
               </label>
-              <input
-                type="date"
-                class="input-bordered input"
-                bind:value={formData.from}
-                required
-              />
+              <input type="date" class="input-bordered input" bind:value={formData.from} required />
             </div>
 
             <div class="form-control">
@@ -512,11 +481,7 @@
             <form method="dialog">
               <button class="btn btn-ghost">Cancel</button>
             </form>
-            <button
-              class="btn btn-primary"
-              onclick={() => handleEdit(bkp)}
-              disabled={isSubmitting}
-            >
+            <button class="btn btn-primary" onclick={() => handleEdit(bkp)} disabled={isSubmitting}>
               {isSubmitting ? "Saving..." : "Save"}
             </button>
           </div>
@@ -545,11 +510,7 @@
             <form method="dialog">
               <button class="btn btn-ghost">Cancel</button>
             </form>
-            <button
-              class="btn btn-error"
-              onclick={() => handleDelete(bkp)}
-              disabled={isSubmitting}
-            >
+            <button class="btn btn-error" onclick={() => handleDelete(bkp)} disabled={isSubmitting}>
               {isSubmitting ? "Deleting..." : "Delete"}
             </button>
           </div>

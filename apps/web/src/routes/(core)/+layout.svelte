@@ -5,11 +5,13 @@
   let {children} = $props();
 
   $effect(() => {
-    if (userState.tokenInvalid) {
+    if (userState.tokenInvalid && !userState.data) {
       // console.log(`goto(resolve("/login"));`)
       window.location.href = resolve("/login") + `?redirect=${window.location.toString()}`;
     }
   })
 </script>
 
-{@render children()}
+{#if userState.data}
+  {@render children()}
+{/if}

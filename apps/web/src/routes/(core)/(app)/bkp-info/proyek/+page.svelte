@@ -11,9 +11,9 @@
       icon: "heroicons:home",
     },
     {
-      label: "New BKP",
-      href: "/new-bkp",
-      icon: "heroicons:plus",
+      label: "BKP",
+      href: "/bkp-info",
+      icon: "heroicons:information-circle",
     },
     {
       label: pageTitle,
@@ -22,7 +22,7 @@
   ];
 
   function handleBack() {
-    goto("/new-bkp");
+    goto("/bkp-info");
   }
 </script>
 
@@ -51,10 +51,10 @@
             Overview
           </h2>
           <p>
-            BKP Proyek memfasilitasi mahasiswa untuk terlibat dalam proyek penelitian atau pengembangan
-            sistem/aplikasi di bawah bimbingan dosen atau unit kerja di ITS. Program ini memberikan
-            pengalaman riset dan pengembangan produk nyata yang dapat berkontribusi pada kemajuan ilmu
-            pengetahuan atau solusi praktis.
+            BKP Proyek memfasilitasi mahasiswa untuk terlibat dalam proyek penelitian atau
+            pengembangan sistem/aplikasi di bawah bimbingan dosen atau unit kerja di ITS. Program
+            ini memberikan pengalaman riset dan pengembangan produk nyata yang dapat berkontribusi
+            pada kemajuan ilmu pengetahuan atau solusi praktis.
           </p>
         </div>
       </div>
@@ -149,8 +149,8 @@
             </div>
           </div>
           <p class="mt-3 text-sm text-base-content/60">
-            Konversi SKS akan ditentukan oleh dosen pembimbing dan koordinator BKP berdasarkan kompleksitas
-            dan kontribusi mahasiswa.
+            Konversi SKS akan ditentukan oleh dosen pembimbing dan koordinator BKP berdasarkan
+            kompleksitas dan kontribusi mahasiswa.
           </p>
         </div>
       </div>

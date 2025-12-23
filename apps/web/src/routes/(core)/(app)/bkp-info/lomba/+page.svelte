@@ -11,9 +11,9 @@
       icon: "heroicons:home",
     },
     {
-      label: "New BKP",
-      href: "/new-bkp",
-      icon: "heroicons:plus",
+      label: "BKP",
+      href: "/bkp-info",
+      icon: "heroicons:information-circle",
     },
     {
       label: pageTitle,
@@ -22,7 +22,7 @@
   ];
 
   function handleBack() {
-    goto("/new-bkp");
+    goto("/bkp-info");
   }
 </script>
 
@@ -52,8 +52,9 @@
           </h2>
           <p>
             BKP Lomba mengakui partisipasi mahasiswa dalam berbagai kompetisi ilmiah, teknologi, dan
-            inovasi baik tingkat lokal, nasional, maupun internasional. Program ini mendorong mahasiswa
-            untuk mengasah kemampuan problem-solving, teamwork, dan presentasi melalui kompetisi.
+            inovasi baik tingkat lokal, nasional, maupun internasional. Program ini mendorong
+            mahasiswa untuk mengasah kemampuan problem-solving, teamwork, dan presentasi melalui
+            kompetisi.
           </p>
         </div>
       </div>
@@ -188,18 +189,10 @@
             Catatan Penting
           </h2>
           <ul class="list-disc space-y-2 pl-6">
-            <li>
-              Pengajuan BKP Lomba harus dilakukan maksimal 1 semester setelah lomba selesai
-            </li>
-            <li>
-              Untuk lomba tim, SKS dapat dibagi atau dihitung per individu (sesuai kebijakan)
-            </li>
-            <li>
-              Sertifikat dan dokumentasi harus asli dan dapat diverifikasi
-            </li>
-            <li>
-              Lomba online yang kredibel juga dapat diakui (Kaggle, HackerRank, dll)
-            </li>
+            <li>Pengajuan BKP Lomba harus dilakukan maksimal 1 semester setelah lomba selesai</li>
+            <li>Untuk lomba tim, SKS dapat dibagi atau dihitung per individu (sesuai kebijakan)</li>
+            <li>Sertifikat dan dokumentasi harus asli dan dapat diverifikasi</li>
+            <li>Lomba online yang kredibel juga dapat diakui (Kaggle, HackerRank, dll)</li>
           </ul>
         </div>
       </div>

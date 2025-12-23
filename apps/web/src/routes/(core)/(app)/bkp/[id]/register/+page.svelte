@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { page } from "$app/stores";
+  import { page } from "$app/state";
   import { goto } from "$app/navigation";
   import { resolve } from "$app/paths";
   import Icon from "@iconify/svelte";
@@ -13,13 +13,14 @@
     setActiveStep(STEP_LABELS.REGISTRATION);
   });
 
-  const bkpId = $page.params.id;
+  const bkpId = page.params.id;
 
   // Fetch BKP data
   const bkpQ = client.bKP.useFindUnique({
     where: { id: bkpId },
     include: {
       User: true,
+      RegistrationApproval__reviewedBy_User: true,
     },
   });
 
@@ -259,7 +260,7 @@
       });
 
       toast.success("Draft saved successfully!");
-      bkpQ?.refetch();
+      $bkpQ.refetch();
 
       // Clear file inputs after saving
       documents.forEach((doc) => (doc.file = null));
@@ -371,7 +372,9 @@
             {#if bkp.RegistrationApproval?.reviewedBy_UserId}
               <div>
                 <span class="font-semibold">Verified By:</span>
-                <span class="ml-2">{bkp.RegistrationApproval__reviewedBy_User?.name || "Admin"}</span>
+                <span class="ml-2"
+                  >{bkp.RegistrationApproval__reviewedBy_User?.name || "Admin"}</span
+                >
               </div>
             {/if}
 

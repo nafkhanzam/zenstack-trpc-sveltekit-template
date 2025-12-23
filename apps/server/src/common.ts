@@ -63,6 +63,7 @@ export const generateTokensFromUser = async (ctx: Context, user: User) => {
   const accessToken = buildAccessToken({
     id: user.id,
     username: user.username,
+    name: user.name,
     role: user.role,
   });
 

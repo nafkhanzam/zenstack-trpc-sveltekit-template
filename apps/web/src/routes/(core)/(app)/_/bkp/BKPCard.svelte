@@ -2,6 +2,7 @@
   import { resolve } from "$app/paths";
   import Icon from "@iconify/svelte";
   import StatusBadge from "../ui/StatusBadge.svelte";
+  import { BKPStatus } from "$lib/zenstack/models";
 
   interface Props {
     id: string;
@@ -9,7 +10,7 @@
     position: string;
     bkpType: string;
     bkpCategory: string;
-    status: "draft" | "submitted" | "approved" | "rejected";
+    status: BKPStatus;
     submittedDate?: string;
     periode: string;
     weeklyReportsSubmitted?: number;
@@ -19,47 +20,79 @@
 
   let props: Props = $props();
 
-  function getProgressStep(bkp: Props): number {
-    if (bkp.status === "draft") return 0;
-    if (bkp.status === "submitted") return 1;
-    if (bkp.status === "rejected") return 1;
-    if (bkp.status === "approved") {
-      if (bkp.isGraded) return 5;
-      if (
-        bkp.weeklyReportsSubmitted &&
-        bkp.totalWeeklyReports &&
-        bkp.weeklyReportsSubmitted >= bkp.totalWeeklyReports
-      )
+  function getProgressStep(status: BKPStatus): number {
+    switch (status) {
+      case BKPStatus.PROPOSAL:
+        return 0;
+      case BKPStatus.WAITING_PROPOSAL_APPROVAL:
+        return 1;
+      case BKPStatus.REGISTRATION:
+        return 2;
+      case BKPStatus.WAITING_REGISTRATION_APPROVAL:
+        return 3;
+      case BKPStatus.WEEKLY_REPORTING:
         return 4;
-      return 3;
+      case BKPStatus.UPLOADING_FIELD_ASSESSMENT:
+        return 5;
+      case BKPStatus.GRADING:
+        return 6;
+      case BKPStatus.COMPLETED:
+        return 7;
+      case BKPStatus.DELETED:
+        return 0;
+      default:
+        return 0;
     }
-    return 0;
   }
 
-  function getProgressLabel(bkp: Props): string {
-    const step = getProgressStep(bkp);
-    const labels = [
-      "Draft",
-      "Pending Approval",
-      "Upload Documents",
-      "Weekly Reporting",
-      "Grading",
-      "Completed",
-    ];
-    return labels[step] || "";
+  function getProgressLabel(status: BKPStatus): string {
+    switch (status) {
+      case BKPStatus.PROPOSAL:
+        return "Creating Proposal";
+      case BKPStatus.WAITING_PROPOSAL_APPROVAL:
+        return "Pending Proposal Approval";
+      case BKPStatus.REGISTRATION:
+        return "Uploading Registration Documents";
+      case BKPStatus.WAITING_REGISTRATION_APPROVAL:
+        return "Pending Registration Approval";
+      case BKPStatus.WEEKLY_REPORTING:
+        return "Weekly Reporting";
+      case BKPStatus.UPLOADING_FIELD_ASSESSMENT:
+        return "Uploading Field Assessment";
+      case BKPStatus.GRADING:
+        return "Being Graded";
+      case BKPStatus.COMPLETED:
+        return "Completed";
+      case BKPStatus.DELETED:
+        return "Deleted";
+      default:
+        return "Unknown";
+    }
   }
 
-  function getBorderColor(status: Props["status"]): string {
-    const colors = {
-      draft: "border-neutral",
-      submitted: "border-info",
-      approved: "border-success",
-      rejected: "border-error",
-    };
-    return colors[status];
+  function getBorderColor(status: BKPStatus): string {
+    switch (status) {
+      case BKPStatus.PROPOSAL:
+        return "border-neutral";
+      case BKPStatus.WAITING_PROPOSAL_APPROVAL:
+      case BKPStatus.WAITING_REGISTRATION_APPROVAL:
+        return "border-info";
+      case BKPStatus.REGISTRATION:
+      case BKPStatus.WEEKLY_REPORTING:
+      case BKPStatus.UPLOADING_FIELD_ASSESSMENT:
+        return "border-warning";
+      case BKPStatus.GRADING:
+        return "border-secondary";
+      case BKPStatus.COMPLETED:
+        return "border-success";
+      case BKPStatus.DELETED:
+        return "border-error";
+      default:
+        return "border-neutral";
+    }
   }
 
-  const progressStep = $derived(getProgressStep(props));
+  const progressStep = $derived(getProgressStep(props.status));
 </script>
 
 <div
@@ -80,17 +113,17 @@
         <a href={resolve(`/bkp/${props.id}`)} class="group mb-3 block">
           <div class="mb-1 flex items-center justify-between">
             <span class="text-sm font-semibold transition-colors group-hover:text-primary"
-              >Progress: {getProgressLabel(props)}</span
+              >Progress: {getProgressLabel(props.status)}</span
             >
-            <span class="text-sm text-base-content/70">{Math.round((progressStep / 5) * 100)}%</span
+            <span class="text-sm text-base-content/70">{Math.round((progressStep / 7) * 100)}%</span
             >
           </div>
           <progress
             class="progress w-full cursor-pointer progress-primary"
-            value={(progressStep / 5) * 100}
+            value={(progressStep / 7) * 100}
             max="100"
           ></progress>
-          {#if props.status === "approved" && props.weeklyReportsSubmitted !== undefined && props.totalWeeklyReports}
+          {#if props.status === BKPStatus.WEEKLY_REPORTING && props.weeklyReportsSubmitted !== undefined && props.totalWeeklyReports}
             <div class="mt-1 text-xs text-base-content/70">
               Weekly Reports: {props.weeklyReportsSubmitted}/{props.totalWeeklyReports}
             </div>
@@ -132,7 +165,7 @@
 
     <!-- Actions -->
     <div class="mt-4 card-actions justify-end">
-      {#if props.status === "draft"}
+      {#if props.status === BKPStatus.PROPOSAL}
         <a href={resolve(`/bkp/${props.id}`)} class="btn btn-sm btn-primary">
           <Icon icon="heroicons:pencil-square" class="h-4 w-4" />
           Edit
@@ -142,7 +175,7 @@
           <Icon icon="heroicons:eye" class="h-4 w-4" />
           View Details
         </a>
-        {#if props.status === "approved"}
+        {#if props.status === BKPStatus.WEEKLY_REPORTING}
           <a href={resolve(`/bkp/weekly-report/${props.id}`)} class="btn btn-sm btn-primary">
             <Icon icon="heroicons:document-text" class="h-4 w-4" />
             Weekly Reports

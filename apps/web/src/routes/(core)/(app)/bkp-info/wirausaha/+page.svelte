@@ -11,9 +11,9 @@
       icon: "heroicons:home",
     },
     {
-      label: "New BKP",
-      href: "/new-bkp",
-      icon: "heroicons:plus",
+      label: "BKP",
+      href: "/bkp-info",
+      icon: "heroicons:information-circle",
     },
     {
       label: pageTitle,
@@ -22,7 +22,7 @@
   ];
 
   function handleBack() {
-    goto("/new-bkp");
+    goto("/bkp-info");
   }
 </script>
 
@@ -51,9 +51,9 @@
             Overview
           </h2>
           <p>
-            BKP Wirausaha mendukung mahasiswa yang mengembangkan bisnis atau startup berbasis teknologi.
-            Program ini mengakui usaha kewirausahaan sebagai pembelajaran praktis yang mengintegrasikan
-            pengetahuan teknis dengan keterampilan bisnis, manajemen, dan inovasi.
+            BKP Wirausaha mendukung mahasiswa yang mengembangkan bisnis atau startup berbasis
+            teknologi. Program ini mengakui usaha kewirausahaan sebagai pembelajaran praktis yang
+            mengintegrasikan pengetahuan teknis dengan keterampilan bisnis, manajemen, dan inovasi.
           </p>
         </div>
       </div>
@@ -151,8 +151,8 @@
             </div>
           </div>
           <p class="mt-3 text-sm text-base-content/60">
-            SKS ditentukan berdasarkan: skala usaha, omzet, dampak sosial, inovasi teknologi, dan tingkat
-            keterlibatan mahasiswa.
+            SKS ditentukan berdasarkan: skala usaha, omzet, dampak sosial, inovasi teknologi, dan
+            tingkat keterlibatan mahasiswa.
           </p>
         </div>
       </div>

@@ -11,9 +11,9 @@
       icon: "heroicons:home",
     },
     {
-      label: "New BKP",
-      href: "/new-bkp",
-      icon: "heroicons:plus",
+      label: "BKP",
+      href: "/bkp-info",
+      icon: "heroicons:information-circle",
     },
     {
       label: pageTitle,
@@ -22,7 +22,7 @@
   ];
 
   function handleBack() {
-    goto("/new-bkp");
+    goto("/bkp-info");
   }
 </script>
 
@@ -51,10 +51,10 @@
             Overview
           </h2>
           <p>
-            Studi Independen adalah program Kampus Merdeka yang memungkinkan mahasiswa belajar di luar
-            kampus melalui platform pembelajaran online atau bootcamp intensif. Program ini fokus pada
-            pengembangan keterampilan praktis melalui project-based learning dengan mentoring dari
-            praktisi industri.
+            Studi Independen adalah program Kampus Merdeka yang memungkinkan mahasiswa belajar di
+            luar kampus melalui platform pembelajaran online atau bootcamp intensif. Program ini
+            fokus pada pengembangan keterampilan praktis melalui project-based learning dengan
+            mentoring dari praktisi industri.
           </p>
         </div>
       </div>

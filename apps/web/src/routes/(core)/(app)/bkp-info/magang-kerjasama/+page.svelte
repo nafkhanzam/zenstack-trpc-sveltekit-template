@@ -11,9 +11,9 @@
       icon: "heroicons:home",
     },
     {
-      label: "New BKP",
-      href: "/new-bkp",
-      icon: "heroicons:plus",
+      label: "BKP",
+      href: "/bkp-info",
+      icon: "heroicons:information-circle",
     },
     {
       label: pageTitle,
@@ -22,7 +22,7 @@
   ];
 
   function handleBack() {
-    goto("/new-bkp");
+    goto("/bkp-info");
   }
 </script>
 
@@ -51,9 +51,10 @@
             Overview
           </h2>
           <p>
-            Magang Kerjasama adalah program magang yang diselenggarakan melalui Memorandum of Understanding
-            (MoU) atau Memorandum of Agreement (MoA) antara ITS dengan perusahaan atau institusi partner.
-            Program ini menjamin kualitas dan standar magang sesuai dengan kurikulum akademik.
+            Magang Kerjasama adalah program magang yang diselenggarakan melalui Memorandum of
+            Understanding (MoU) atau Memorandum of Agreement (MoA) antara ITS dengan perusahaan atau
+            institusi partner. Program ini menjamin kualitas dan standar magang sesuai dengan
+            kurikulum akademik.
           </p>
         </div>
       </div>

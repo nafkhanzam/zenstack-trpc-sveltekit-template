@@ -27,6 +27,7 @@ const getUserFromToken = (token: string | undefined): JWTPayload | null => {
   // return {
   //   id: user.id,
   //   username: user.username,
+  //   name: user.name,
   //   role: user.role,
   // };
 };

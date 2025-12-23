@@ -11,9 +11,9 @@
       icon: "heroicons:home",
     },
     {
-      label: "New BKP",
-      href: "/new-bkp",
-      icon: "heroicons:plus",
+      label: "BKP",
+      href: "/bkp-info",
+      icon: "heroicons:information-circle",
     },
     {
       label: pageTitle,
@@ -22,7 +22,7 @@
   ];
 
   function handleBack() {
-    goto("/new-bkp");
+    goto("/bkp-info");
   }
 </script>
 
@@ -51,10 +51,10 @@
             Overview
           </h2>
           <p>
-            Magang Magenta adalah program magang yang diselenggarakan melalui kerjasama antara ITS dengan
-            platform Magenta (Merdeka Belajar - Kampus Merdeka Gema Cermat Berkarya). Program ini
-            menyediakan kesempatan magang di perusahaan teknologi terkemuka dengan bimbingan intensif dan
-            proyek nyata.
+            Magang Magenta adalah program magang yang diselenggarakan melalui kerjasama antara ITS
+            dengan platform Magenta (Merdeka Belajar - Kampus Merdeka Gema Cermat Berkarya). Program
+            ini menyediakan kesempatan magang di perusahaan teknologi terkemuka dengan bimbingan
+            intensif dan proyek nyata.
           </p>
         </div>
       </div>

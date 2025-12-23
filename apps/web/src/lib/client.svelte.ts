@@ -45,6 +45,6 @@ export const trpc_ = createTRPC(myFetchNoRefresh);
 
 //? Zenstack V3 RPC
 import { useClientQueries } from "@zenstackhq/tanstack-query/svelte";
-import { schema } from "../../../server/src/zenstack/schema";
+import { schema } from "$lib/zenstack/schema";
 
 export const client = useClientQueries(schema);

@@ -11,9 +11,9 @@
       icon: "heroicons:home",
     },
     {
-      label: "New BKP",
-      href: "/new-bkp",
-      icon: "heroicons:plus",
+      label: "BKP",
+      href: "/bkp-info",
+      icon: "heroicons:information-circle",
     },
     {
       label: pageTitle,
@@ -22,7 +22,7 @@
   ];
 
   function handleBack() {
-    goto("/new-bkp");
+    goto("/bkp-info");
   }
 </script>
 
@@ -51,10 +51,10 @@
             Overview
           </h2>
           <p>
-            Magang Mandiri memberikan kebebasan kepada mahasiswa untuk mencari dan melaksanakan program
-            magang di perusahaan atau institusi pilihan sendiri. Program ini cocok bagi mahasiswa yang
-            memiliki inisiatif tinggi dan sudah memiliki target perusahaan/industri tertentu untuk
-            pengembangan karir.
+            Magang Mandiri memberikan kebebasan kepada mahasiswa untuk mencari dan melaksanakan
+            program magang di perusahaan atau institusi pilihan sendiri. Program ini cocok bagi
+            mahasiswa yang memiliki inisiatif tinggi dan sudah memiliki target perusahaan/industri
+            tertentu untuk pengembangan karir.
           </p>
         </div>
       </div>
@@ -126,21 +126,14 @@
             Catatan Penting
           </h2>
           <ul class="list-disc space-y-2 pl-6">
+            <li>Pastikan perusahaan bersedia menerbitkan surat penerimaan resmi dan bermaterai</li>
+            <li>Perusahaan harus dapat memberikan pembimbing lapangan yang kompeten</li>
+            <li>Kegiatan magang harus relevan dengan kompetensi Teknik Informatika</li>
             <li>
-              Pastikan perusahaan bersedia menerbitkan surat penerimaan resmi dan bermaterai
+              Mahasiswa bertanggung jawab penuh atas proses pencarian dan komunikasi dengan
+              perusahaan
             </li>
-            <li>
-              Perusahaan harus dapat memberikan pembimbing lapangan yang kompeten
-            </li>
-            <li>
-              Kegiatan magang harus relevan dengan kompetensi Teknik Informatika
-            </li>
-            <li>
-              Mahasiswa bertanggung jawab penuh atas proses pencarian dan komunikasi dengan perusahaan
-            </li>
-            <li>
-              Wajib melakukan bimbingan rutin dengan dosen pembimbing
-            </li>
+            <li>Wajib melakukan bimbingan rutin dengan dosen pembimbing</li>
           </ul>
         </div>
       </div>

@@ -1,7 +1,7 @@
 <script lang="ts">
   import Breadcrumbs from "$lib/components/Breadcrumbs.svelte";
+  import {LinkCategory} from "../_/links";
   import { Alert } from "../_/ui";
-  import { LinkCategory } from "$lib/components/links";
 
   interface LinkItem {
     title: string;

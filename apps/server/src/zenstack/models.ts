@@ -37,3 +37,5 @@ export const CourseType = $schema.enums.CourseType.values;
 export type CourseType = (typeof CourseType)[keyof typeof CourseType];
 export const BKPStatus = $schema.enums.BKPStatus.values;
 export type BKPStatus = (typeof BKPStatus)[keyof typeof BKPStatus];
+export const BKPType = $schema.enums.BKPType.values;
+export type BKPType = (typeof BKPType)[keyof typeof BKPType];

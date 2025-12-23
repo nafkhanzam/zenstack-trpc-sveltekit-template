@@ -11,9 +11,9 @@
       icon: "heroicons:home",
     },
     {
-      label: "New BKP",
-      href: "/new-bkp",
-      icon: "heroicons:plus",
+      label: "BKP",
+      href: "/bkp-info",
+      icon: "heroicons:information-circle",
     },
     {
       label: pageTitle,
@@ -22,7 +22,7 @@
   ];
 
   function handleBack() {
-    goto("/new-bkp");
+    goto("/bkp-info");
   }
 </script>
 
@@ -38,7 +38,8 @@
         <h1 class="text-3xl font-bold">{pageTitle}</h1>
       </div>
       <p class="text-base-content/70">
-        Program magang yang berdampak langsung pada masyarakat dan industri melalui platform Kemendikbud
+        Program magang yang berdampak langsung pada masyarakat dan industri melalui platform
+        Kemendikbud
       </p>
     </div>
 
@@ -51,10 +52,10 @@
             Overview
           </h2>
           <p>
-            Magang Berdampak adalah program Kampus Merdeka yang memfasilitasi mahasiswa untuk melakukan
-            magang di perusahaan atau organisasi yang terdaftar di platform Kemendikbud. Program ini
-            dirancang untuk memberikan pengalaman kerja nyata yang berdampak pada pengembangan kompetensi
-            mahasiswa dan kontribusi terhadap industri.
+            Magang Berdampak adalah program Kampus Merdeka yang memfasilitasi mahasiswa untuk
+            melakukan magang di perusahaan atau organisasi yang terdaftar di platform Kemendikbud.
+            Program ini dirancang untuk memberikan pengalaman kerja nyata yang berdampak pada
+            pengembangan kompetensi mahasiswa dan kontribusi terhadap industri.
           </p>
         </div>
       </div>

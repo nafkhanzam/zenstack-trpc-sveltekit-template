@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { page } from "$app/stores";
+  import { page } from "$app/state";
   import Icon from "@iconify/svelte";
   import { client } from "$lib/client.svelte";
   import Query from "$lib/components/Query.svelte";
@@ -9,7 +9,7 @@
     setActiveStep(STEP_LABELS.GRADING);
   });
 
-  const bkpId = $page.params.id;
+  const bkpId = page.params.id;
 
   // Fetch BKP data with grading info
   const bkpQ = client.bKP.useFindUnique({
@@ -108,7 +108,9 @@
       {#snippet children(allCourses)}
         {@const gradingStatus = getGradingStatus(bkp)}
         {@const components = bkp.Grading?.components || []}
-        {@const gradedCourses = components.filter((c: any) => c.score !== null && c.score !== undefined)}
+        {@const gradedCourses = components.filter(
+          (c: any) => c.score !== null && c.score !== undefined,
+        )}
         {@const totalCourses = components.length}
         {@const showGrades = bkp.status === "COMPLETED"}
         {@const courseDetails = components.map((comp: any) => {
@@ -118,10 +120,7 @@
             course: course,
           };
         })}
-        {@const totalSks = courseDetails.reduce(
-          (sum, item) => sum + (item.course?.sks || 0),
-          0,
-        )}
+        {@const totalSks = courseDetails.reduce((sum, item) => sum + (item.course?.sks || 0), 0)}
         {@const weightedScore = calculateWeightedScore(components, allCourses)}
 
         <div class="max-w-5xl">
@@ -275,7 +274,9 @@
                                 {item.component.score}/100
                               </div>
                               <div
-                                class="mt-1 text-sm font-semibold {getGradeColor(item.component.score)}"
+                                class="mt-1 text-sm font-semibold {getGradeColor(
+                                  item.component.score,
+                                )}"
                               >
                                 {item.component.grade || getGradeLetter(item.component.score)}
                               </div>

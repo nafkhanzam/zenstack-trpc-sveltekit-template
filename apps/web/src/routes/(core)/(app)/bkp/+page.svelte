@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { resolve } from "$app/paths";
+  import { goto } from "$app/navigation";
   import { client } from "$lib/client.svelte";
   import { user } from "$lib/stores/user.svelte";
   import Breadcrumbs from "$lib/components/Breadcrumbs.svelte";
@@ -7,28 +7,14 @@
   import BKPCard from "../_/bkp/BKPCard.svelte";
   import Alert from "../_/ui/Alert.svelte";
   import Icon from "@iconify/svelte";
-
-  interface BKP {
-    id: string;
-    companyName: string;
-    position: string;
-    bkpType: string;
-    bkpCategory: string;
-    status: "draft" | "submitted" | "approved" | "rejected";
-    submittedDate?: string;
-    periode: string;
-    weeklyReportsSubmitted?: number;
-    totalWeeklyReports?: number;
-    isGraded?: boolean;
-  }
+  import { BKPStatus } from "$lib/zenstack/models";
+  import { resolve } from "$app/paths";
 
   // Page content
   const pageTitle = "My BKP Submissions";
   const pageDescription = "View and manage your BKP submissions";
-  const addButtonText = "Add New BKP";
-  const addButtonIcon = "heroicons:plus";
   const emptyStateTitle = "No BKP submissions yet";
-  const emptyStateMessage = 'Click "Add New BKP" to create your first submission.';
+  const emptyStateMessage = 'Click "Create BKP" to create your first submission.';
 
   // Breadcrumb configuration
   const breadcrumbItems = [
@@ -54,6 +40,38 @@
       createdAt: "desc",
     },
   });
+
+  const createBkpQ = client.bKP.useCreate();
+  async function handleCreateBKP() {
+    try {
+      // Create a new BKP with initial status and selected type
+      const newBKP = await $createBkpQ.mutateAsync({
+        data: {
+          userId: user().id,
+          status: BKPStatus.PROPOSAL,
+          Proposal: {},
+          BKPRegistration: {
+            additionalDocuments: [],
+          },
+          WeeklyReports: {
+            WeeklyReportList: [],
+          },
+          FieldAssessment: {},
+          Grading: {
+            components: [],
+          },
+          ProposalApproval: {},
+          RegistrationApproval: {},
+        },
+      });
+
+      // Redirect to the BKP detail page
+      location.href = resolve(`/bkp/${newBKP.id}`);
+    } catch (error) {
+      console.error("Failed to create BKP:", error);
+      // TODO: Show error message to user
+    }
+  }
 </script>
 
 <div class="min-h-screen bg-base-100">
@@ -66,12 +84,21 @@
       <p class="text-sm text-base-content/70">{pageDescription}</p>
     </div>
 
-    <!-- Add BKP Button -->
-    <div class="mb-6">
-      <a href={resolve(`/new-bkp`)} class="btn btn-primary">
-        <Icon icon={addButtonIcon} class="h-5 w-5" />
-        {addButtonText}
-      </a>
+    <!-- Add BKP Section -->
+    <div class="mb-6 card bg-base-200 shadow-lg">
+      <div class="card-body">
+        <h2 class="card-title">Create New BKP</h2>
+        <div class="flex gap-2">
+          <button class="btn btn-primary" onclick={handleCreateBKP}>
+            <Icon icon="heroicons:plus" class="h-5 w-5" />
+            Create BKP
+          </button>
+          <a href="/bkp-info" class="btn btn-outline">
+            <Icon icon="heroicons:information-circle" class="h-5 w-5" />
+            BKP Info
+          </a>
+        </div>
+      </div>
     </div>
 
     <!-- BKP List -->
@@ -86,7 +113,7 @@
                 position={bkp.Proposal?.position ?? "N/A"}
                 bkpType={bkp.Proposal?.bkpType ?? "N/A"}
                 bkpCategory="BKP"
-                status={bkp.status.toLowerCase() as "draft" | "submitted" | "approved" | "rejected"}
+                status={bkp.status}
                 submittedDate={bkp.Proposal?.submittedAt
                   ? new Date(bkp.Proposal.submittedAt).toISOString().split("T")[0]
                   : undefined}

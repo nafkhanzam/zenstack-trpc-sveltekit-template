@@ -5,7 +5,7 @@
   import { uploadFile, getFileUrl } from "$lib";
   import { client } from "$lib/client.svelte";
   import Query from "$lib/components/Query.svelte";
-  import toast from "$lib";
+  import {toast} from "$lib";
 
   $effect(() => {
     setActiveStep(STEP_LABELS.FIELD_ASSESSMENT);

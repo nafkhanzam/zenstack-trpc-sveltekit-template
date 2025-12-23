@@ -34,6 +34,7 @@ export const refresh = t.procedure
     const accessToken = buildAccessToken({
       id: user.id,
       username: user.username,
+      name: user.name,
       role: user.role,
     });
 

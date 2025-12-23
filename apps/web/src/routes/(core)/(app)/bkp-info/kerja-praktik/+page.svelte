@@ -11,9 +11,9 @@
       icon: "heroicons:home",
     },
     {
-      label: "New BKP",
-      href: "/new-bkp",
-      icon: "heroicons:plus",
+      label: "BKP",
+      href: "/bkp-info",
+      icon: "heroicons:information-circle",
     },
     {
       label: pageTitle,
@@ -22,7 +22,7 @@
   ];
 
   function handleBack() {
-    goto("/new-bkp");
+    goto("/bkp-info");
   }
 </script>
 
@@ -37,9 +37,7 @@
         </div>
         <h1 class="text-3xl font-bold">{pageTitle}</h1>
       </div>
-      <p class="text-base-content/70">
-        Program kerja praktik sebagai bagian dari kurikulum wajib
-      </p>
+      <p class="text-base-content/70">Program kerja praktik sebagai bagian dari kurikulum wajib</p>
     </div>
 
     <div class="grid gap-6">
@@ -52,9 +50,9 @@
           </h2>
           <p>
             Kerja Praktik (KP) adalah mata kuliah wajib yang harus ditempuh oleh seluruh mahasiswa
-            Departemen Teknik Informatika ITS. Program ini bertujuan memberikan pengalaman kerja praktis di
-            industri atau institusi profesional untuk mengaplikasikan ilmu yang telah dipelajari dan
-            mempersiapkan mahasiswa memasuki dunia kerja.
+            Departemen Teknik Informatika ITS. Program ini bertujuan memberikan pengalaman kerja
+            praktis di industri atau institusi profesional untuk mengaplikasikan ilmu yang telah
+            dipelajari dan mempersiapkan mahasiswa memasuki dunia kerja.
           </p>
         </div>
       </div>
@@ -171,18 +169,10 @@
             Catatan Penting
           </h2>
           <ul class="list-disc space-y-2 pl-6">
-            <li>
-              KP adalah mata kuliah WAJIB dan tidak dapat digantikan dengan kegiatan lain
-            </li>
-            <li>
-              Mahasiswa wajib melakukan bimbingan rutin dengan dosen pembimbing KP
-            </li>
-            <li>
-              Laporan KP harus mengikuti template dan format yang ditentukan departemen
-            </li>
-            <li>
-              Wajib melakukan seminar KP setelah selesai (sesuai kebijakan departemen)
-            </li>
+            <li>KP adalah mata kuliah WAJIB dan tidak dapat digantikan dengan kegiatan lain</li>
+            <li>Mahasiswa wajib melakukan bimbingan rutin dengan dosen pembimbing KP</li>
+            <li>Laporan KP harus mengikuti template dan format yang ditentukan departemen</li>
+            <li>Wajib melakukan seminar KP setelah selesai (sesuai kebijakan departemen)</li>
             <li>
               Nilai KP ditentukan oleh gabungan penilaian pembimbing lapangan, dosen pembimbing, dan
               laporan

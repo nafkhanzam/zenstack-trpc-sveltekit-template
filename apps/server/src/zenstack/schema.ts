@@ -467,13 +467,11 @@ export class SchemaType implements SchemaDef {
                 Proposal: {
                     name: "Proposal",
                     type: "BKPProposal",
-                    optional: true,
                     attributes: [{ name: "@json" }]
                 },
                 ProposalApproval: {
                     name: "ProposalApproval",
                     type: "BKPProposalApproval",
-                    optional: true,
                     attributes: [{ name: "@json" }]
                 },
                 ProposalApproval__reviewedBy_UserId: {
@@ -499,7 +497,6 @@ export class SchemaType implements SchemaDef {
                 RegistrationApproval: {
                     name: "RegistrationApproval",
                     type: "BKPRegistrationApproval",
-                    optional: true,
                     attributes: [{ name: "@json" }]
                 },
                 RegistrationApproval__reviewedBy_UserId: {
@@ -549,7 +546,7 @@ export class SchemaType implements SchemaDef {
                 }
             },
             attributes: [
-                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("all") }, { name: "condition", value: ExpressionUtils.binary(ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["role"]), "==", ExpressionUtils.literal("ADMIN")), "||", ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["role"]), "==", ExpressionUtils.literal("SUPERADMIN"))) }] }
+                { name: "@@allow", args: [{ name: "operation", value: ExpressionUtils.literal("all") }, { name: "condition", value: ExpressionUtils.binary(ExpressionUtils.binary(ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["id"]), "==", ExpressionUtils.field("userId")), "||", ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["role"]), "==", ExpressionUtils.literal("ADMIN"))), "||", ExpressionUtils.binary(ExpressionUtils.member(ExpressionUtils.call("auth"), ["role"]), "==", ExpressionUtils.literal("SUPERADMIN"))) }] }
             ],
             idFields: ["id"],
             uniqueFields: {
@@ -654,7 +651,7 @@ export class SchemaType implements SchemaDef {
                 },
                 bkpType: {
                     name: "bkpType",
-                    type: "String",
+                    type: "BKPType",
                     optional: true
                 },
                 period: {
@@ -755,7 +752,9 @@ export class SchemaType implements SchemaDef {
                 additionalDocuments: {
                     name: "additionalDocuments",
                     type: "BKPRegistrationAdditionalDocument",
-                    array: true
+                    array: true,
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.array([]) }] }],
+                    default: []
                 },
                 studentNotes: {
                     name: "studentNotes",
@@ -805,7 +804,9 @@ export class SchemaType implements SchemaDef {
                 WeeklyReportList: {
                     name: "WeeklyReportList",
                     type: "WeeklyReport",
-                    array: true
+                    array: true,
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.array([]) }] }],
+                    default: []
                 }
             }
         },
@@ -855,7 +856,9 @@ export class SchemaType implements SchemaDef {
                 components: {
                     name: "components",
                     type: "ComponentGrading",
-                    array: true
+                    array: true,
+                    attributes: [{ name: "@default", args: [{ name: "value", value: ExpressionUtils.array([]) }] }],
+                    default: []
                 }
             }
         }
@@ -892,6 +895,20 @@ export class SchemaType implements SchemaDef {
                 GRADING: "GRADING",
                 COMPLETED: "COMPLETED",
                 DELETED: "DELETED"
+            }
+        },
+        BKPType: {
+            values: {
+                MAGANG_BERDAMPAK: "MAGANG_BERDAMPAK",
+                MAGANG_MAGENTA: "MAGANG_MAGENTA",
+                MAGANG_KERJASAMA: "MAGANG_KERJASAMA",
+                MAGANG_MANDIRI: "MAGANG_MANDIRI",
+                INDEPENDENT_STUDY: "INDEPENDENT_STUDY",
+                LOMBA: "LOMBA",
+                PROYEK: "PROYEK",
+                WIRAUSAHA: "WIRAUSAHA",
+                MAGANG_INTERNAL: "MAGANG_INTERNAL",
+                KERJA_PRAKTIK: "KERJA_PRAKTIK"
             }
         }
     } as const;

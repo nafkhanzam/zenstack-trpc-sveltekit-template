@@ -11,9 +11,9 @@
       icon: "heroicons:home",
     },
     {
-      label: "New BKP",
-      href: "/new-bkp",
-      icon: "heroicons:plus",
+      label: "BKP",
+      href: "/bkp-info",
+      icon: "heroicons:information-circle",
     },
     {
       label: pageTitle,
@@ -22,7 +22,7 @@
   ];
 
   function handleBack() {
-    goto("/new-bkp");
+    goto("/bkp-info");
   }
 </script>
 
@@ -37,9 +37,7 @@
         </div>
         <h1 class="text-3xl font-bold">{pageTitle}</h1>
       </div>
-      <p class="text-base-content/70">
-        Magang di unit kerja atau laboratorium internal ITS
-      </p>
+      <p class="text-base-content/70">Magang di unit kerja atau laboratorium internal ITS</p>
     </div>
 
     <div class="grid gap-6">
@@ -51,10 +49,10 @@
             Overview
           </h2>
           <p>
-            Magang Internal adalah program yang memfasilitasi mahasiswa untuk mendapatkan pengalaman kerja
-            praktis di unit kerja atau laboratorium di lingkungan ITS. Program ini memberikan kesempatan
-            untuk belajar langsung dari dosen dan staf ahli sambil berkontribusi pada kegiatan akademik
-            atau operasional kampus.
+            Magang Internal adalah program yang memfasilitasi mahasiswa untuk mendapatkan pengalaman
+            kerja praktis di unit kerja atau laboratorium di lingkungan ITS. Program ini memberikan
+            kesempatan untuk belajar langsung dari dosen dan staf ahli sambil berkontribusi pada
+            kegiatan akademik atau operasional kampus.
           </p>
         </div>
       </div>
@@ -150,8 +148,8 @@
             </div>
           </div>
           <p class="mt-3 text-sm text-base-content/60">
-            1 SKS = ±170 jam kerja efektif. SKS akan ditentukan berdasarkan durasi, kompleksitas pekerjaan,
-            dan deliverables.
+            1 SKS = ±170 jam kerja efektif. SKS akan ditentukan berdasarkan durasi, kompleksitas
+            pekerjaan, dan deliverables.
           </p>
         </div>
       </div>

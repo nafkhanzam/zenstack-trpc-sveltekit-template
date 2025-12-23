@@ -1,32 +1,28 @@
 <script lang="ts">
-  import { page } from "$app/stores";
+  import { page } from "$app/state";
   import { resolve } from "$app/paths";
-  import { goto } from "$app/navigation";
   import { client } from "$lib/client.svelte";
-  import { user } from "$lib/stores/user.svelte";
   import Query from "$lib/components/Query.svelte";
   import {toast} from "$lib";
   import Svelecte from "svelecte";
   import Icon from "@iconify/svelte";
   import { setActiveStep, STEP_LABELS } from "./bkp-step.svelte";
+    import type { BKP, BKPType } from "$lib/zenstack/models";
 
   $effect(() => {
     setActiveStep(STEP_LABELS.PROPOSAL);
   });
 
-  const bkpId = $page.params.id;
-  const isNew = bkpId === "new";
+  const bkpId = page.params.id;
 
-  // Fetch BKP data if editing
-  const bkpQ = isNew
-    ? null
-    : client.bKP.useFindUnique({
-        where: { id: bkpId },
-        include: {
-          User: true,
-          ProposalApproval__reviewedBy_User: true,
-        },
-      });
+  // Fetch BKP data
+  const bkpQ = client.bKP.useFindUnique({
+    where: { id: bkpId },
+    include: {
+      User: true,
+      ProposalApproval__reviewedBy_User: true,
+    },
+  });
 
   // Fetch courses for conversion dropdown
   const coursesQ = client.course.useFindMany({
@@ -37,7 +33,6 @@
   });
 
   // Mutations
-  const createBKPMutation = client.bKP.useCreate();
   const updateBKPMutation = client.bKP.useUpdate();
 
   // Form state
@@ -48,7 +43,7 @@
   let monthDuration = $state<number | "">("");
   let startDate = $state("");
   let endDate = $state("");
-  let bkpType = $state("");
+  let bkpType = $state<BKPType | undefined>();
   let jobLink = $state("");
   let studentNotes = $state("");
 
@@ -90,7 +85,7 @@
 
     isSubmitting = true;
     try {
-      const proposalData = {
+      const proposalData: BKP["Proposal"] = {
         companyName,
         position,
         jobDescription,
@@ -104,31 +99,15 @@
         submittedAt: new Date(),
       };
 
-      if (isNew) {
-        await $createBKPMutation.mutateAsync({
-          data: {
-            userId: user().id,
-            status: "WAITING_PROPOSAL_APPROVAL",
-            Proposal: proposalData,
-            BKPRegistration: {},
-            WeeklyReports: { WeeklyReportList: [] },
-            FieldAssessment: {},
-            Grading: { components: [] },
-          },
-        });
-        toast.success("BKP proposal submitted successfully!");
-        goto(resolve("/bkp"));
-      } else {
-        await $updateBKPMutation.mutateAsync({
-          where: { id: bkpId },
-          data: {
-            status: "WAITING_PROPOSAL_APPROVAL",
-            Proposal: proposalData,
-          },
-        });
-        toast.success("BKP proposal updated and submitted!");
-        bkpQ?.refetch();
-      }
+      await $updateBKPMutation.mutateAsync({
+        where: { id: bkpId },
+        data: {
+          status: "WAITING_PROPOSAL_APPROVAL",
+          Proposal: proposalData,
+        },
+      });
+      toast.success("BKP proposal updated and submitted!");
+      $bkpQ.refetch();
     } catch (error) {
       console.error("Error submitting BKP:", error);
       toast.error("Failed to submit BKP proposal");
@@ -153,31 +132,15 @@
         studentNotes: studentNotes || undefined,
       };
 
-      if (isNew) {
-        const result = await $createBKPMutation.mutateAsync({
-          data: {
-            userId: user().id,
-            status: "PROPOSAL",
-            Proposal: proposalData,
-            BKPRegistration: {},
-            WeeklyReports: { WeeklyReportList: [] },
-            FieldAssessment: {},
-            Grading: { components: [] },
-          },
-        });
-        toast.success("Draft saved successfully!");
-        goto(resolve(`/bkp/${result.id}`));
-      } else {
-        await $updateBKPMutation.mutateAsync({
-          where: { id: bkpId },
-          data: {
-            status: "PROPOSAL",
-            Proposal: proposalData,
-          },
-        });
-        toast.success("Draft saved successfully!");
-        bkpQ?.refetch();
-      }
+      await $updateBKPMutation.mutateAsync({
+        where: { id: bkpId },
+        data: {
+          status: "PROPOSAL",
+          Proposal: proposalData,
+        },
+      });
+      toast.success("Draft saved successfully!");
+      $bkpQ.refetch();
     } catch (error) {
       console.error("Error saving draft:", error);
       toast.error("Failed to save draft");
@@ -188,29 +151,29 @@
 
   // Populate form when editing
   $effect(() => {
-    if (!isNew && bkpQ && $bkpQ.data) {
+    if ($bkpQ.data) {
       const bkp = $bkpQ.data;
-      periode = bkp.Proposal?.period || "";
-      companyName = bkp.Proposal?.companyName || "";
-      position = bkp.Proposal?.position || "";
-      jobDescription = bkp.Proposal?.jobDescription || "";
-      monthDuration = bkp.Proposal?.monthDuration || "";
-      startDate = bkp.Proposal?.startDate
+      periode = bkp.Proposal.period ?? "";
+      companyName = bkp.Proposal.companyName ?? "";
+      position = bkp.Proposal.position ?? "";
+      jobDescription = bkp.Proposal.jobDescription ?? "";
+      monthDuration = bkp.Proposal.monthDuration ?? "";
+      startDate = bkp.Proposal.startDate
         ? new Date(bkp.Proposal.startDate).toISOString().split("T")[0]
         : "";
-      endDate = bkp.Proposal?.endDate
+      endDate = bkp.Proposal.endDate
         ? new Date(bkp.Proposal.endDate).toISOString().split("T")[0]
         : "";
-      bkpType = bkp.Proposal?.bkpType || "";
-      jobLink = bkp.Proposal?.jobLink || "";
-      studentNotes = bkp.Proposal?.studentNotes || "";
+      bkpType = bkp.Proposal.bkpType ?? undefined;
+      jobLink = bkp.Proposal.jobLink ?? "";
+      studentNotes = bkp.Proposal.studentNotes ?? "";
     }
   });
 </script>
 
-<Query q={isNew ? coursesQ : bkpQ}>
+<Query q={bkpQ}>
   {#snippet children(data)}
-    {@const bkp = isNew ? null : data}
+    {@const bkp = data}
     {@const isRejected = bkp && bkp.ProposalApproval && bkp.status === "PROPOSAL"}
 
     <div class="max-w-5xl">
@@ -221,11 +184,6 @@
             <div class="badge gap-2 badge-error">
               <Icon icon="mdi:close-circle" class="h-4 w-4" />
               Rejected
-            </div>
-          {:else if isNew}
-            <div class="badge gap-2 badge-success">
-              <Icon icon="mdi:plus" class="h-4 w-4" />
-              New
             </div>
           {:else if bkp?.status === "PROPOSAL"}
             <div class="badge gap-2 badge-warning">
@@ -239,9 +197,7 @@
             </div>
           {/if}
         </div>
-        <h1 class="mb-2 text-xl font-bold">
-          {isNew ? "New BKP Proposal" : "Edit BKP Proposal"}
-        </h1>
+        <h1 class="mb-2 text-xl font-bold">Edit BKP Proposal</h1>
         <p class="text-xs text-base-content/70">
           Fill in all required information for your BKP submission
         </p>
