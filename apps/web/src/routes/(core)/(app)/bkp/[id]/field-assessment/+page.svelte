@@ -5,7 +5,10 @@
   import { uploadFile, getFileUrl } from "$lib";
   import { client } from "$lib/client.svelte";
   import Query from "$lib/components/Query.svelte";
-  import {toast} from "$lib";
+  import { toast } from "$lib";
+  import { resolve } from "$app/paths";
+  import { goto } from "$app/navigation";
+    import { BKPStatus, type BKP } from "$lib/zenstack/models";
 
   $effect(() => {
     setActiveStep(STEP_LABELS.FIELD_ASSESSMENT);
@@ -27,6 +30,7 @@
   let fileInput: HTMLInputElement | null = $state(null);
   let selectedFile: File | null = $state(null);
   let isUploading: boolean = $state(false);
+  let isContinuing: boolean = $state(false);
 
   // Modal state
   let deleteModal: HTMLDialogElement | null = $state(null);
@@ -140,10 +144,37 @@
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
   }
+
+  // ===== NAVIGATION FUNCTIONS =====
+  async function handleContinueToGrading(bkp: BKP) {
+    isContinuing = true;
+    try {
+      // If status is not yet GRADING, update it
+      if (bkp.status === "UPLOADING_FIELD_ASSESSMENT") {
+        await $bkpUpdateQ.mutateAsync({
+          where: { id: bkpId },
+          data: {
+            status: "GRADING",
+          },
+        });
+        toast.success("Proceeding to grading!");
+      }
+
+      goto(resolve(`/bkp/${bkpId}/grading`));
+    } catch (error) {
+      console.error("Error updating status:", error);
+      toast.error("Failed to proceed to grading");
+    } finally {
+      isContinuing = false;
+    }
+  }
 </script>
 
 <Query q={bkpQ}>
   {#snippet children(bkp)}
+    {@const isEditable = (<BKPStatus[]>["UPLOADING_FIELD_ASSESSMENT", "GRADING"]).includes(
+      bkp.status,
+    )}
     <div class="max-w-5xl">
       <!-- Header -->
       <div class="mb-6">
@@ -165,7 +196,7 @@
           <div class="divider my-2"></div>
 
           <div class="flex items-center gap-3">
-            {#if bkp.FieldAssessment?.assessmentKey}
+            {#if bkp.FieldAssessment.assessmentKey}
               <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-error/10">
                 <Icon icon="mdi:file-pdf-box" class="h-6 w-6 text-error" />
               </div>
@@ -198,7 +229,7 @@
       </div>
 
       <!-- Upload Section -->
-      {#if bkp.status === "UPLOADING_FIELD_ASSESSMENT" && !bkp.FieldAssessment?.assessmentKey}
+      {#if isEditable && !bkp.FieldAssessment.assessmentKey}
         <div class="card mb-4 bg-base-100 shadow-xl">
           <div class="card-body p-4">
             <h2 class="mb-3 card-title text-base">Upload Assessment Document</h2>
@@ -255,7 +286,7 @@
       {/if}
 
       <!-- Uploaded Document Card -->
-      {#if bkp.FieldAssessment?.assessmentKey}
+      {#if bkp.FieldAssessment.assessmentKey}
         <div class="card mb-4 bg-base-100 shadow-xl">
           <div class="card-body p-4">
             <h2 class="mb-3 card-title text-base">Uploaded Document</h2>
@@ -292,7 +323,7 @@
                   <Icon icon="mdi:eye-outline" class="h-4 w-4" />
                   View
                 </a>
-                {#if bkp.status === "UPLOADING_FIELD_ASSESSMENT"}
+                {#if isEditable}
                   <button class="btn gap-2 btn-outline btn-sm btn-error" onclick={openDeleteModal}>
                     <Icon icon="mdi:delete" class="h-4 w-4" />
                     Delete
@@ -305,7 +336,7 @@
       {/if}
 
       <!-- Info Alert -->
-      {#if !bkp.FieldAssessment?.assessmentKey && bkp.status === "UPLOADING_FIELD_ASSESSMENT"}
+      {#if !bkp.FieldAssessment.assessmentKey && isEditable}
         <div class="alert alert-info">
           <Icon icon="mdi:information-outline" class="h-5 w-5 shrink-0" />
           <div>
@@ -316,6 +347,30 @@
           </div>
         </div>
       {/if}
+
+      <!-- Navigation Action Buttons -->
+      <div class="mt-8 flex flex-wrap justify-center gap-4">
+        <a href={resolve(`/bkp/${bkpId}/weekly-reports`)} class="btn gap-2 btn-outline">
+          <Icon icon="mdi:arrow-left" class="h-5 w-5" />
+          Back to Weekly Reports
+        </a>
+        <!-- ? IGNORE, because not mandatory -->
+        {#if true || bkp.FieldAssessment.assessmentKey}
+          <button
+            class="btn gap-2 btn-primary"
+            onclick={() => handleContinueToGrading(bkp)}
+            disabled={isContinuing}
+          >
+            {#if isContinuing}
+              <span class="loading loading-spinner loading-sm"></span>
+              Continuing...
+            {:else}
+              Continue to Grading
+              <Icon icon="mdi:arrow-right" class="h-5 w-5" />
+            {/if}
+          </button>
+        {/if}
+      </div>
     </div>
   {/snippet}
 </Query>

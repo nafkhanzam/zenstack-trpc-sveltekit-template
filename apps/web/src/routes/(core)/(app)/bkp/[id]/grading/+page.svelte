@@ -4,6 +4,7 @@
   import { client } from "$lib/client.svelte";
   import Query from "$lib/components/Query.svelte";
   import { setActiveStep, STEP_LABELS } from "../bkp-step.svelte";
+    import type { BKP, Course } from "$lib/zenstack/models";
 
   $effect(() => {
     setActiveStep(STEP_LABELS.GRADING);
@@ -21,7 +22,12 @@
   });
 
   // Fetch all courses to get details
-  const coursesQ = client.course.useFindMany({
+  const coursesQf = (courseIds: string[]) => client.course.useFindMany({
+    where: {
+      id: {
+        in: courseIds,
+      },
+    },
     include: {
       Major: true,
     },
@@ -62,7 +68,7 @@
     return "E";
   }
 
-  function getGradingStatus(bkp: any): "pending" | "in_progress" | "completed" {
+  function getGradingStatus(bkp: BKP): "pending" | "in_progress" | "completed" {
     if (bkp.status === "COMPLETED") return "completed";
     if (bkp.status === "GRADING") return "in_progress";
     return "pending";
@@ -86,7 +92,7 @@
     return texts[status];
   }
 
-  function calculateWeightedScore(components: any[], courses: any[]): number {
+  function calculateWeightedScore(components: BKP["Grading"]["components"], courses: Course[]): number {
     let totalWeightedScore = 0;
     let totalSks = 0;
 
@@ -104,16 +110,18 @@
 
 <Query q={bkpQ}>
   {#snippet children(bkp)}
-    <Query q={coursesQ}>
+    <Query
+      q={coursesQf(
+        bkp.Grading.components.map((v) => v.courseId).filter((v) => typeof v === "string"),
+      )}
+    >
       {#snippet children(allCourses)}
         {@const gradingStatus = getGradingStatus(bkp)}
-        {@const components = bkp.Grading?.components || []}
-        {@const gradedCourses = components.filter(
-          (c: any) => c.score !== null && c.score !== undefined,
-        )}
+        {@const components = bkp.Grading.components}
+        {@const gradedCourses = components.filter((c) => c.score !== null && c.score !== undefined)}
         {@const totalCourses = components.length}
         {@const showGrades = bkp.status === "COMPLETED"}
-        {@const courseDetails = components.map((comp: any) => {
+        {@const courseDetails = components.map((comp) => {
           const course = allCourses.find((c) => c.id === comp.courseId);
           return {
             component: comp,
@@ -270,15 +278,17 @@
                         <div class="text-right">
                           {#if hasScore}
                             {#if showGrades}
-                              <div class="text-xl font-bold {getGradeColor(item.component.score)}">
+                              <div
+                                class="text-xl font-bold {getGradeColor(item.component.score ?? 0)}"
+                              >
                                 {item.component.score}/100
                               </div>
                               <div
                                 class="mt-1 text-sm font-semibold {getGradeColor(
-                                  item.component.score,
+                                  item.component.score ?? 0,
                                 )}"
                               >
-                                {item.component.grade || getGradeLetter(item.component.score)}
+                                {item.component.grade || getGradeLetter(item.component.score ?? 0)}
                               </div>
                             {:else}
                               <span class="badge badge-sm badge-success">Graded</span>
@@ -336,25 +346,25 @@
               <div class="grid gap-3 text-sm md:grid-cols-2">
                 <div>
                   <span class="font-semibold">Company:</span>
-                  <span class="ml-2">{bkp.Proposal?.companyName || "N/A"}</span>
+                  <span class="ml-2">{bkp.Proposal.companyName || "N/A"}</span>
                 </div>
                 <div>
                   <span class="font-semibold">Position:</span>
-                  <span class="ml-2">{bkp.Proposal?.position || "N/A"}</span>
+                  <span class="ml-2">{bkp.Proposal.position || "N/A"}</span>
                 </div>
                 <div>
                   <span class="font-semibold">Type:</span>
-                  <span class="ml-2">{bkp.Proposal?.bkpType || "N/A"}</span>
+                  <span class="ml-2">{bkp.Proposal.bkpType || "N/A"}</span>
                 </div>
                 <div>
                   <span class="font-semibold">Duration:</span>
                   <span class="ml-2">
-                    {bkp.Proposal?.monthDuration ? `${bkp.Proposal.monthDuration} months` : "N/A"}
+                    {bkp.Proposal.monthDuration ? `${bkp.Proposal.monthDuration} months` : "N/A"}
                   </span>
                 </div>
                 <div>
                   <span class="font-semibold">Period:</span>
-                  <span class="ml-2">{bkp.Proposal?.period || "N/A"}</span>
+                  <span class="ml-2">{bkp.Proposal.period || "N/A"}</span>
                 </div>
                 <div>
                   <span class="font-semibold">Status:</span>

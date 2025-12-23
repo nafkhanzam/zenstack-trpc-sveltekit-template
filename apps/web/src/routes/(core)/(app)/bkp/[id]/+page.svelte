@@ -8,7 +8,7 @@
   import Icon from "@iconify/svelte";
   import { setActiveStep, STEP_LABELS } from "./bkp-step.svelte";
   import { BKPType } from "$lib/zenstack/models";
-  import type { BKP } from "$lib/zenstack/models";
+  import type { BKP, Course } from "$lib/zenstack/models";
 
   $effect(() => {
     setActiveStep(STEP_LABELS.PROPOSAL);
@@ -76,10 +76,8 @@
   let jobLink = $state("");
   let studentNotes = $state("");
 
-  // Conversion courses (dynamic)
-  interface ConversionCourse {
+  type ConversionCourse = {
     id: string;
-    courseId: string;
   }
   let conversionCourses = $state<ConversionCourse[]>([]);
 
@@ -93,10 +91,9 @@
     showHelpModal = true;
   }
 
-  function addConversionCourse() {
+  function addConversionCourse(courses: Course[]) {
     conversionCourses.push({
-      id: crypto.randomUUID(),
-      courseId: "",
+      id: courses[0].id,
     });
   }
 
@@ -133,6 +130,11 @@
         data: {
           status: "WAITING_PROPOSAL_APPROVAL",
           Proposal: proposalData,
+          Grading: {
+            components: conversionCourses.map(v => ({
+              courseId: v.id,
+            }))
+          }
         },
       });
       toast.success("BKP proposal updated and submitted!");
@@ -200,287 +202,290 @@
   });
 </script>
 
-<Query q={bkpQ}>
-  {#snippet children(bkp)}
-    {@const isCurrentStage = bkp.status === "PROPOSAL"}
-    {@const isRejected = isCurrentStage && bkp.ProposalApproval.rejected}
+<Query q={coursesQ}>
+  {#snippet children(courses)}
+    <Query q={bkpQ}>
+      {#snippet children(bkp)}
+        {@const isCurrentStage = bkp.status === "PROPOSAL"}
+        {@const isRejected = isCurrentStage && bkp.ProposalApproval.rejected}
 
-    <div class="max-w-5xl">
-      <!-- Header -->
-      <div class="mb-6">
-        <div class="mb-2 flex items-center gap-2">
-          {#if isRejected}
-            <div class="badge gap-2 badge-error">
-              <Icon icon="mdi:close-circle" class="h-4 w-4" />
-              Rejected
-            </div>
-          {:else if bkp?.status === "PROPOSAL"}
-            <div class="badge gap-2 badge-warning">
-              <Icon icon="mdi:file-document-edit" class="h-4 w-4" />
-              Draft
-            </div>
-          {:else if bkp?.status === "WAITING_PROPOSAL_APPROVAL"}
-            <div class="badge gap-2 badge-info">
-              <Icon icon="mdi:clock-outline" class="h-4 w-4" />
-              Waiting Approval
-            </div>
-          {/if}
-        </div>
-        <h1 class="mb-2 text-xl font-bold">Edit BKP Proposal</h1>
-        <p class="text-xs text-base-content/70">
-          Fill in all required information for your BKP submission
-        </p>
-      </div>
-
-      <!-- Rejection Card -->
-      {#if isRejected}
-        <div class="mb-6 alert alert-error shadow-lg">
-          <div class="flex-none">
-            <Icon icon="mdi:alert-circle-outline" class="h-8 w-8" />
-          </div>
-          <div class="flex-1">
-            <h3 class="text-base font-bold">Proposal Rejected</h3>
-            <div class="mt-1 text-xs">
-              <p class="mb-2">
-                Your BKP proposal was rejected
-                {#if bkp.ProposalApproval.reviewedAt}
-                  on {new Date(bkp.ProposalApproval.reviewedAt).toLocaleDateString()}
-                {/if}
-                {#if bkp.ProposalApproval__reviewedBy_User}
-                  by {bkp.ProposalApproval__reviewedBy_User.name}
-                {/if}.
-              </p>
-              {#if bkp.ProposalApproval.reviewerNotes}
-                <div class="card mt-3 bg-error-content/10">
-                  <div class="card-body p-3">
-                    <h4 class="flex items-center gap-2 text-sm font-semibold">
-                      <Icon icon="mdi:comment-alert-outline" class="h-4 w-4" />
-                      Rejection Reason:
-                    </h4>
-                    <p class="mt-1 text-xs">{bkp.ProposalApproval.reviewerNotes}</p>
-                  </div>
+        <div class="max-w-5xl">
+          <!-- Header -->
+          <div class="mb-6">
+            <div class="mb-2 flex items-center gap-2">
+              {#if isRejected}
+                <div class="badge gap-2 badge-error">
+                  <Icon icon="mdi:close-circle" class="h-4 w-4" />
+                  Rejected
+                </div>
+              {:else if bkp?.status === "PROPOSAL"}
+                <div class="badge gap-2 badge-warning">
+                  <Icon icon="mdi:file-document-edit" class="h-4 w-4" />
+                  Draft
+                </div>
+              {:else if bkp?.status === "WAITING_PROPOSAL_APPROVAL"}
+                <div class="badge gap-2 badge-info">
+                  <Icon icon="mdi:clock-outline" class="h-4 w-4" />
+                  Waiting Approval
                 </div>
               {/if}
-              <p class="mt-3 font-semibold">
-                Please review the feedback above and update your proposal accordingly.
-              </p>
             </div>
-          </div>
-        </div>
-      {/if}
-
-      <!-- Non-Editable Warning -->
-      {#if !isCurrentStage && !isRejected}
-        <div class="mb-6 alert alert-warning shadow-lg">
-          <div class="flex-none">
-            <Icon icon="mdi:information-outline" class="h-8 w-8" />
-          </div>
-          <div class="flex-1">
-            <h3 class="text-base font-bold">View Only Mode</h3>
-            <p class="mt-1 text-xs">
-              This proposal cannot be edited because it has already been submitted for approval or
-              is in a different stage of processing.
+            <h1 class="mb-2 text-xl font-bold">Edit BKP Proposal</h1>
+            <p class="text-xs text-base-content/70">
+              Fill in all required information for your BKP submission
             </p>
           </div>
-        </div>
-      {/if}
 
-      <form onsubmit={handleSubmit}>
-        <!-- Registration Details Section -->
-        <div class="card mb-4 bg-base-100 shadow-xl transition-all hover:shadow-2xl">
-          <div class="card-body p-4">
-            <h2 class="card-title text-base">
-              <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                <Icon icon="mdi:file-document-outline" class="h-5 w-5 text-primary" />
+          <!-- Rejection Card -->
+          {#if isRejected}
+            <div class="mb-6 alert alert-error shadow-lg">
+              <div class="flex-none">
+                <Icon icon="mdi:alert-circle-outline" class="h-8 w-8" />
               </div>
-              Registration Information
-            </h2>
-            <div class="divider my-2"></div>
-
-            <div class="space-y-3">
-              <!-- Periode -->
-              <div class="flex flex-col items-start gap-3 lg:flex-row">
-                <label class="label flex flex-wrap items-center pt-3 lg:flex-1" for="periode">
-                  <span class="label-text text-xs font-semibold text-wrap"
-                    >Periode (FRS) <span class="text-error">*</span></span
-                  >
-                  <button
-                    type="button"
-                    class="label-text-alt flex link items-center gap-1 link-primary"
-                    onclick={() =>
-                      showHelp(
-                        "Periode akademik saat Anda mengambil BKP ini. Anda dapat memilih beberapa periode. Contoh: Genap 2023/2024",
-                      )}
-                  >
-                    <Icon icon="mdi:help-circle-outline" class="h-4 w-4" />
-                    Help
-                  </button>
-                </label>
-                <select
-                  id="periode"
-                  class="select select-bordered lg:flex-1"
-                  bind:value={periode}
-                  disabled={!isCurrentStage}
-                  required
-                >
-                  <option value="" disabled selected>Select periode...</option>
-                  {#each periodOptions as option}
-                    <option value={option.value}>{option.label}</option>
-                  {/each}
-                </select>
-              </div>
-
-              <!-- BKP Type -->
-              <div class="flex flex-col items-start gap-3 lg:flex-row">
-                <label class="label flex flex-wrap items-center pt-3 lg:flex-1" for="bkpType">
-                  <span class="label-text text-xs font-semibold text-wrap"
-                    >BKP Type <span class="text-error">*</span></span
-                  >
-                </label>
-                <select
-                  id="bkpType"
-                  class="select select-bordered lg:flex-1"
-                  bind:value={bkpType}
-                  disabled={!isCurrentStage}
-                  required
-                >
-                  <option value={undefined} disabled selected>Select BKP type...</option>
-                  {#each bkpTypeOptions as option}
-                    <option value={option.value}>{option.label}</option>
-                  {/each}
-                </select>
-              </div>
-
-              <!-- Company Name -->
-              <div class="flex flex-col items-start gap-3 lg:flex-row">
-                <label class="label flex flex-wrap items-center pt-3 lg:flex-1" for="company">
-                  <span class="label-text text-xs font-semibold text-wrap"
-                    >Nama Perusahaan/Organisasi <span class="text-error">*</span></span
-                  >
-                  <button
-                    type="button"
-                    class="label-text-alt flex link items-center gap-1 link-primary"
-                    onclick={() =>
-                      showHelp("Masukkan nama perusahaan secara legal, contoh: PT Tokopedia")}
-                  >
-                    <Icon icon="mdi:help-circle-outline" class="h-4 w-4" />
-                    Help
-                  </button>
-                </label>
-                <input
-                  id="company"
-                  type="text"
-                  placeholder="e.g., PT Tokopedia"
-                  class="input-bordered input lg:flex-1"
-                  bind:value={companyName}
-                  disabled={!isCurrentStage}
-                  required
-                />
-              </div>
-
-              <!-- Position -->
-              <div class="flex flex-col items-start gap-3 lg:flex-row">
-                <label class="label flex flex-wrap items-center pt-3 lg:flex-1" for="position">
-                  <span class="label-text text-xs font-semibold text-wrap"
-                    >Nama Posisi (Role) <span class="text-error">*</span></span
-                  >
-                </label>
-                <input
-                  id="position"
-                  type="text"
-                  placeholder="e.g., Frontend Engineer Intern"
-                  class="input-bordered input lg:flex-1"
-                  bind:value={position}
-                  disabled={!isCurrentStage}
-                  required
-                />
-              </div>
-
-              <!-- Job Description -->
-              <div class="flex flex-col items-start gap-3 lg:flex-row">
-                <label class="label pt-3 lg:flex-1" for="description">
-                  <span class="label-text text-xs font-semibold text-wrap"
-                    >Deskripsi Pekerjaan <span class="text-error">*</span></span
-                  >
-                </label>
-                <textarea
-                  id="description"
-                  placeholder="Describe your job responsibilities..."
-                  class="textarea-bordered textarea h-32 lg:flex-1"
-                  bind:value={jobDescription}
-                  disabled={!isCurrentStage}
-                  required
-                ></textarea>
-              </div>
-
-              <!-- Duration and Dates -->
-              <div class="flex flex-col items-start gap-3 lg:flex-row">
-                <label class="label flex flex-wrap items-center pt-3 lg:flex-1" for="monthDuration">
-                  <span class="label-text text-xs font-semibold text-wrap"
-                    >Durasi (Bulan) <span class="text-error">*</span></span
-                  >
-                </label>
-                <input
-                  id="monthDuration"
-                  type="number"
-                  placeholder="e.g., 3"
-                  class="input-bordered input lg:flex-1"
-                  bind:value={monthDuration}
-                  min="1"
-                  disabled={!isCurrentStage}
-                  required
-                />
-              </div>
-
-              <div class="flex flex-col items-start gap-3 lg:flex-row">
-                <label class="label flex flex-wrap items-center pt-3 lg:flex-1" for="startDate">
-                  <span class="label-text text-xs font-semibold text-wrap">Start Date</span>
-                </label>
-                <input
-                  id="startDate"
-                  type="date"
-                  class="input-bordered input lg:flex-1"
-                  bind:value={startDate}
-                  disabled={!isCurrentStage}
-                />
-              </div>
-
-              <div class="flex flex-col items-start gap-3 lg:flex-row">
-                <label class="label flex flex-wrap items-center pt-3 lg:flex-1" for="endDate">
-                  <span class="label-text text-xs font-semibold text-wrap">End Date</span>
-                </label>
-                <input
-                  id="endDate"
-                  type="date"
-                  class="input-bordered input lg:flex-1"
-                  bind:value={endDate}
-                  disabled={!isCurrentStage}
-                />
-              </div>
-
-              <!-- Job Link -->
-              <div class="flex flex-col items-start gap-3 lg:flex-row">
-                <label class="label flex flex-wrap items-center pt-3 lg:flex-1" for="jobLink">
-                  <span class="label-text text-xs font-semibold text-wrap"
-                    >Link Lowongan (optional)</span
-                  >
-                </label>
-                <input
-                  id="jobLink"
-                  type="url"
-                  placeholder="https://..."
-                  class="input-bordered input lg:flex-1"
-                  bind:value={jobLink}
-                  disabled={!isCurrentStage}
-                />
+              <div class="flex-1">
+                <h3 class="text-base font-bold">Proposal Rejected</h3>
+                <div class="mt-1 text-xs">
+                  <p class="mb-2">
+                    Your BKP proposal was rejected
+                    {#if bkp.ProposalApproval.reviewedAt}
+                      on {new Date(bkp.ProposalApproval.reviewedAt).toLocaleDateString()}
+                    {/if}
+                    {#if bkp.ProposalApproval__reviewedBy_User}
+                      by {bkp.ProposalApproval__reviewedBy_User.name}
+                    {/if}.
+                  </p>
+                  {#if bkp.ProposalApproval.reviewerNotes}
+                    <div class="card mt-3 bg-error-content/10">
+                      <div class="card-body p-3">
+                        <h4 class="flex items-center gap-2 text-sm font-semibold">
+                          <Icon icon="mdi:comment-alert-outline" class="h-4 w-4" />
+                          Rejection Reason:
+                        </h4>
+                        <p class="mt-1 text-xs">{bkp.ProposalApproval.reviewerNotes}</p>
+                      </div>
+                    </div>
+                  {/if}
+                  <p class="mt-3 font-semibold">
+                    Please review the feedback above and update your proposal accordingly.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          {/if}
 
-        <!-- Conversion Courses Section -->
-        <Query q={coursesQ}>
-          {#snippet children(courses)}
+          <!-- Non-Editable Warning -->
+          {#if !isCurrentStage && !isRejected}
+            <div class="mb-6 alert alert-warning shadow-lg">
+              <div class="flex-none">
+                <Icon icon="mdi:information-outline" class="h-8 w-8" />
+              </div>
+              <div class="flex-1">
+                <h3 class="text-base font-bold">View Only Mode</h3>
+                <p class="mt-1 text-xs">
+                  This proposal cannot be edited because it has already been submitted for approval
+                  or is in a different stage of processing.
+                </p>
+              </div>
+            </div>
+          {/if}
+
+          <form onsubmit={handleSubmit}>
+            <!-- Registration Details Section -->
+            <div class="card mb-4 bg-base-100 shadow-xl transition-all hover:shadow-2xl">
+              <div class="card-body p-4">
+                <h2 class="card-title text-base">
+                  <div class="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                    <Icon icon="mdi:file-document-outline" class="h-5 w-5 text-primary" />
+                  </div>
+                  Registration Information
+                </h2>
+                <div class="divider my-2"></div>
+
+                <div class="space-y-3">
+                  <!-- Periode -->
+                  <div class="flex flex-col items-start gap-3 lg:flex-row">
+                    <label class="label flex flex-wrap items-center pt-3 lg:flex-1" for="periode">
+                      <span class="label-text text-xs font-semibold text-wrap"
+                        >Periode (FRS) <span class="text-error">*</span></span
+                      >
+                      <button
+                        type="button"
+                        class="label-text-alt flex link items-center gap-1 link-primary"
+                        onclick={() =>
+                          showHelp(
+                            "Periode akademik saat Anda mengambil BKP ini. Anda dapat memilih beberapa periode. Contoh: Genap 2023/2024",
+                          )}
+                      >
+                        <Icon icon="mdi:help-circle-outline" class="h-4 w-4" />
+                        Help
+                      </button>
+                    </label>
+                    <select
+                      id="periode"
+                      class="select select-bordered lg:flex-1"
+                      bind:value={periode}
+                      disabled={!isCurrentStage}
+                      required
+                    >
+                      <option value="" disabled selected>Select periode...</option>
+                      {#each periodOptions as option}
+                        <option value={option.value}>{option.label}</option>
+                      {/each}
+                    </select>
+                  </div>
+
+                  <!-- BKP Type -->
+                  <div class="flex flex-col items-start gap-3 lg:flex-row">
+                    <label class="label flex flex-wrap items-center pt-3 lg:flex-1" for="bkpType">
+                      <span class="label-text text-xs font-semibold text-wrap"
+                        >BKP Type <span class="text-error">*</span></span
+                      >
+                    </label>
+                    <select
+                      id="bkpType"
+                      class="select select-bordered lg:flex-1"
+                      bind:value={bkpType}
+                      disabled={!isCurrentStage}
+                      required
+                    >
+                      <option value={undefined} disabled selected>Select BKP type...</option>
+                      {#each bkpTypeOptions as option}
+                        <option value={option.value}>{option.label}</option>
+                      {/each}
+                    </select>
+                  </div>
+
+                  <!-- Company Name -->
+                  <div class="flex flex-col items-start gap-3 lg:flex-row">
+                    <label class="label flex flex-wrap items-center pt-3 lg:flex-1" for="company">
+                      <span class="label-text text-xs font-semibold text-wrap"
+                        >Nama Perusahaan/Organisasi <span class="text-error">*</span></span
+                      >
+                      <button
+                        type="button"
+                        class="label-text-alt flex link items-center gap-1 link-primary"
+                        onclick={() =>
+                          showHelp("Masukkan nama perusahaan secara legal, contoh: PT Tokopedia")}
+                      >
+                        <Icon icon="mdi:help-circle-outline" class="h-4 w-4" />
+                        Help
+                      </button>
+                    </label>
+                    <input
+                      id="company"
+                      type="text"
+                      placeholder="e.g., PT Tokopedia"
+                      class="input-bordered input lg:flex-1"
+                      bind:value={companyName}
+                      disabled={!isCurrentStage}
+                      required
+                    />
+                  </div>
+
+                  <!-- Position -->
+                  <div class="flex flex-col items-start gap-3 lg:flex-row">
+                    <label class="label flex flex-wrap items-center pt-3 lg:flex-1" for="position">
+                      <span class="label-text text-xs font-semibold text-wrap"
+                        >Nama Posisi (Role) <span class="text-error">*</span></span
+                      >
+                    </label>
+                    <input
+                      id="position"
+                      type="text"
+                      placeholder="e.g., Frontend Engineer Intern"
+                      class="input-bordered input lg:flex-1"
+                      bind:value={position}
+                      disabled={!isCurrentStage}
+                      required
+                    />
+                  </div>
+
+                  <!-- Job Description -->
+                  <div class="flex flex-col items-start gap-3 lg:flex-row">
+                    <label class="label pt-3 lg:flex-1" for="description">
+                      <span class="label-text text-xs font-semibold text-wrap"
+                        >Deskripsi Pekerjaan <span class="text-error">*</span></span
+                      >
+                    </label>
+                    <textarea
+                      id="description"
+                      placeholder="Describe your job responsibilities..."
+                      class="textarea-bordered textarea h-32 lg:flex-1"
+                      bind:value={jobDescription}
+                      disabled={!isCurrentStage}
+                      required
+                    ></textarea>
+                  </div>
+
+                  <!-- Duration and Dates -->
+                  <div class="flex flex-col items-start gap-3 lg:flex-row">
+                    <label
+                      class="label flex flex-wrap items-center pt-3 lg:flex-1"
+                      for="monthDuration"
+                    >
+                      <span class="label-text text-xs font-semibold text-wrap"
+                        >Durasi (Bulan) <span class="text-error">*</span></span
+                      >
+                    </label>
+                    <input
+                      id="monthDuration"
+                      type="number"
+                      placeholder="e.g., 3"
+                      class="input-bordered input lg:flex-1"
+                      bind:value={monthDuration}
+                      min="1"
+                      disabled={!isCurrentStage}
+                      required
+                    />
+                  </div>
+
+                  <div class="flex flex-col items-start gap-3 lg:flex-row">
+                    <label class="label flex flex-wrap items-center pt-3 lg:flex-1" for="startDate">
+                      <span class="label-text text-xs font-semibold text-wrap">Start Date</span>
+                    </label>
+                    <input
+                      id="startDate"
+                      type="date"
+                      class="input-bordered input lg:flex-1"
+                      bind:value={startDate}
+                      disabled={!isCurrentStage}
+                    />
+                  </div>
+
+                  <div class="flex flex-col items-start gap-3 lg:flex-row">
+                    <label class="label flex flex-wrap items-center pt-3 lg:flex-1" for="endDate">
+                      <span class="label-text text-xs font-semibold text-wrap">End Date</span>
+                    </label>
+                    <input
+                      id="endDate"
+                      type="date"
+                      class="input-bordered input lg:flex-1"
+                      bind:value={endDate}
+                      disabled={!isCurrentStage}
+                    />
+                  </div>
+
+                  <!-- Job Link -->
+                  <div class="flex flex-col items-start gap-3 lg:flex-row">
+                    <label class="label flex flex-wrap items-center pt-3 lg:flex-1" for="jobLink">
+                      <span class="label-text text-xs font-semibold text-wrap"
+                        >Link Lowongan (optional)</span
+                      >
+                    </label>
+                    <input
+                      id="jobLink"
+                      type="url"
+                      placeholder="https://..."
+                      class="input-bordered input lg:flex-1"
+                      bind:value={jobLink}
+                      disabled={!isCurrentStage}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Conversion Courses Section -->
             <div class="card mb-4 bg-base-100 shadow-xl transition-all hover:shadow-2xl">
               <div class="card-body p-4">
                 <h2 class="card-title text-base">
@@ -515,7 +520,7 @@
                         <tbody>
                           {#each conversionCourses as convCourse, idx (convCourse.id)}
                             {@const selectedCourseData = courses.find(
-                              (c) => c.id === convCourse.courseId,
+                              (c) => c.id === convCourse.id,
                             )}
                             <tr>
                               <td class="text-xs">{idx + 1}</td>
@@ -525,7 +530,7 @@
                                     value: c.id,
                                     label: `${c.code} - ${c.name} (${c.sks} SKS)`,
                                   }))}
-                                  bind:value={convCourse.courseId}
+                                  bind:value={convCourse.id}
                                   disabled={!isCurrentStage}
                                   required
                                 />
@@ -551,9 +556,7 @@
                             <td colspan="3" class="text-right text-xs">Total SKS:</td>
                             <td class="text-xs">
                               {conversionCourses.reduce((total, convCourse) => {
-                                const courseData = courses.find(
-                                  (c) => c.id === convCourse.courseId,
-                                );
+                                const courseData = courses.find((c) => c.id === convCourse.id);
                                 return total + (courseData?.sks || 0);
                               }, 0)}
                             </td>
@@ -567,7 +570,7 @@
                   <button
                     type="button"
                     class="btn gap-2 btn-outline btn-sm"
-                    onclick={addConversionCourse}
+                    onclick={() => addConversionCourse(courses)}
                     disabled={!isCurrentStage}
                   >
                     <Icon icon="mdi:plus" class="h-5 w-5" />
@@ -576,79 +579,86 @@
                 </div>
               </div>
             </div>
-          {/snippet}
-        </Query>
 
-        <!-- Notes Section -->
-        <div class="card mb-8 bg-base-100 shadow-xl transition-all hover:shadow-2xl">
-          <div class="card-body p-4">
-            <h2 class="card-title text-base">
-              <div class="flex h-8 w-8 items-center justify-center rounded-full bg-info/10">
-                <Icon icon="mdi:note-text-outline" class="h-5 w-5 text-info" />
-              </div>
-              Notes
-            </h2>
-            <div class="divider my-2"></div>
-
-            <div class="space-y-4">
-              <!-- Student Notes -->
-              <div class="flex flex-col items-start gap-4 lg:flex-row">
-                <label class="label flex flex-wrap items-center pt-4 lg:flex-1" for="studentNotes">
-                  <span class="label-text text-xs font-semibold text-wrap">Student Notes</span>
-                </label>
-                <textarea
-                  id="studentNotes"
-                  placeholder="Add any additional notes or comments..."
-                  class="textarea-bordered textarea h-32 lg:flex-1"
-                  bind:value={studentNotes}
-                  disabled={!isCurrentStage}
-                ></textarea>
-              </div>
-
-              <!-- Reviewer Notes (Read-only) -->
-              {#if bkp.ProposalApproval.reviewerNotes}
-                <div class="flex flex-col items-start gap-4 lg:flex-row">
-                  <label class="label flex flex-wrap items-center pt-4 lg:flex-1">
-                    <span class="label-text text-xs font-semibold text-wrap">Reviewer Notes</span>
-                  </label>
-                  <div class="rounded-lg bg-base-200 p-3 lg:flex-1">
-                    <p class="text-xs whitespace-pre-wrap">{bkp.ProposalApproval.reviewerNotes}</p>
+            <!-- Notes Section -->
+            <div class="card mb-8 bg-base-100 shadow-xl transition-all hover:shadow-2xl">
+              <div class="card-body p-4">
+                <h2 class="card-title text-base">
+                  <div class="flex h-8 w-8 items-center justify-center rounded-full bg-info/10">
+                    <Icon icon="mdi:note-text-outline" class="h-5 w-5 text-info" />
                   </div>
+                  Notes
+                </h2>
+                <div class="divider my-2"></div>
+
+                <div class="space-y-4">
+                  <!-- Student Notes -->
+                  <div class="flex flex-col items-start gap-4 lg:flex-row">
+                    <label
+                      class="label flex flex-wrap items-center pt-4 lg:flex-1"
+                      for="studentNotes"
+                    >
+                      <span class="label-text text-xs font-semibold text-wrap">Student Notes</span>
+                    </label>
+                    <textarea
+                      id="studentNotes"
+                      placeholder="Add any additional notes or comments..."
+                      class="textarea-bordered textarea h-32 lg:flex-1"
+                      bind:value={studentNotes}
+                      disabled={!isCurrentStage}
+                    ></textarea>
+                  </div>
+
+                  <!-- Reviewer Notes (Read-only) -->
+                  {#if bkp.ProposalApproval.reviewerNotes}
+                    <div class="flex flex-col items-start gap-4 lg:flex-row">
+                      <label class="label flex flex-wrap items-center pt-4 lg:flex-1">
+                        <span class="label-text text-xs font-semibold text-wrap"
+                          >Reviewer Notes</span
+                        >
+                      </label>
+                      <div class="rounded-lg bg-base-200 p-3 lg:flex-1">
+                        <p class="text-xs whitespace-pre-wrap">
+                          {bkp.ProposalApproval.reviewerNotes}
+                        </p>
+                      </div>
+                    </div>
+                  {/if}
                 </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap justify-center gap-4">
+              <a href={resolve("/bkp")} class="btn gap-2 btn-outline">
+                <Icon icon="mdi:arrow-left" class="h-5 w-5" />
+                Back to My BKP List
+              </a>
+              {#if isCurrentStage}
+                <button
+                  type="button"
+                  class="btn gap-2 btn-secondary"
+                  onclick={saveDraft}
+                  disabled={isSubmitting}
+                >
+                  <Icon icon="mdi:content-save-outline" class="h-5 w-5" />
+                  {isSubmitting ? "Saving..." : "Save Draft"}
+                </button>
+                <button type="submit" class="btn gap-2 btn-primary" disabled={isSubmitting}>
+                  <Icon icon="mdi:send" class="h-5 w-5" />
+                  {isSubmitting ? "Submitting..." : "Submit for Approval"}
+                </button>
+              {:else}
+                <a href={resolve(`/bkp/${bkpId}/approval`)} class="btn gap-2 btn-primary">
+                  <Icon icon="mdi:file-check-outline" class="h-5 w-5" />
+                  Go to Proposal Approval
+                </a>
               {/if}
             </div>
-          </div>
+          </form>
         </div>
-
-        <!-- Action Buttons -->
-        <div class="flex flex-wrap justify-center gap-4">
-          <a href={resolve("/bkp")} class="btn gap-2 btn-outline">
-            <Icon icon="mdi:arrow-left" class="h-5 w-5" />
-            Back to My BKP List
-          </a>
-          {#if isCurrentStage}
-            <button
-              type="button"
-              class="btn gap-2 btn-secondary"
-              onclick={saveDraft}
-              disabled={isSubmitting}
-            >
-              <Icon icon="mdi:content-save-outline" class="h-5 w-5" />
-              {isSubmitting ? "Saving..." : "Save Draft"}
-            </button>
-            <button type="submit" class="btn gap-2 btn-primary" disabled={isSubmitting}>
-              <Icon icon="mdi:send" class="h-5 w-5" />
-              {isSubmitting ? "Submitting..." : "Submit for Approval"}
-            </button>
-          {:else}
-            <a href={resolve(`/bkp/${bkpId}/approval`)} class="btn gap-2 btn-primary">
-              <Icon icon="mdi:file-check-outline" class="h-5 w-5" />
-              Go to Proposal Approval
-            </a>
-          {/if}
-        </div>
-      </form>
-    </div>
+      {/snippet}
+    </Query>
   {/snippet}
 </Query>
 

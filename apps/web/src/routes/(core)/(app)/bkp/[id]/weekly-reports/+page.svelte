@@ -7,6 +7,7 @@
   import type { WeeklyReport, DailyReport, BKP } from "$lib/zenstack/models";
   import { page } from "$app/state";
   import { resolve } from "$app/paths";
+  import { goto } from "$app/navigation";
 
   $effect(() => {
     setActiveStep(STEP_LABELS.WEEKLY_REPORTS);
@@ -57,6 +58,7 @@
   let uploadedPhotoFile: File | null = $state(null);
   let isSubmitting = $state(false);
   let isUploading = $state(false);
+  let isContinuing = $state(false);
 
   function getStatusBadge(status: string): string {
     if (status === "WEEKLY_REPORTING") return "badge-info";
@@ -393,6 +395,29 @@
       isSubmitting = false;
     }
   }
+
+  // ===== NAVIGATION FUNCTIONS =====
+  async function handleContinueToFieldAssessment(currentBKP: BKP) {
+    isContinuing = true;
+    try {
+      if (currentBKP.status === "WEEKLY_REPORTING") {
+        await $updateBKPMutation.mutateAsync({
+          where: { id: bkpId },
+          data: {
+            status: "UPLOADING_FIELD_ASSESSMENT",
+          },
+        });
+
+        toast.success("Proceeding to field assessment!");
+      }
+      goto(resolve(`/bkp/${bkpId}/field-assessment`));
+    } catch (error) {
+      console.error("Error updating status:", error);
+      toast.error("Failed to proceed to field assessment");
+    } finally {
+      isContinuing = false;
+    }
+  }
 </script>
 
 <Query q={bkpQ}>
@@ -404,7 +429,10 @@
       ? Math.ceil((bkp.Proposal.monthDuration * 30) / 7)
       : NaN}
     {@const submittedCount = bkp.WeeklyReports.WeeklyReportList.length}
-    {@const canEdit = bkp.status === "WEEKLY_REPORTING" || bkp.status === "PROPOSAL"}
+    {@const canEdit =
+      bkp.status === "WEEKLY_REPORTING" ||
+      bkp.status === "UPLOADING_FIELD_ASSESSMENT" ||
+      bkp.status === "GRADING"}
 
     <div class="max-w-5xl">
       <!-- Header -->
@@ -419,7 +447,8 @@
         <div>
           <h3 class="text-sm font-bold">This step is optional</h3>
           <p class="text-xs">
-            Weekly reports are not mandatory. You can skip this step and continue directly to the field assessment.
+            Weekly reports are not mandatory. You can skip this step and continue directly to the
+            field assessment.
           </p>
         </div>
       </div>
@@ -641,10 +670,19 @@
           <Icon icon="mdi:arrow-left" class="h-5 w-5" />
           Back to Registration Approval
         </a>
-        <a href={resolve(`/bkp/${bkpId}/field-assessment`)} class="btn gap-2 btn-primary">
-          Continue to Field Assessment
-          <Icon icon="mdi:arrow-right" class="h-5 w-5" />
-        </a>
+        <button
+          class="btn gap-2 btn-primary"
+          onclick={() => handleContinueToFieldAssessment(bkp)}
+          disabled={isContinuing}
+        >
+          {#if isContinuing}
+            <span class="loading loading-spinner loading-sm"></span>
+            Continuing...
+          {:else}
+            Continue to Field Assessment
+            <Icon icon="mdi:arrow-right" class="h-5 w-5" />
+          {/if}
+        </button>
       </div>
     </div>
 
