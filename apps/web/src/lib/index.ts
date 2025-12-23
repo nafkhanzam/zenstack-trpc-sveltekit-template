@@ -1,9 +1,23 @@
 import { env } from "$env/dynamic/public";
 import { TRPCClientError } from "@trpc/client";
+import { customAlphabet } from "nanoid";
 import toast from "svelte-french-toast";
 export { toast };
 import * as z from "zod";
 export { z };
+
+function genCharArray(st: string, ed: string): string[] {
+  const res = [];
+  const endChar = ed.charCodeAt(0);
+  for (let i = st.charCodeAt(0); i <= endChar; ++i) {
+    res.push(String.fromCharCode(i));
+  }
+  return res;
+}
+
+export const nanoid = customAlphabet(
+  [...genCharArray("a", "z"), ...genCharArray("A", "Z"), ...genCharArray("0", "9")].join(""),
+);
 
 export function isTRPCClientError(cause: unknown): cause is TRPCClientError<any> {
   return cause instanceof TRPCClientError;

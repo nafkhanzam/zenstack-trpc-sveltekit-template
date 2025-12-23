@@ -42,8 +42,17 @@
   });
 
   const createBkpQ = client.bKP.useCreate();
+
+  let confirmModal: HTMLDialogElement;
+  let isCreating = $state(false);
+
+  function openConfirmModal() {
+    confirmModal.showModal();
+  }
+
   async function handleCreateBKP() {
     try {
+      isCreating = true;
       // Create a new BKP with initial status and selected type
       const newBKP = await $createBkpQ.mutateAsync({
         data: {
@@ -65,11 +74,14 @@
         },
       });
 
-      // Redirect to the BKP detail page
+      // Close modal and redirect to the BKP detail page
+      confirmModal.close();
       location.href = resolve(`/bkp/${newBKP.id}`);
     } catch (error) {
       console.error("Failed to create BKP:", error);
       // TODO: Show error message to user
+    } finally {
+      isCreating = false;
     }
   }
 </script>
@@ -89,7 +101,7 @@
       <div class="card-body">
         <h2 class="card-title">Create New BKP</h2>
         <div class="flex gap-2">
-          <button class="btn btn-primary" onclick={handleCreateBKP}>
+          <button class="btn btn-primary" onclick={openConfirmModal}>
             <Icon icon="heroicons:plus" class="h-5 w-5" />
             Create BKP
           </button>
@@ -109,18 +121,18 @@
             {#each data as bkp (bkp.id)}
               <BKPCard
                 id={bkp.id}
-                companyName={bkp.Proposal?.companyName ?? "N/A"}
-                position={bkp.Proposal?.position ?? "N/A"}
-                bkpType={bkp.Proposal?.bkpType ?? "N/A"}
+                companyName={bkp.Proposal.companyName ?? "N/A"}
+                position={bkp.Proposal.position ?? "N/A"}
+                bkpType={bkp.Proposal.bkpType ?? "N/A"}
                 bkpCategory="BKP"
                 status={bkp.status}
-                submittedDate={bkp.Proposal?.submittedAt
+                submittedDate={bkp.Proposal.submittedAt
                   ? new Date(bkp.Proposal.submittedAt).toISOString().split("T")[0]
                   : undefined}
-                periode={bkp.Proposal?.period ?? "N/A"}
+                periode={bkp.Proposal.period ?? "N/A"}
                 weeklyReportsSubmitted={bkp.WeeklyReports?.WeeklyReportList?.length ?? 0}
-                totalWeeklyReports={bkp.Proposal?.monthDuration ?? 0}
-                isGraded={bkp.Grading?.components?.length ? true : false}
+                totalWeeklyReports={bkp.Proposal.monthDuration ?? 0}
+                isGraded={bkp.Grading.components.length ? true : false}
               />
             {/each}
           </div>
@@ -134,5 +146,31 @@
         {/if}
       {/snippet}
     </Query>
+
+    <!-- Confirmation Modal -->
+    <dialog bind:this={confirmModal} class="modal">
+      <div class="modal-box">
+        <form method="dialog">
+          <button class="btn absolute top-2 right-2 btn-circle btn-ghost btn-sm">✕</button>
+        </form>
+        <h3 class="mb-4 text-lg font-bold">Create New BKP?</h3>
+        <p class="mb-4">
+          Are you sure you want to create a new BKP submission? You will be redirected to the BKP
+          detail page to fill in the proposal information.
+        </p>
+
+        <div class="modal-action">
+          <form method="dialog">
+            <button class="btn btn-ghost">Cancel</button>
+          </form>
+          <button class="btn btn-primary" onclick={handleCreateBKP} disabled={isCreating}>
+            {isCreating ? "Creating..." : "Create BKP"}
+          </button>
+        </div>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+      </form>
+    </dialog>
   </div>
 </div>

@@ -24,6 +24,7 @@ export type BKPProposalApproval = $TypeDefResult<$Schema, "BKPProposalApproval">
 export type BKPRegistrationAdditionalDocument = $TypeDefResult<$Schema, "BKPRegistrationAdditionalDocument">;
 export type BKPRegistration = $TypeDefResult<$Schema, "BKPRegistration">;
 export type BKPRegistrationApproval = $TypeDefResult<$Schema, "BKPRegistrationApproval">;
+export type DailyReport = $TypeDefResult<$Schema, "DailyReport">;
 export type WeeklyReport = $TypeDefResult<$Schema, "WeeklyReport">;
 export type WeeklyReports = $TypeDefResult<$Schema, "WeeklyReports">;
 export type FieldAssessment = $TypeDefResult<$Schema, "FieldAssessment">;

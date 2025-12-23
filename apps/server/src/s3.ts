@@ -6,6 +6,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { TRPCError } from "@trpc/server";
 import { env } from "./env.js";
+import { nanoid } from "./lib.js";
 
 // Initialize S3 Client
 export const s3 = new S3Client({
@@ -57,7 +58,7 @@ export const generateFileKey = (
 ): { filename: string; key: string } => {
   const timestamp = Date.now();
   const sanitizedFilename = originalFilename.replace(/[^a-zA-Z0-9.-]/g, "_");
-  const filename = `${timestamp}-${sanitizedFilename}`;
+  const filename = `${timestamp}-${nanoid(5)}-${sanitizedFilename}`;
   const basePath = prefix ? `${prefix}/` : "";
   const key = `${basePath}${userId}/${filename}`;
   return { key, filename };

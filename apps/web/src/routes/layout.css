@@ -2,3 +2,8 @@
 @plugin "daisyui";
 @plugin "@tailwindcss/forms";
 @plugin "@tailwindcss/typography";
+
+.debug {
+  @apply border-4;
+  @apply border-red-600;
+}

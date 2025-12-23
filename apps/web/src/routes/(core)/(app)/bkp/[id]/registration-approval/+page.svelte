@@ -5,6 +5,10 @@
   import { client } from "$lib/client.svelte";
   import Query from "$lib/components/Query.svelte";
   import { setActiveStep, STEP_LABELS } from "../bkp-step.svelte";
+  import { BKPStatus, type BKP } from "$lib/zenstack/models";
+  import { toast } from "$lib";
+  import { goto } from "$app/navigation";
+  import { user } from "$lib/stores/user.svelte";
 
   $effect(() => {
     setActiveStep(STEP_LABELS.R_APPROVAL);
@@ -21,11 +25,30 @@
     },
   });
 
-  function getApprovalStatus(bkp: any): "pending" | "approved" | "rejected" {
+  // Update mutation
+  const updateBkpQ = client.bKP.useUpdate();
+
+  // Check if user is admin or superadmin
+  const isAdminOrSuperAdmin = $derived(["ADMIN", "SUPERADMIN"].includes(user().role));
+
+  // State for editing
+  let reviewerNotes = $state("");
+  let isSaving = $state(false);
+
+  $effect(() => {
+    if ($bkpQ.data) {
+      const notes = $bkpQ.data.RegistrationApproval.reviewerNotes;
+      if (notes) {
+        reviewerNotes = notes;
+      }
+    }
+  });
+
+  function getApprovalStatus(bkp: BKP): "pending" | "approved" | "rejected" {
     if (bkp.status === "WAITING_REGISTRATION_APPROVAL") {
       return "pending";
     }
-    if (bkp.RegistrationApproval?.reviewedAt) {
+    if (bkp.RegistrationApproval.reviewedAt) {
       // If reviewed, check if moved forward or rejected
       if (
         bkp.status === "WEEKLY_REPORTING" ||
@@ -35,11 +58,103 @@
       ) {
         return "approved";
       }
-      if (bkp.status === "REGISTRATION") {
+      if (bkp.status === "REGISTRATION" && bkp.RegistrationApproval.rejected) {
         return "rejected";
       }
     }
     return "pending";
+  }
+
+  const nextStatus = BKPStatus.WEEKLY_REPORTING;
+  const previousStatus = BKPStatus.REGISTRATION;
+
+  async function handleApprove(bkp: BKP) {
+    isSaving = true;
+    try {
+      await $updateBkpQ.mutateAsync({
+        where: { id: bkp.id },
+        data: {
+          status: nextStatus,
+          RegistrationApproval: {
+            reviewedAt: new Date(),
+            reviewerNotes: reviewerNotes || null,
+            rejected: false,
+          },
+          RegistrationApproval__reviewedBy_UserId: user().id,
+        },
+      });
+      $bkpQ.refetch();
+    } catch (error) {
+      console.error("Failed to approve:", error);
+      alert("Failed to approve BKP");
+    } finally {
+      isSaving = false;
+    }
+  }
+
+  async function handleReject(bkp: BKP) {
+    isSaving = true;
+    try {
+      await $updateBkpQ.mutateAsync({
+        where: { id: bkp.id },
+        data: {
+          status: previousStatus,
+          RegistrationApproval: {
+            reviewedAt: new Date(),
+            reviewerNotes: reviewerNotes || null,
+            rejected: true,
+          },
+          RegistrationApproval__reviewedBy_UserId: user().id,
+        },
+      });
+      $bkpQ.refetch();
+    } catch (error) {
+      console.error("Failed to reject:", error);
+      alert("Failed to reject BKP");
+    } finally {
+      isSaving = false;
+    }
+  }
+
+  async function handleSaveNotes(bkp: BKP) {
+    isSaving = true;
+    try {
+      await $updateBkpQ.mutateAsync({
+        where: { id: bkp.id },
+        data: {
+          RegistrationApproval: {
+            reviewedAt: bkp.RegistrationApproval.reviewedAt || new Date(),
+            reviewerNotes: reviewerNotes || null,
+          },
+          RegistrationApproval__reviewedBy_UserId: user().id,
+        },
+      });
+      $bkpQ.refetch();
+    } catch (error) {
+      console.error("Failed to save notes:", error);
+      alert("Failed to save notes");
+    } finally {
+      isSaving = false;
+    }
+  }
+
+  async function cancelSubmission(bkp: BKP) {
+    isSaving = true;
+    try {
+      await $updateBkpQ.mutateAsync({
+        where: { id: bkp.id },
+        data: {
+          status: BKPStatus.REGISTRATION,
+        },
+      });
+      toast.success("Submission cancelled successfully!");
+      goto(resolve(`/bkp/${bkpId}/register`));
+    } catch (error) {
+      console.error("Error cancelling submission:", error);
+      toast.error("Failed to cancel submission");
+    } finally {
+      isSaving = false;
+    }
   }
 </script>
 
@@ -141,7 +256,7 @@
                   </div>
                   <div class="stat-title text-xs">Approved On</div>
                   <div class="stat-value text-lg text-success">
-                    {bkp.RegistrationApproval?.reviewedAt
+                    {bkp.RegistrationApproval.reviewedAt
                       ? new Date(bkp.RegistrationApproval.reviewedAt).toLocaleDateString()
                       : "-"}
                   </div>
@@ -158,7 +273,7 @@
                 </div>
               </div>
 
-              {#if bkp.RegistrationApproval?.reviewerNotes}
+              {#if bkp.RegistrationApproval.reviewerNotes}
                 <div class="card bg-base-200">
                   <div class="card-body p-4">
                     <h3 class="card-title text-sm">Reviewer Notes</h3>
@@ -187,7 +302,7 @@
                   </div>
                   <div class="stat-title text-xs">Rejected On</div>
                   <div class="stat-value text-lg text-error">
-                    {bkp.RegistrationApproval?.reviewedAt
+                    {bkp.RegistrationApproval.reviewedAt
                       ? new Date(bkp.RegistrationApproval.reviewedAt).toLocaleDateString()
                       : "-"}
                   </div>
@@ -211,7 +326,7 @@
                     Rejection Reason
                   </h3>
                   <p class="text-xs whitespace-pre-wrap">
-                    {bkp.RegistrationApproval?.reviewerNotes || "No reason provided."}
+                    {bkp.RegistrationApproval.reviewerNotes || "No reason provided."}
                   </p>
                 </div>
               </div>
@@ -219,6 +334,78 @@
           </div>
         </div>
       </div>
+
+      <!-- Admin/Superadmin Edit Card -->
+      {#if isAdminOrSuperAdmin}
+        <div class="card mb-4 bg-base-100 shadow-xl">
+          <div class="card-body p-4">
+            <h2 class="card-title text-base mb-3">
+              <div class="flex h-8 w-8 items-center justify-center rounded-full bg-warning/10">
+                <Icon icon="mdi:shield-account" class="h-5 w-5 text-warning" />
+              </div>
+              Admin Actions
+            </h2>
+
+            <div class="divider my-2"></div>
+
+            <div class="space-y-3">
+              <div class="form-control">
+                <label class="label" for="reviewerNotes">
+                  <span class="label-text font-semibold">Reviewer Notes</span>
+                </label>
+                <textarea
+                  id="reviewerNotes"
+                  class="textarea textarea-bordered h-24 text-sm"
+                  placeholder="Enter your review notes here..."
+                  bind:value={reviewerNotes}
+                  disabled={isSaving}
+                ></textarea>
+              </div>
+
+              <div class="flex flex-wrap gap-2">
+                <button
+                  class="btn btn-sm btn-error"
+                  onclick={() => handleReject(bkp)}
+                  disabled={isSaving}
+                >
+                  {#if isSaving}
+                    <span class="loading loading-spinner loading-sm"></span>
+                  {:else}
+                    <Icon icon="mdi:close" class="h-4 w-4" />
+                  {/if}
+                  Reject & Move to {previousStatus}
+                </button>
+
+                <button
+                  class="btn btn-sm btn-success"
+                  onclick={() => handleApprove(bkp)}
+                  disabled={isSaving}
+                >
+                  {#if isSaving}
+                    <span class="loading loading-spinner loading-sm"></span>
+                  {:else}
+                    <Icon icon="mdi:check" class="h-4 w-4" />
+                  {/if}
+                  Approve & Move to {nextStatus}
+                </button>
+
+                <button
+                  class="btn btn-sm btn-info"
+                  onclick={() => handleSaveNotes(bkp)}
+                  disabled={isSaving}
+                >
+                  {#if isSaving}
+                    <span class="loading loading-spinner loading-sm"></span>
+                  {:else}
+                    <Icon icon="mdi:content-save" class="h-4 w-4" />
+                  {/if}
+                  Save Notes Only
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      {/if}
 
       <!-- BKP Information -->
       <div class="card mb-4 bg-base-100 shadow-xl">
@@ -234,25 +421,25 @@
           <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
             <div>
               <p class="text-xs font-semibold text-base-content/70">Company/Organization</p>
-              <p class="text-sm">{bkp.Proposal?.companyName || "N/A"}</p>
+              <p class="text-sm">{bkp.Proposal.companyName || "N/A"}</p>
             </div>
             <div>
               <p class="text-xs font-semibold text-base-content/70">Position</p>
-              <p class="text-sm">{bkp.Proposal?.position || "N/A"}</p>
+              <p class="text-sm">{bkp.Proposal.position || "N/A"}</p>
             </div>
             <div>
               <p class="text-xs font-semibold text-base-content/70">BKP Type</p>
-              <p class="text-sm">{bkp.Proposal?.bkpType || "N/A"}</p>
+              <p class="text-sm">{bkp.Proposal.bkpType || "N/A"}</p>
             </div>
             <div>
               <p class="text-xs font-semibold text-base-content/70">Duration</p>
               <p class="text-sm">
-                {bkp.Proposal?.monthDuration ? `${bkp.Proposal.monthDuration} months` : "N/A"}
+                {bkp.Proposal.monthDuration ? `${bkp.Proposal.monthDuration} months` : "N/A"}
               </p>
             </div>
             <div>
               <p class="text-xs font-semibold text-base-content/70">Period</p>
-              <p class="text-sm">{bkp.Proposal?.period || "N/A"}</p>
+              <p class="text-sm">{bkp.Proposal.period || "N/A"}</p>
             </div>
             <div>
               <p class="text-xs font-semibold text-base-content/70">Status</p>
@@ -262,14 +449,29 @@
         </div>
       </div>
 
-      <!-- Action Buttons -->
-      <div class="flex flex-wrap justify-end gap-4">
-        <a href={resolve("/bkp")} class="btn gap-2 btn-outline">
+      <!-- User Action Buttons -->
+      <div class="mt-6 flex flex-wrap justify-center gap-4">
+        <a href={resolve(`/bkp/${bkpId}/register`)} class="btn gap-2 btn-outline">
           <Icon icon="mdi:arrow-left" class="h-5 w-5" />
-          Back to List
+          Back to Registration
         </a>
+        {#if bkp.status === "WAITING_REGISTRATION_APPROVAL"}
+          <button
+            class="btn gap-2 btn-warning"
+            onclick={() => cancelSubmission(bkp)}
+            disabled={isSaving}
+          >
+            {#if isSaving}
+              <span class="loading loading-spinner loading-sm"></span>
+              Cancelling...
+            {:else}
+              <Icon icon="mdi:close-circle-outline" class="h-5 w-5" />
+              Cancel Registration Submission
+            {/if}
+          </button>
+        {/if}
         {#if isRejected}
-          <a href={resolve(`/bkp/${bkpId}/upload-documents`)} class="btn gap-2 btn-primary">
+          <a href={resolve(`/bkp/${bkpId}/register`)} class="btn gap-2 btn-primary">
             <Icon icon="mdi:pencil" class="h-5 w-5" />
             Revise Registration
           </a>

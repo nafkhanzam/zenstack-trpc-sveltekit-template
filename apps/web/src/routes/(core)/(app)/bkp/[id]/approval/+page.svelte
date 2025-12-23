@@ -4,6 +4,10 @@
   import { setActiveStep, STEP_LABELS } from "../bkp-step.svelte";
   import { client } from "$lib/client.svelte";
   import Query from "$lib/components/Query.svelte";
+  import { user } from "$lib/stores/user.svelte";
+  import { BKPStatus, type BKP } from "$lib/zenstack/models";
+  import { toast } from "$lib";
+    import { resolve } from "$app/paths";
 
   $effect(() => {
     setActiveStep(STEP_LABELS.P_APPROVAL);
@@ -20,14 +24,34 @@
     },
   });
 
+  // Update mutation
+  const updateBkpQ = client.bKP.useUpdate();
+
+  // Check if user is admin or superadmin
+  const isAdminOrSuperAdmin = $derived(["ADMIN", "SUPERADMIN"].includes(user().role));
+
+  // State for editing
+  let reviewerNotes = $state("");
+  let isSaving = $state(false);
+
+  $effect(() => {
+    console.log(user().role, isAdminOrSuperAdmin)
+    if ($bkpQ.data) {
+      const notes = $bkpQ.data.ProposalApproval.reviewerNotes;
+      if (notes) {
+        reviewerNotes = notes;
+      }
+    }
+  })
+
   type ApprovalStatus = "pending" | "approved" | "rejected";
 
-  function getApprovalStatus(bkp: any): ApprovalStatus {
+  function getApprovalStatus(bkp: BKP): ApprovalStatus {
     if (bkp.status === "PROPOSAL") {
       return "pending";
     } else if (bkp.status === "WAITING_PROPOSAL_APPROVAL") {
       return "pending";
-    } else if (bkp.ProposalApproval?.reviewedAt) {
+    } else if (bkp.ProposalApproval.reviewedAt) {
       // If reviewed, check if it was approved (moved to next stage) or rejected
       if (bkp.status === "REGISTRATION" ||
           bkp.status === "WAITING_REGISTRATION_APPROVAL" ||
@@ -68,6 +92,98 @@
     }
     return "mdi:clock-outline";
   }
+
+  const nextStatus = BKPStatus.REGISTRATION;
+  const previousStatus = BKPStatus.PROPOSAL;
+
+  async function handleApprove(bkp: BKP) {
+    isSaving = true;
+    try {
+      await $updateBkpQ.mutateAsync({
+        where: { id: bkp.id },
+        data: {
+          status: nextStatus,
+          ProposalApproval: {
+            reviewedAt: new Date(),
+            reviewerNotes: reviewerNotes || null,
+            rejected: false,
+          },
+          ProposalApproval__reviewedBy_UserId: user().id,
+        },
+      });
+      $bkpQ.refetch();
+    } catch (error) {
+      console.error("Failed to approve:", error);
+      alert("Failed to approve BKP");
+    } finally {
+      isSaving = false;
+    }
+  }
+
+  async function handleReject(bkp: BKP) {
+    isSaving = true;
+    try {
+      await $updateBkpQ.mutateAsync({
+        where: { id: bkp.id },
+        data: {
+          status: previousStatus,
+          ProposalApproval: {
+            reviewedAt: new Date(),
+            reviewerNotes: reviewerNotes || null,
+            rejected: true,
+          },
+          ProposalApproval__reviewedBy_UserId: user().id,
+        },
+      });
+      $bkpQ.refetch();
+    } catch (error) {
+      console.error("Failed to reject:", error);
+      alert("Failed to reject BKP");
+    } finally {
+      isSaving = false;
+    }
+  }
+
+  async function handleSaveNotes(bkp: BKP) {
+    isSaving = true;
+    try {
+      await $updateBkpQ.mutateAsync({
+        where: { id: bkp.id },
+        data: {
+          ProposalApproval: {
+            reviewedAt: bkp.ProposalApproval.reviewedAt || new Date(),
+            reviewerNotes: reviewerNotes || null,
+          },
+          ProposalApproval__reviewedBy_UserId: user().id,
+        },
+      });
+      $bkpQ.refetch();
+    } catch (error) {
+      console.error("Failed to save notes:", error);
+      alert("Failed to save notes");
+    } finally {
+      isSaving = false;
+    }
+  }
+
+  async function cancelSubmission(bkp: BKP) {
+    isSaving = true;
+    try {
+      await $updateBkpQ.mutateAsync({
+        where: { id: bkp.id },
+        data: {
+          status: BKPStatus.PROPOSAL,
+        },
+      });
+      toast.success("Submission cancelled successfully!");
+      $bkpQ.refetch();
+    } catch (error) {
+      console.error("Error cancelling submission:", error);
+      toast.error("Failed to cancel submission");
+    } finally {
+      isSaving = false;
+    }
+  }
 </script>
 
 <Query q={bkpQ}>
@@ -78,9 +194,7 @@
       <!-- Header -->
       <div class="mb-6">
         <h1 class="mb-2 text-xl font-bold">Proposal Approval Status</h1>
-        <p class="text-xs text-base-content/70">
-          View the status of your BKP proposal approval
-        </p>
+        <p class="text-xs text-base-content/70">View the status of your BKP proposal approval</p>
       </div>
 
       <!-- Status Card -->
@@ -97,7 +211,7 @@
           <div class="divider my-2"></div>
 
           <div class="grid gap-3 text-sm md:grid-cols-2">
-            {#if bkp.Proposal?.submittedAt}
+            {#if bkp.Proposal.submittedAt}
               <div>
                 <span class="font-semibold">Submitted Date:</span>
                 <span class="ml-2">
@@ -117,7 +231,7 @@
               </div>
             {/if}
 
-            {#if bkp.ProposalApproval?.reviewedAt}
+            {#if bkp.ProposalApproval.reviewedAt}
               <div>
                 <span class="font-semibold">Reviewed Date:</span>
                 <span class="ml-2">
@@ -138,7 +252,7 @@
             </div>
           </div>
 
-          {#if bkp.ProposalApproval?.reviewerNotes}
+          {#if bkp.ProposalApproval.reviewerNotes}
             <div class="mt-3">
               <p class="mb-1 text-sm font-semibold">Reviewer Notes:</p>
               <div class="rounded-lg bg-base-200 p-3">
@@ -175,6 +289,78 @@
         </div>
       </div>
 
+      <!-- Admin/Superadmin Edit Card -->
+      {#if isAdminOrSuperAdmin}
+        <div class="card mb-4 bg-base-100 shadow-xl">
+          <div class="card-body p-4">
+            <h2 class="card-title text-base mb-3">
+              <div class="flex h-8 w-8 items-center justify-center rounded-full bg-warning/10">
+                <Icon icon="mdi:shield-account" class="h-5 w-5 text-warning" />
+              </div>
+              Admin Actions
+            </h2>
+
+            <div class="divider my-2"></div>
+
+            <div class="space-y-3">
+              <div class="form-control">
+                <label class="label" for="reviewerNotes">
+                  <span class="label-text font-semibold">Reviewer Notes</span>
+                </label>
+                <textarea
+                  id="reviewerNotes"
+                  class="textarea textarea-bordered h-24 text-sm"
+                  placeholder="Enter your review notes here..."
+                  bind:value={reviewerNotes}
+                  disabled={isSaving}
+                ></textarea>
+              </div>
+
+              <div class="flex flex-wrap gap-2">
+                <button
+                  class="btn btn-sm btn-error"
+                  onclick={() => handleReject(bkp)}
+                  disabled={isSaving}
+                >
+                  {#if isSaving}
+                    <span class="loading loading-spinner loading-sm"></span>
+                  {:else}
+                    <Icon icon="mdi:close" class="h-4 w-4" />
+                  {/if}
+                  Reject & Move to {previousStatus}
+                </button>
+
+                <button
+                  class="btn btn-sm btn-success"
+                  onclick={() => handleApprove(bkp)}
+                  disabled={isSaving}
+                >
+                  {#if isSaving}
+                    <span class="loading loading-spinner loading-sm"></span>
+                  {:else}
+                    <Icon icon="mdi:check" class="h-4 w-4" />
+                  {/if}
+                  Approve & Move to {nextStatus}
+                </button>
+
+                <button
+                  class="btn btn-sm btn-info"
+                  onclick={() => handleSaveNotes(bkp)}
+                  disabled={isSaving}
+                >
+                  {#if isSaving}
+                    <span class="loading loading-spinner loading-sm"></span>
+                  {:else}
+                    <Icon icon="mdi:content-save" class="h-4 w-4" />
+                  {/if}
+                  Save Notes Only
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      {/if}
+
       <!-- BKP Details Card -->
       <div class="card bg-base-100 shadow-xl">
         <div class="card-body p-4">
@@ -192,94 +378,105 @@
               <span class="font-semibold">BKP ID:</span>
               <span class="ml-2">{bkp.id}</span>
             </div>
-            {#if bkp.Proposal?.companyName}
-              <div>
-                <span class="font-semibold">Company:</span>
-                <span class="ml-2">{bkp.Proposal.companyName}</span>
-              </div>
-            {/if}
-            {#if bkp.Proposal?.position}
-              <div>
-                <span class="font-semibold">Position:</span>
-                <span class="ml-2">{bkp.Proposal.position}</span>
-              </div>
-            {/if}
-            {#if bkp.Proposal?.bkpType}
-              <div>
-                <span class="font-semibold">Type:</span>
-                <span class="ml-2">{bkp.Proposal.bkpType}</span>
-              </div>
-            {/if}
-            {#if bkp.Proposal?.period}
-              <div>
-                <span class="font-semibold">Period:</span>
-                <span class="ml-2">{bkp.Proposal.period}</span>
-              </div>
-            {/if}
-            {#if bkp.Proposal?.monthDuration}
-              <div>
-                <span class="font-semibold">Duration:</span>
-                <span class="ml-2">{bkp.Proposal.monthDuration} months</span>
-              </div>
-            {/if}
-            {#if bkp.Proposal?.startDate}
-              <div>
-                <span class="font-semibold">Start Date:</span>
-                <span class="ml-2">
-                  {new Date(bkp.Proposal.startDate).toLocaleDateString("id-ID", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </span>
-              </div>
-            {/if}
-            {#if bkp.Proposal?.endDate}
-              <div>
-                <span class="font-semibold">End Date:</span>
-                <span class="ml-2">
-                  {new Date(bkp.Proposal.endDate).toLocaleDateString("id-ID", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </span>
-              </div>
-            {/if}
+            <div>
+              <span class="font-semibold">Company:</span>
+              <span class="ml-2">{bkp.Proposal.companyName}</span>
+            </div>
+            <div>
+              <span class="font-semibold">Position:</span>
+              <span class="ml-2">{bkp.Proposal.position}</span>
+            </div>
+            <div>
+              <span class="font-semibold">Type:</span>
+              <span class="ml-2">{bkp.Proposal.bkpType}</span>
+            </div>
+            <div>
+              <span class="font-semibold">Period:</span>
+              <span class="ml-2">{bkp.Proposal.period}</span>
+            </div>
+            <div>
+              <span class="font-semibold">Duration:</span>
+              <span class="ml-2">{bkp.Proposal.monthDuration} months</span>
+            </div>
+            <div>
+              <span class="font-semibold">Start Date:</span>
+              <span class="ml-2">
+                {bkp.Proposal.startDate
+                  ? new Date(bkp.Proposal.startDate).toLocaleDateString("id-ID", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })
+                  : ""}
+              </span>
+            </div>
+            <div>
+              <span class="font-semibold">End Date:</span>
+              <span class="ml-2">
+                {bkp.Proposal.endDate
+                  ? new Date(bkp.Proposal.endDate).toLocaleDateString("id-ID", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })
+                  : ""}
+              </span>
+            </div>
           </div>
 
-          {#if bkp.Proposal?.jobDescription}
-            <div class="mt-3">
-              <p class="mb-1 text-sm font-semibold">Job Description:</p>
-              <div class="rounded-lg bg-base-200 p-3">
-                <p class="text-xs whitespace-pre-wrap">{bkp.Proposal.jobDescription}</p>
-              </div>
+          <div class="mt-3">
+            <p class="mb-1 text-sm font-semibold">Job Description:</p>
+            <div class="rounded-lg bg-base-200 p-3">
+              <p class="text-xs whitespace-pre-wrap">{bkp.Proposal.jobDescription}</p>
             </div>
-          {/if}
+          </div>
 
-          {#if bkp.Proposal?.studentNotes}
-            <div class="mt-3">
-              <p class="mb-1 text-sm font-semibold">Student Notes:</p>
-              <div class="rounded-lg bg-base-200 p-3">
-                <p class="text-xs whitespace-pre-wrap">{bkp.Proposal.studentNotes}</p>
-              </div>
+          <div class="mt-3">
+            <p class="mb-1 text-sm font-semibold">Student Notes:</p>
+            <div class="rounded-lg bg-base-200 p-3">
+              <p class="text-xs whitespace-pre-wrap">{bkp.Proposal.studentNotes}</p>
             </div>
-          {/if}
+          </div>
 
-          {#if bkp.Proposal?.jobLink}
-            <div class="mt-3">
-              <p class="mb-1 text-sm font-semibold">Job Link:</p>
-              <a
-                href={bkp.Proposal.jobLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="link link-primary text-xs"
-              >
-                {bkp.Proposal.jobLink}
-              </a>
-            </div>
-          {/if}
+          <div class="mt-3">
+            <p class="mb-1 text-sm font-semibold">Job Link:</p>
+            <a
+              href={bkp.Proposal.jobLink ?? "#"}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="link link-primary text-xs"
+            >
+              {bkp.Proposal.jobLink ?? "null"}
+            </a>
+          </div>
         </div>
+      </div>
+
+      <!-- User Action Buttons -->
+      <div class="mt-6 flex flex-wrap justify-center gap-4">
+        <a href={resolve(`/bkp/${bkpId}`)} class="btn gap-2 btn-outline">
+          <Icon icon="mdi:arrow-left" class="h-5 w-5" />
+          Back to Proposal
+        </a>
+        {#if bkp.status === "WAITING_PROPOSAL_APPROVAL"}
+          <button
+            class="btn gap-2 btn-warning"
+            onclick={() => cancelSubmission(bkp)}
+            disabled={isSaving}
+          >
+            {#if isSaving}
+              <span class="loading loading-spinner loading-sm"></span>
+              Cancelling...
+            {:else}
+              <Icon icon="mdi:close-circle-outline" class="h-5 w-5" />
+              Cancel Proposal Submission
+            {/if}
+          </button>
+        {/if}
+        <a href={resolve(`/bkp/${bkpId}/register`)} class="btn gap-2 btn-primary">
+          <Icon icon="mdi:file-check-outline" class="h-5 w-5" />
+          Go to Registration
+        </a>
       </div>
     </div>
   {/snippet}

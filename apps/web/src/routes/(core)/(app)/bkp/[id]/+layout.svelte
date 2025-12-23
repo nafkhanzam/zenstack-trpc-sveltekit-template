@@ -101,15 +101,16 @@
               </span>
             {/if}
             <a
-              href={resolve(step.path)}
-              class="hidden transition-colors hover:text-primary sm:inline {activeStepLabel === step.label
+              href={step.path}
+              class="hidden transition-colors hover:text-primary sm:inline {activeStepLabel ===
+              step.label
                 ? 'font-bold'
                 : ''}"
             >
               {step.label}
             </a>
             <a
-              href={resolve(step.path)}
+              href={step.path}
               class="transition-colors hover:text-primary sm:hidden {activeStepLabel === step.label
                 ? 'font-bold'
                 : ''}"

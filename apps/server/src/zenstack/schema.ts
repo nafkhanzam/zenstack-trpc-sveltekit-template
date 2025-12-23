@@ -698,6 +698,11 @@ export class SchemaType implements SchemaDef {
                     name: "reviewerNotes",
                     type: "String",
                     optional: true
+                },
+                rejected: {
+                    name: "rejected",
+                    type: "Boolean",
+                    optional: true
                 }
             }
         },
@@ -783,6 +788,26 @@ export class SchemaType implements SchemaDef {
                 }
             }
         },
+        DailyReport: {
+            name: "DailyReport",
+            fields: {
+                date: {
+                    name: "date",
+                    type: "DateTime",
+                    optional: true
+                },
+                photoKey: {
+                    name: "photoKey",
+                    type: "String",
+                    optional: true
+                },
+                content: {
+                    name: "content",
+                    type: "String",
+                    optional: true
+                }
+            }
+        },
         WeeklyReport: {
             name: "WeeklyReport",
             fields: {
@@ -800,6 +825,11 @@ export class SchemaType implements SchemaDef {
                     name: "to",
                     type: "DateTime",
                     optional: true
+                },
+                reports: {
+                    name: "reports",
+                    type: "DailyReport",
+                    array: true
                 }
             }
         },

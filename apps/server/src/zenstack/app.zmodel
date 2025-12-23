@@ -90,6 +90,7 @@ type BKPProposal {
 type BKPProposalApproval {
   reviewedAt    DateTime?
   reviewerNotes String?
+  rejected      Boolean?
 }
 
 type BKPRegistrationAdditionalDocument {
@@ -115,10 +116,17 @@ type BKPRegistrationApproval {
   rejected      Boolean?
 }
 
+type DailyReport {
+  date     DateTime?
+  photoKey String?
+  content  String?
+}
+
 type WeeklyReport {
-  week Int?
-  from DateTime?
-  to   DateTime?
+  week    Int?
+  from    DateTime?
+  to      DateTime?
+  reports DailyReport[]
 }
 
 type WeeklyReports {

@@ -65,7 +65,7 @@
   const updateBKPMutation = client.bKP.useUpdate();
 
   // Form state
-  let periode = $state<string[]>([]);
+  let periode = $state<string>("");
   let companyName = $state("");
   let position = $state("");
   let jobDescription = $state("");
@@ -107,11 +107,6 @@
   async function handleSubmit(event: Event) {
     event.preventDefault();
 
-    if (periode.length === 0) {
-      toast.error("Please select at least one periode");
-      return;
-    }
-
     if (!monthDuration || monthDuration < 1) {
       toast.error("Please enter a valid duration");
       return;
@@ -127,9 +122,9 @@
         startDate: startDate ? new Date(startDate) : undefined,
         endDate: endDate ? new Date(endDate) : undefined,
         bkpType,
-        period: periode.join(", "),
-        jobLink: jobLink || undefined,
-        studentNotes: studentNotes || undefined,
+        period: periode,
+        jobLink: jobLink ?? undefined,
+        studentNotes: studentNotes ?? undefined,
         submittedAt: new Date(),
       };
 
@@ -154,16 +149,16 @@
     isSubmitting = true;
     try {
       const proposalData = {
-        companyName: companyName || undefined,
-        position: position || undefined,
-        jobDescription: jobDescription || undefined,
+        companyName: companyName ?? undefined,
+        position: position ?? undefined,
+        jobDescription: jobDescription ?? undefined,
         monthDuration: monthDuration ? Number(monthDuration) : undefined,
         startDate: startDate ? new Date(startDate) : undefined,
         endDate: endDate ? new Date(endDate) : undefined,
-        bkpType: bkpType || undefined,
-        period: periode.length > 0 ? periode.join(", ") : undefined,
-        jobLink: jobLink || undefined,
-        studentNotes: studentNotes || undefined,
+        bkpType: bkpType ?? undefined,
+        period: periode ?? undefined,
+        jobLink: jobLink ?? undefined,
+        studentNotes: studentNotes ?? undefined,
       };
 
       await $updateBKPMutation.mutateAsync({
@@ -187,9 +182,7 @@
   $effect(() => {
     if ($bkpQ.data) {
       const bkp = $bkpQ.data;
-      periode = bkp.Proposal.period
-        ? bkp.Proposal.period.split(", ").filter(p => p.trim() !== "")
-        : [];
+      periode = bkp.Proposal.period ?? "";
       companyName = bkp.Proposal.companyName ?? "";
       position = bkp.Proposal.position ?? "";
       jobDescription = bkp.Proposal.jobDescription ?? "";
@@ -209,7 +202,8 @@
 
 <Query q={bkpQ}>
   {#snippet children(bkp)}
-    {@const isRejected = bkp.ProposalApproval.rejected}
+    {@const isCurrentStage = bkp.status === "PROPOSAL"}
+    {@const isRejected = isCurrentStage && bkp.ProposalApproval.rejected}
 
     <div class="max-w-5xl">
       <!-- Header -->
@@ -275,6 +269,22 @@
         </div>
       {/if}
 
+      <!-- Non-Editable Warning -->
+      {#if !isCurrentStage && !isRejected}
+        <div class="mb-6 alert alert-warning shadow-lg">
+          <div class="flex-none">
+            <Icon icon="mdi:information-outline" class="h-8 w-8" />
+          </div>
+          <div class="flex-1">
+            <h3 class="text-base font-bold">View Only Mode</h3>
+            <p class="mt-1 text-xs">
+              This proposal cannot be edited because it has already been submitted for approval or
+              is in a different stage of processing.
+            </p>
+          </div>
+        </div>
+      {/if}
+
       <form onsubmit={handleSubmit}>
         <!-- Registration Details Section -->
         <div class="card mb-4 bg-base-100 shadow-xl transition-all hover:shadow-2xl">
@@ -306,13 +316,18 @@
                     Help
                   </button>
                 </label>
-                <Svelecte
-                  options={periodOptions}
+                <select
+                  id="periode"
+                  class="select select-bordered lg:flex-1"
                   bind:value={periode}
-                  placeholder="Select periode..."
-                  class="lg:flex-1"
+                  disabled={!isCurrentStage}
                   required
-                />
+                >
+                  <option value="" disabled selected>Select periode...</option>
+                  {#each periodOptions as option}
+                    <option value={option.value}>{option.label}</option>
+                  {/each}
+                </select>
               </div>
 
               <!-- BKP Type -->
@@ -322,13 +337,18 @@
                     >BKP Type <span class="text-error">*</span></span
                   >
                 </label>
-                <Svelecte
-                  options={bkpTypeOptions}
+                <select
+                  id="bkpType"
+                  class="select select-bordered lg:flex-1"
                   bind:value={bkpType}
-                  placeholder="Select BKP type..."
-                  class="lg:flex-1"
+                  disabled={!isCurrentStage}
                   required
-                />
+                >
+                  <option value={undefined} disabled selected>Select BKP type...</option>
+                  {#each bkpTypeOptions as option}
+                    <option value={option.value}>{option.label}</option>
+                  {/each}
+                </select>
               </div>
 
               <!-- Company Name -->
@@ -353,6 +373,7 @@
                   placeholder="e.g., PT Tokopedia"
                   class="input-bordered input lg:flex-1"
                   bind:value={companyName}
+                  disabled={!isCurrentStage}
                   required
                 />
               </div>
@@ -370,6 +391,7 @@
                   placeholder="e.g., Frontend Engineer Intern"
                   class="input-bordered input lg:flex-1"
                   bind:value={position}
+                  disabled={!isCurrentStage}
                   required
                 />
               </div>
@@ -386,6 +408,7 @@
                   placeholder="Describe your job responsibilities..."
                   class="textarea-bordered textarea h-32 lg:flex-1"
                   bind:value={jobDescription}
+                  disabled={!isCurrentStage}
                   required
                 ></textarea>
               </div>
@@ -404,6 +427,7 @@
                   class="input-bordered input lg:flex-1"
                   bind:value={monthDuration}
                   min="1"
+                  disabled={!isCurrentStage}
                   required
                 />
               </div>
@@ -417,6 +441,7 @@
                   type="date"
                   class="input-bordered input lg:flex-1"
                   bind:value={startDate}
+                  disabled={!isCurrentStage}
                 />
               </div>
 
@@ -429,6 +454,7 @@
                   type="date"
                   class="input-bordered input lg:flex-1"
                   bind:value={endDate}
+                  disabled={!isCurrentStage}
                 />
               </div>
 
@@ -445,6 +471,7 @@
                   placeholder="https://..."
                   class="input-bordered input lg:flex-1"
                   bind:value={jobLink}
+                  disabled={!isCurrentStage}
                 />
               </div>
             </div>
@@ -499,8 +526,7 @@
                                     label: `${c.code} - ${c.name} (${c.sks} SKS)`,
                                   }))}
                                   bind:value={convCourse.courseId}
-                                  placeholder="Select course..."
-                                  class="min-w-[200px]"
+                                  disabled={!isCurrentStage}
                                   required
                                 />
                               </td>
@@ -512,6 +538,7 @@
                                   class="btn btn-circle bg-error btn-ghost btn-xs"
                                   onclick={() => removeConversionCourse(convCourse.id)}
                                   aria-label="Remove course"
+                                  disabled={!isCurrentStage}
                                 >
                                   <Icon icon="mdi:close" class="h-4 w-4" />
                                 </button>
@@ -541,6 +568,7 @@
                     type="button"
                     class="btn gap-2 btn-outline btn-sm"
                     onclick={addConversionCourse}
+                    disabled={!isCurrentStage}
                   >
                     <Icon icon="mdi:plus" class="h-5 w-5" />
                     Add Course
@@ -573,31 +601,51 @@
                   placeholder="Add any additional notes or comments..."
                   class="textarea-bordered textarea h-32 lg:flex-1"
                   bind:value={studentNotes}
+                  disabled={!isCurrentStage}
                 ></textarea>
               </div>
+
+              <!-- Reviewer Notes (Read-only) -->
+              {#if bkp.ProposalApproval.reviewerNotes}
+                <div class="flex flex-col items-start gap-4 lg:flex-row">
+                  <label class="label flex flex-wrap items-center pt-4 lg:flex-1">
+                    <span class="label-text text-xs font-semibold text-wrap">Reviewer Notes</span>
+                  </label>
+                  <div class="rounded-lg bg-base-200 p-3 lg:flex-1">
+                    <p class="text-xs whitespace-pre-wrap">{bkp.ProposalApproval.reviewerNotes}</p>
+                  </div>
+                </div>
+              {/if}
             </div>
           </div>
         </div>
 
         <!-- Action Buttons -->
-        <div class="flex flex-wrap justify-end gap-4">
+        <div class="flex flex-wrap justify-center gap-4">
           <a href={resolve("/bkp")} class="btn gap-2 btn-outline">
-            <Icon icon="mdi:close" class="h-5 w-5" />
-            Cancel
+            <Icon icon="mdi:arrow-left" class="h-5 w-5" />
+            Back to My BKP List
           </a>
-          <button
-            type="button"
-            class="btn gap-2 btn-secondary"
-            onclick={saveDraft}
-            disabled={isSubmitting}
-          >
-            <Icon icon="mdi:content-save-outline" class="h-5 w-5" />
-            {isSubmitting ? "Saving..." : "Save Draft"}
-          </button>
-          <button type="submit" class="btn gap-2 btn-primary" disabled={isSubmitting}>
-            <Icon icon="mdi:send" class="h-5 w-5" />
-            {isSubmitting ? "Submitting..." : "Submit for Approval"}
-          </button>
+          {#if isCurrentStage}
+            <button
+              type="button"
+              class="btn gap-2 btn-secondary"
+              onclick={saveDraft}
+              disabled={isSubmitting}
+            >
+              <Icon icon="mdi:content-save-outline" class="h-5 w-5" />
+              {isSubmitting ? "Saving..." : "Save Draft"}
+            </button>
+            <button type="submit" class="btn gap-2 btn-primary" disabled={isSubmitting}>
+              <Icon icon="mdi:send" class="h-5 w-5" />
+              {isSubmitting ? "Submitting..." : "Submit for Approval"}
+            </button>
+          {:else}
+            <a href={resolve(`/bkp/${bkpId}/approval`)} class="btn gap-2 btn-primary">
+              <Icon icon="mdi:file-check-outline" class="h-5 w-5" />
+              Go to Proposal Approval
+            </a>
+          {/if}
         </div>
       </form>
     </div>
