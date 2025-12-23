@@ -7,13 +7,42 @@
   import Svelecte from "svelecte";
   import Icon from "@iconify/svelte";
   import { setActiveStep, STEP_LABELS } from "./bkp-step.svelte";
-    import type { BKP, BKPType } from "$lib/zenstack/models";
+  import { BKPType } from "$lib/zenstack/models";
+  import type { BKP } from "$lib/zenstack/models";
 
   $effect(() => {
     setActiveStep(STEP_LABELS.PROPOSAL);
   });
 
   const bkpId = page.params.id;
+
+  const periodOptions = [
+    { value: "Ganjil 2023/2024", label: "Ganjil 2023/2024" },
+    { value: "Genap 2023/2024", label: "Genap 2023/2024" },
+    { value: "Ganjil 2024/2025", label: "Ganjil 2024/2025" },
+    { value: "Genap 2024/2025", label: "Genap 2024/2025" },
+    { value: "Ganjil 2025/2026", label: "Ganjil 2025/2026" },
+  ]
+
+  // BKP Type display names
+  const bkpTypeNames: Record<BKPType, string> = {
+    [BKPType.MAGANG_BERDAMPAK]: "Magang Berdampak",
+    [BKPType.MAGANG_MAGENTA]: "Magang Magenta",
+    [BKPType.MAGANG_KERJASAMA]: "Magang Kerjasama",
+    [BKPType.MAGANG_MANDIRI]: "Magang Mandiri",
+    [BKPType.INDEPENDENT_STUDY]: "Studi Independen",
+    [BKPType.LOMBA]: "Lomba",
+    [BKPType.PROYEK]: "Proyek",
+    [BKPType.WIRAUSAHA]: "Wirausaha",
+    [BKPType.MAGANG_INTERNAL]: "Magang Internal",
+    [BKPType.KERJA_PRAKTIK]: "Kerja Praktik",
+  };
+
+  // Create options from enum
+  const bkpTypeOptions = Object.values(BKPType).map((type) => ({
+    value: type,
+    label: bkpTypeNames[type as BKPType],
+  }));
 
   // Fetch BKP data
   const bkpQ = client.bKP.useFindUnique({
@@ -36,7 +65,7 @@
   const updateBKPMutation = client.bKP.useUpdate();
 
   // Form state
-  let periode = $state("");
+  let periode = $state<string[]>([]);
   let companyName = $state("");
   let position = $state("");
   let jobDescription = $state("");
@@ -78,6 +107,11 @@
   async function handleSubmit(event: Event) {
     event.preventDefault();
 
+    if (periode.length === 0) {
+      toast.error("Please select at least one periode");
+      return;
+    }
+
     if (!monthDuration || monthDuration < 1) {
       toast.error("Please enter a valid duration");
       return;
@@ -93,7 +127,7 @@
         startDate: startDate ? new Date(startDate) : undefined,
         endDate: endDate ? new Date(endDate) : undefined,
         bkpType,
-        period: periode,
+        period: periode.join(", "),
         jobLink: jobLink || undefined,
         studentNotes: studentNotes || undefined,
         submittedAt: new Date(),
@@ -127,7 +161,7 @@
         startDate: startDate ? new Date(startDate) : undefined,
         endDate: endDate ? new Date(endDate) : undefined,
         bkpType: bkpType || undefined,
-        period: periode || undefined,
+        period: periode.length > 0 ? periode.join(", ") : undefined,
         jobLink: jobLink || undefined,
         studentNotes: studentNotes || undefined,
       };
@@ -153,7 +187,9 @@
   $effect(() => {
     if ($bkpQ.data) {
       const bkp = $bkpQ.data;
-      periode = bkp.Proposal.period ?? "";
+      periode = bkp.Proposal.period
+        ? bkp.Proposal.period.split(", ").filter(p => p.trim() !== "")
+        : [];
       companyName = bkp.Proposal.companyName ?? "";
       position = bkp.Proposal.position ?? "";
       jobDescription = bkp.Proposal.jobDescription ?? "";
@@ -172,9 +208,8 @@
 </script>
 
 <Query q={bkpQ}>
-  {#snippet children(data)}
-    {@const bkp = data}
-    {@const isRejected = bkp && bkp.ProposalApproval && bkp.status === "PROPOSAL"}
+  {#snippet children(bkp)}
+    {@const isRejected = bkp.ProposalApproval.rejected}
 
     <div class="max-w-5xl">
       <!-- Header -->
@@ -204,7 +239,7 @@
       </div>
 
       <!-- Rejection Card -->
-      {#if isRejected && bkp.ProposalApproval}
+      {#if isRejected}
         <div class="mb-6 alert alert-error shadow-lg">
           <div class="flex-none">
             <Icon icon="mdi:alert-circle-outline" class="h-8 w-8" />
@@ -264,49 +299,36 @@
                     class="label-text-alt flex link items-center gap-1 link-primary"
                     onclick={() =>
                       showHelp(
-                        "Periode akademik saat Anda mengambil BKP ini. Contoh: Genap 2023/2024",
+                        "Periode akademik saat Anda mengambil BKP ini. Anda dapat memilih beberapa periode. Contoh: Genap 2023/2024",
                       )}
                   >
                     <Icon icon="mdi:help-circle-outline" class="h-4 w-4" />
                     Help
                   </button>
                 </label>
-                <select
-                  id="periode"
-                  class="select-bordered select lg:flex-1"
+                <Svelecte
+                  options={periodOptions}
                   bind:value={periode}
+                  placeholder="Select periode..."
+                  class="lg:flex-1"
                   required
-                >
-                  <option value="">Select periode...</option>
-                  <option value="Ganjil 2023/2024">Ganjil 2023/2024</option>
-                  <option value="Genap 2023/2024">Genap 2023/2024</option>
-                  <option value="Ganjil 2024/2025">Ganjil 2024/2025</option>
-                  <option value="Genap 2024/2025">Genap 2024/2025</option>
-                  <option value="Ganjil 2025/2026">Ganjil 2025/2026</option>
-                </select>
+                />
               </div>
 
               <!-- BKP Type -->
               <div class="flex flex-col items-start gap-3 lg:flex-row">
                 <label class="label flex flex-wrap items-center pt-3 lg:flex-1" for="bkpType">
                   <span class="label-text text-xs font-semibold text-wrap"
-                    >Jenis BKP <span class="text-error">*</span></span
+                    >BKP Type <span class="text-error">*</span></span
                   >
                 </label>
-                <select
-                  id="bkpType"
-                  class="select-bordered select lg:flex-1"
+                <Svelecte
+                  options={bkpTypeOptions}
                   bind:value={bkpType}
+                  placeholder="Select BKP type..."
+                  class="lg:flex-1"
                   required
-                >
-                  <option value="">Select BKP type...</option>
-                  <option value="Magang Berdampak">Magang Berdampak</option>
-                  <option value="Magang Mandiri">Magang Mandiri</option>
-                  <option value="Lomba">Lomba</option>
-                  <option value="Riset">Riset</option>
-                  <option value="Startup">Startup</option>
-                  <option value="Proyek Kemanusiaan">Proyek Kemanusiaan</option>
-                </select>
+                />
               </div>
 
               <!-- Company Name -->

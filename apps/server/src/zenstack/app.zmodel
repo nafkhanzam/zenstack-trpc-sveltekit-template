@@ -112,6 +112,7 @@ type BKPRegistration {
 type BKPRegistrationApproval {
   reviewedAt    DateTime?
   reviewerNotes String?
+  rejected      Boolean?
 }
 
 type WeeklyReport {

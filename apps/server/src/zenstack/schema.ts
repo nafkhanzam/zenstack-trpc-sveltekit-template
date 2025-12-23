@@ -775,6 +775,11 @@ export class SchemaType implements SchemaDef {
                     name: "reviewerNotes",
                     type: "String",
                     optional: true
+                },
+                rejected: {
+                    name: "rejected",
+                    type: "Boolean",
+                    optional: true
                 }
             }
         },
