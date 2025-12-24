@@ -6,17 +6,23 @@
   import { isServerError, isTRPCClientError } from "$lib";
   // import type {useModelQuery} from "@zenstackhq/tanstack-query/runtime-v5/svelte";
 
-  const {
+  let {
     q,
     errorFn,
     notFound,
     children,
+    data = $bindable(),
   }: {
     q: CreateQueryResult<T, E>; // | ReturnType<typeof useModelQuery<T, T, E>>;
     errorFn?: (err: E) => string;
     notFound?: string;
     children: (data: NonNullable<T>) => any;
+    data?: T;
   } = $props();
+
+  $effect(() => {
+    data = $q.data;
+  });
 
   function createErrorMessage(error: NonNullable<E>) {
     if (errorFn) {

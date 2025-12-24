@@ -79,6 +79,7 @@
   type ConversionCourse = {
     id: string;
   }
+  let courses = $state<Course[]>([]);
   let conversionCourses = $state<ConversionCourse[]>([]);
 
   // Modal state
@@ -91,7 +92,7 @@
     showHelpModal = true;
   }
 
-  function addConversionCourse(courses: Course[]) {
+  function addConversionCourse() {
     conversionCourses.push({
       id: courses[0].id,
     });
@@ -202,7 +203,7 @@
   });
 </script>
 
-<Query q={coursesQ}>
+<Query q={coursesQ} bind:data={courses}>
   {#snippet children(courses)}
     <Query q={bkpQ}>
       {#snippet children(bkp)}
@@ -308,17 +309,6 @@
                       <span class="label-text text-xs font-semibold text-wrap"
                         >Periode (FRS) <span class="text-error">*</span></span
                       >
-                      <button
-                        type="button"
-                        class="label-text-alt flex link items-center gap-1 link-primary"
-                        onclick={() =>
-                          showHelp(
-                            "Periode akademik saat Anda mengambil BKP ini. Anda dapat memilih beberapa periode. Contoh: Genap 2023/2024",
-                          )}
-                      >
-                        <Icon icon="mdi:help-circle-outline" class="h-4 w-4" />
-                        Help
-                      </button>
                     </label>
                     <select
                       id="periode"
@@ -518,7 +508,7 @@
                           </tr>
                         </thead>
                         <tbody>
-                          {#each conversionCourses as convCourse, idx (convCourse.id)}
+                          {#each conversionCourses as convCourse, idx (idx)}
                             {@const selectedCourseData = courses.find(
                               (c) => c.id === convCourse.id,
                             )}
@@ -570,7 +560,7 @@
                   <button
                     type="button"
                     class="btn gap-2 btn-outline btn-sm"
-                    onclick={() => addConversionCourse(courses)}
+                    onclick={addConversionCourse}
                     disabled={!isCurrentStage}
                   >
                     <Icon icon="mdi:plus" class="h-5 w-5" />

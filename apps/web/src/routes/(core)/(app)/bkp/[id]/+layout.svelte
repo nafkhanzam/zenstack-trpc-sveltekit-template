@@ -1,10 +1,11 @@
 <script lang="ts">
   import { page } from "$app/state";
-  import { resolve } from "$app/paths";
   import Breadcrumbs from "$lib/components/Breadcrumbs.svelte";
   import Icon from "@iconify/svelte";
   import type { ResolvedPathname } from "$app/types";
   import { getActiveStep, STEP_LABELS, type StepLabel } from "./bkp-step.svelte";
+  import { client } from "$lib/client.svelte";
+  import { BKPStatus } from "$lib/zenstack/models";
 
   interface Props {
     children: import("svelte").Snippet;
@@ -12,29 +13,43 @@
 
   let { children }: Props = $props();
 
-  // In a real app, this would come from the load function with actual BKP data
-  // For now, using mock data based on the id
-  const bkpId = page.params.id!;
+  const bkpId = page.params.id;
 
-  // Mock BKP data - in real app, this would come from +layout.ts or +layout.server.ts
-  const mockBkp = $derived({
-    id: bkpId,
-    status: "approved",
-    isGraded: false,
+  // Query real BKP data
+  const bkpQ = client.bKP.useFindUnique({
+    where: {
+      id: bkpId,
+    },
   });
 
-  function getProgressStep(bkp: typeof mockBkp): number {
-    if (bkp.status === "draft") return 0;
-    if (bkp.status === "submitted") return 1;
-    if (bkp.status === "rejected") return 1;
-    if (bkp.status === "approved") {
-      if (bkp.isGraded) return 6;
-      return 4;
+  const bkp = $derived($bkpQ.data);
+
+  function getProgressStep(status: BKPStatus, hasGrading: boolean): number {
+    switch (status) {
+      case BKPStatus.PROPOSAL:
+        return 0;
+      case BKPStatus.WAITING_PROPOSAL_APPROVAL:
+        return 1;
+      case BKPStatus.REGISTRATION:
+        return 2;
+      case BKPStatus.WAITING_REGISTRATION_APPROVAL:
+        return 3;
+      case BKPStatus.WEEKLY_REPORTING:
+        return 4;
+      case BKPStatus.UPLOADING_FIELD_ASSESSMENT:
+        return 5;
+      case BKPStatus.GRADING:
+        return 6;
+      case BKPStatus.COMPLETED:
+        return hasGrading ? 7 : 6;
+      default:
+        return 0;
     }
-    return 0;
   }
 
-  const progressStep = $derived(getProgressStep(mockBkp));
+  const progressStep = $derived(
+    bkp ? getProgressStep(bkp.status, bkp.Grading?.components?.length > 0) : 0
+  );
 
   // Define steps configuration
   const steps: { label: StepLabel; path: ResolvedPathname }[] = [
@@ -80,7 +95,7 @@
           icon: "mdi:clipboard-text-outline",
         },
         {
-          label: mockBkp.id,
+          label: bkp ? `${bkp.Proposal.companyName} - ${bkp.Proposal.position}` : "Loading...",
           icon: "mdi:briefcase-outline",
         },
       ]}

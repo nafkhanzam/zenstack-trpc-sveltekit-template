@@ -33,6 +33,13 @@ model Course with Base {
   Major   Major      @relation(fields: [majorId], references: [id])
 
   cloList String[]
+
+  @@allow('read', true)
+  @@allow(
+    'all',
+    auth().role == "ADMIN" ||
+    auth().role == "SUPERADMIN"
+  )
 }
 
 enum BKPStatus {
