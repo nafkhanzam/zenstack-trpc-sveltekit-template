@@ -66,21 +66,19 @@
   }
 
   function getGradeColor(score: number): string {
-    if (score >= 80) return "text-success";
-    if (score >= 70) return "text-info";
-    if (score >= 60) return "text-warning";
+    if (score >= 86) return "text-success";
+    if (score >= 66) return "text-info";
+    if (score >= 56) return "text-warning";
     return "text-error";
   }
 
   function getGradeLetter(score: number): string {
-    if (score >= 85) return "A";
-    if (score >= 80) return "A-";
-    if (score >= 75) return "B+";
-    if (score >= 70) return "B";
-    if (score >= 65) return "B-";
-    if (score >= 60) return "C+";
-    if (score >= 55) return "C";
-    if (score >= 50) return "D";
+    if (score >= 86) return "A";
+    if (score >= 76) return "AB";
+    if (score >= 66) return "B";
+    if (score >= 61) return "BC";
+    if (score >= 56) return "C";
+    if (score >= 41) return "D";
     return "E";
   }
 

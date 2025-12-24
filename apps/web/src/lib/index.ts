@@ -1,4 +1,5 @@
 import { env } from "$env/dynamic/public";
+import type { CreateQueryResult } from "@tanstack/svelte-query";
 import { TRPCClientError } from "@trpc/client";
 import { customAlphabet } from "nanoid";
 import toast from "svelte-french-toast";
@@ -41,3 +42,5 @@ export const getFileUrl = (key: string): string => {
 };
 
 export { uploadFile, uploadFiles } from "./upload";
+
+export type ResultType<T> = T extends CreateQueryResult<infer D> ? D : unknown;

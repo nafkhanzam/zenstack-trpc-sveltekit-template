@@ -21,26 +21,6 @@
     },
   });
 
-  function getGradeColor(grade: string | null | undefined): string {
-    if (!grade) return "text-base-content";
-    if (grade.startsWith("A")) return "text-success";
-    if (grade.startsWith("B")) return "text-info";
-    if (grade.startsWith("C")) return "text-warning";
-    return "text-error";
-  }
-
-  function calculateAverageScore(components: any[]): number {
-    if (!components || components.length === 0) return 0;
-    const total = components.reduce((sum, c) => sum + (c.score || 0), 0);
-    return Math.round((total / components.length) * 100) / 100;
-  }
-
-  function getAverageGrade(components: any[]): string {
-    if (!components || components.length === 0) return "-";
-    // Find the most common grade or use the first one
-    return components[0]?.grade || "-";
-  }
-
   function calculateDurationMonths(startDate: Date | string, endDate: Date | string): number {
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -51,8 +31,6 @@
 
 <Query q={bkpQ}>
   {#snippet children(bkp)}
-    {@const avgScore = calculateAverageScore(bkp.Grading?.components || [])}
-    {@const avgGrade = getAverageGrade(bkp.Grading?.components || [])}
     {@const totalWeeks = bkp.WeeklyReports?.WeeklyReportList?.length || 0}
     {@const durationMonths = bkp.Proposal?.startDate && bkp.Proposal?.endDate
       ? calculateDurationMonths(bkp.Proposal.startDate, bkp.Proposal.endDate)
@@ -77,20 +55,6 @@
           </p>
 
           <div class="mt-4 flex flex-wrap justify-center gap-3">
-            <div class="rounded-lg bg-base-100 px-4 py-3 shadow-md">
-              <div class="text-2xl font-bold {getGradeColor(avgGrade)}">
-                {avgGrade}
-              </div>
-              <div class="text-xs text-base-content/70">Average Grade</div>
-            </div>
-
-            <div class="rounded-lg bg-base-100 px-4 py-3 shadow-md">
-              <div class="text-2xl font-bold text-primary">
-                {avgScore}
-              </div>
-              <div class="text-xs text-base-content/70">Average Score</div>
-            </div>
-
             <div class="rounded-lg bg-base-100 px-4 py-3 shadow-md">
               <div class="text-2xl font-bold text-secondary">
                 {durationMonths}
@@ -179,19 +143,12 @@
           <h2 class="card-title text-base">Statistics</h2>
           <div class="divider my-2"></div>
 
-          <div class="grid gap-2 md:grid-cols-4">
+          <div class="grid gap-2 md:grid-cols-2">
             <div class="rounded-lg bg-primary/10 p-3 text-center">
               <div class="text-2xl font-bold text-primary">
                 {totalWeeks}
               </div>
               <div class="text-xs text-base-content/70">Weekly Reports</div>
-            </div>
-
-            <div class="rounded-lg bg-success/10 p-3 text-center">
-              <div class="text-2xl font-bold text-success">
-                {bkp.Grading?.components?.length || 0}
-              </div>
-              <div class="text-xs text-base-content/70">Graded Components</div>
             </div>
 
             <div class="rounded-lg bg-info/10 p-3 text-center">
@@ -200,70 +157,9 @@
               </div>
               <div class="text-xs text-base-content/70">Duration (Months)</div>
             </div>
-
-            <div class="rounded-lg bg-secondary/10 p-3 text-center">
-              <div class="text-2xl font-bold text-secondary">
-                {avgScore}
-              </div>
-              <div class="text-xs text-base-content/70">Avg Score</div>
-            </div>
           </div>
         </div>
       </div>
-
-      <!-- Grading Components -->
-      {#if bkp.Grading?.components && bkp.Grading.components.length > 0}
-        <div class="card mb-4 bg-base-100 shadow-xl">
-          <div class="card-body p-4">
-            <h2 class="card-title text-base">Grading Components</h2>
-            <div class="divider my-2"></div>
-
-            <div class="grid gap-3 md:grid-cols-2">
-              {#each bkp.Grading.components as component, idx (idx)}
-                <div
-                  class="rounded-lg border-2 border-base-300 bg-base-100 p-3 transition-all hover:border-primary/50"
-                >
-                  <div class="mb-2 flex items-center justify-between">
-                    <h3 class="text-sm font-bold">Component {idx + 1}</h3>
-                    <span class="badge {getGradeColor(component.grade)} badge-lg">
-                      {component.grade || "-"}
-                    </span>
-                  </div>
-                  <div class="space-y-1 text-xs">
-                    <div>
-                      <span class="font-semibold">Score:</span>
-                      <span class="ml-2">{component.score || "-"}</span>
-                    </div>
-                    {#if component.courseId}
-                      <div>
-                        <span class="font-semibold">Course ID:</span>
-                        <span class="ml-2">{component.courseId}</span>
-                      </div>
-                    {/if}
-                    {#if component.gradedAt}
-                      <div>
-                        <span class="font-semibold">Graded:</span>
-                        <span class="ml-2">
-                          {new Date(component.gradedAt).toLocaleDateString("id-ID", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })}
-                        </span>
-                      </div>
-                    {/if}
-                    {#if component.graderComments}
-                      <div class="mt-2 rounded bg-base-200 p-2">
-                        <p class="text-xs">{component.graderComments}</p>
-                      </div>
-                    {/if}
-                  </div>
-                </div>
-              {/each}
-            </div>
-          </div>
-        </div>
-      {/if}
 
       <!-- Grader Information -->
       {#if bkp.Grading__User}

@@ -11,24 +11,39 @@
   // Configuration
   const brandHref = resolve("/");
 
-  const navItems: NavItem[] = [
+  const isAdmin = $derived(user().role === "ADMIN" || user().role === "SUPERADMIN");
+
+  const navItems = $derived<NavItem[]>([
     // { _type: "single", label: "Home", href: resolve("/") },
     { _type: "single", label: "My BKP", href: resolve("/bkp") },
     { _type: "single", label: "Courses", href: resolve("/courses") },
     { _type: "single", label: "Important Links", href: resolve("/links") },
-  ];
+    ...(isAdmin
+      ? [
+          {
+            _type: "dropdown" as const,
+            label: "Admin",
+            children: [
+              { _type: "single" as const, label: "User Management", href: resolve("/admin/users") },
+              { _type: "single" as const, label: "BKP Management", href: resolve("/admin/bkp") },
+              { _type: "single" as const, label: "My Gradings", href: resolve("/admin/gradings") },
+            ],
+          },
+        ]
+      : []),
+  ]);
 
   // Account dropdown items
   const accountDropdownItems: NavSingle[] = [
-    { _type: "single", label: "Profile", href: resolve("/profile") },
-    { _type: "single", label: "Settings", href: resolve("/settings") },
+    // { _type: "single", label: "Profile", href: resolve("/profile") },
+    // { _type: "single", label: "Settings", href: resolve("/settings") },
     { _type: "single", label: "Logout", href: resolve("/logout") },
   ];
 </script>
 
 <div class="bg-base-300 shadow-lg">
   <div class="navbar container mx-auto">
-    <div class="navbar-start">
+    <div class="navbar-start w-full">
       <!-- Mobile dropdown -->
       <div class="dropdown">
         <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
@@ -72,7 +87,15 @@
                 <ul class="z-1 w-52 rounded-t-none bg-base-100 p-2 shadow">
                   {#each item.children as child (child.label)}
                     {#if child.href}
-                      <li><a href={child.href}>{child.label}</a></li>
+                      <li>
+                        <a
+                          href={child.href}
+                          onclick={(e) => {
+                            const details = e.currentTarget.closest("details");
+                            if (details) details.open = false;
+                          }}>{child.label}</a
+                        >
+                      </li>
                     {/if}
                   {/each}
                 </ul>

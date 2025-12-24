@@ -3,6 +3,7 @@
   import { trpc } from "$lib/client.svelte";
   import { token, refresh } from "$lib/stores/token.svelte";
   import { goto } from "$app/navigation";
+  import { page } from "$app/state";
   import Icon from "@iconify/svelte";
 
   let username = $state("");
@@ -25,7 +26,8 @@
       token.value = res.accessToken;
       refresh.value = res.refreshToken;
       toast.success("Login successful!");
-      goto("/");
+      const redirectTo = page.url.searchParams.get("redirect") || "/";
+      goto(redirectTo);
     } catch (error: any) {
       toast.error(error.message || "Login failed");
     } finally {
@@ -48,7 +50,8 @@
       token.value = res.accessToken;
       refresh.value = res.refreshToken;
       toast.success(`Logged in with ${provider}!`);
-      goto("/");
+      const redirectTo = page.url.searchParams.get("redirect") || "/";
+      goto(redirectTo);
     } catch (error: any) {
       toast.error(error.message || "SSO login failed");
     } finally {

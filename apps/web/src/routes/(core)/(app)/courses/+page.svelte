@@ -5,6 +5,8 @@
   import { CourseCard } from "../_/courses";
   import { client } from "$lib/client.svelte";
   import Query from "$lib/components/Query.svelte";
+    import type { Course } from "$lib/zenstack/models";
+    import type { ResultType } from "$lib";
 
   // Page content
   const pageTitle = "Course Catalog";
@@ -49,7 +51,7 @@
   let searchQuery = $state("");
   let filterType = $state<string>("all");
 
-  function filterCourses(courses: any[]) {
+  function filterCourses(courses: ResultType<typeof coursesQ>) {
     return courses.filter((course) => {
       const matchesSearch =
         course.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -116,9 +118,8 @@
               <div class="alert">
                 <Icon icon={infoIcon} class="h-6 w-6 shrink-0" />
                 <span>
-                  Showing <strong>{filteredCourses.length}</strong> of <strong
-                    >{courses.length}</strong
-                  >
+                  Showing <strong>{filteredCourses.length}</strong> of
+                  <strong>{courses.length}</strong>
                   courses
                 </span>
               </div>
