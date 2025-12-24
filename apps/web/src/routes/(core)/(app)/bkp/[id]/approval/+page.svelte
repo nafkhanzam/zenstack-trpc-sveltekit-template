@@ -47,11 +47,7 @@
   type ApprovalStatus = "pending" | "approved" | "rejected";
 
   function getApprovalStatus(bkp: BKP): ApprovalStatus {
-    if (bkp.status === "PROPOSAL") {
-      return "pending";
-    } else if (bkp.status === "WAITING_PROPOSAL_APPROVAL") {
-      return "pending";
-    } else if (bkp.ProposalApproval.reviewedAt) {
+    if (bkp.ProposalApproval.reviewedAt) {
       // If reviewed, check if it was approved (moved to next stage) or rejected
       if (bkp.status === "REGISTRATION" ||
           bkp.status === "WAITING_REGISTRATION_APPROVAL" ||
@@ -62,6 +58,10 @@
         return "approved";
       }
       return "rejected";
+    } else if (bkp.status === "WAITING_PROPOSAL_APPROVAL") {
+      return "pending";
+    } else if (bkp.status === "PROPOSAL") {
+      return "pending";
     }
     return "pending";
   }
@@ -473,7 +473,11 @@
             {/if}
           </button>
         {/if}
-        <a href={resolve(`/bkp/${bkpId}/register`)} class="btn gap-2 btn-primary">
+        <a
+          href={resolve(`/bkp/${bkpId}/register`)}
+          class="btn gap-2 btn-primary"
+          class:btn-disabled={approvalStatus !== "approved"}
+        >
           <Icon icon="mdi:file-check-outline" class="h-5 w-5" />
           Go to Registration
         </a>

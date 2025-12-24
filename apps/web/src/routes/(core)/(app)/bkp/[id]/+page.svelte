@@ -135,7 +135,7 @@
             components: conversionCourses.map(v => ({
               courseId: v.id,
             }))
-          }
+          },
         },
       });
       toast.success("BKP proposal updated and submitted!");
@@ -151,7 +151,7 @@
   async function saveDraft() {
     isSubmitting = true;
     try {
-      const proposalData = {
+      const proposalData: BKP["Proposal"] = {
         companyName: companyName ?? undefined,
         position: position ?? undefined,
         jobDescription: jobDescription ?? undefined,
@@ -169,6 +169,11 @@
         data: {
           status: "PROPOSAL",
           Proposal: proposalData,
+          Grading: {
+            components: conversionCourses.map(v => ({
+              courseId: v.id,
+            }))
+          },
         },
       });
       toast.success("Draft saved successfully!");
@@ -199,6 +204,11 @@
       bkpType = bkp.Proposal.bkpType ?? undefined;
       jobLink = bkp.Proposal.jobLink ?? "";
       studentNotes = bkp.Proposal.studentNotes ?? "";
+
+      // Populate conversion courses from Grading components
+      conversionCourses = bkp.Grading.components.filter((v) => !!v.courseId).map((component) => ({
+        id: component.courseId!,
+      }));
     }
   });
 </script>

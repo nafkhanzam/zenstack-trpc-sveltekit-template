@@ -92,13 +92,42 @@
     }
   }
 
+  function getStatusRoute(id: string, status: BKPStatus): string {
+    switch (status) {
+      case BKPStatus.PROPOSAL:
+        return resolve(`/bkp/${id}`);
+      case BKPStatus.WAITING_PROPOSAL_APPROVAL:
+        return resolve(`/bkp/${id}/approval`);
+      case BKPStatus.REGISTRATION:
+        return resolve(`/bkp/${id}/register`);
+      case BKPStatus.WAITING_REGISTRATION_APPROVAL:
+        return resolve(`/bkp/${id}/registration-approval`);
+      case BKPStatus.WEEKLY_REPORTING:
+        return resolve(`/bkp/${id}/weekly-reports`);
+      case BKPStatus.UPLOADING_FIELD_ASSESSMENT:
+        return resolve(`/bkp/${id}/field-assessment`);
+      case BKPStatus.GRADING:
+        return resolve(`/bkp/${id}/grading`);
+      case BKPStatus.COMPLETED:
+        return resolve(`/bkp/${id}/completed`);
+      case BKPStatus.DELETED:
+      default:
+        return resolve(`/bkp/${id}`);
+    }
+  }
+
   const progressStep = $derived(getProgressStep(props.status));
+  const statusRoute = $derived(getStatusRoute(props.id, props.status));
 </script>
 
 <div
-  class="card border-l-4 bg-base-100 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl {getBorderColor(
+  class="card border-l-4 bg-base-100 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl cursor-pointer {getBorderColor(
     props.status,
   )}"
+  onclick={() => (location.href = statusRoute)}
+  role="button"
+  tabindex="0"
+  onkeydown={(e) => e.key === "Enter" && (location.href = statusRoute)}
 >
   <div class="card-body p-4 sm:p-6">
     <div class="flex flex-wrap items-start justify-between gap-4">
@@ -110,7 +139,7 @@
         <p class="mb-3 text-base-content/70">{props.position}</p>
 
         <!-- Progress Bar -->
-        <a href={resolve(`/bkp/${props.id}`)} class="group mb-3 block">
+        <a href={statusRoute} class="group mb-3 block">
           <div class="mb-1 flex items-center justify-between">
             <span class="text-sm font-semibold transition-colors group-hover:text-primary"
               >Progress: {getProgressLabel(props.status)}</span
@@ -165,23 +194,10 @@
 
     <!-- Actions -->
     <div class="mt-4 card-actions justify-end">
-      {#if props.status === BKPStatus.PROPOSAL}
-        <a href={resolve(`/bkp/${props.id}`)} class="btn btn-sm btn-primary">
-          <Icon icon="heroicons:pencil-square" class="h-4 w-4" />
-          Edit
-        </a>
-      {:else}
-        <a href={resolve(`/bkp/${props.id}`)} class="btn btn-outline btn-sm">
-          <Icon icon="heroicons:eye" class="h-4 w-4" />
-          View Details
-        </a>
-        {#if props.status === BKPStatus.WEEKLY_REPORTING}
-          <a href={resolve(`/bkp/weekly-report/${props.id}`)} class="btn btn-sm btn-primary">
-            <Icon icon="heroicons:document-text" class="h-4 w-4" />
-            Weekly Reports
-          </a>
-        {/if}
-      {/if}
+      <a href={statusRoute} class="btn btn-sm btn-primary">
+        <Icon icon="heroicons:eye" class="h-4 w-4" />
+        {props.status === BKPStatus.PROPOSAL ? "Edit" : "View Details"}
+      </a>
     </div>
   </div>
 </div>

@@ -154,6 +154,8 @@ type ComponentGrading {
 
 type Grading {
   components ComponentGrading[] @default([])
+
+  @@allow('update,create,delete', auth().role == "SUPERADMIN")
 }
 
 model BKP with Base {

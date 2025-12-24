@@ -5,7 +5,7 @@
   import Icon from "@iconify/svelte";
   import { client } from "$lib/client.svelte";
   import Query from "$lib/components/Query.svelte";
-  import { nanoid, uploadFile } from "$lib";
+  import { nanoid, uploadFile, getFileUrl } from "$lib";
   import { toast } from "$lib";
   import { setActiveStep, STEP_LABELS } from "../bkp-step.svelte";
     import type { BKP } from "$lib/zenstack/models";
@@ -105,6 +105,10 @@
   let studentNotes = $state("");
   let isSubmitting = $state(false);
 
+  // Modal state
+  let deleteModal: HTMLDialogElement | null = $state(null);
+  let documentToDelete: { type: "required" | "additional"; id: string; fieldKey?: string } | null = $state(null);
+
   function addAdditionalDocument() {
     additionalDocuments.push({
       id: crypto.randomUUID(),
@@ -116,6 +120,61 @@
 
   function removeAdditionalDocument(id: string) {
     additionalDocuments = additionalDocuments.filter((doc) => doc.id !== id);
+  }
+
+  function openDeleteModal(type: "required" | "additional", id: string, fieldKey?: string) {
+    documentToDelete = { type, id, fieldKey };
+    deleteModal?.showModal();
+  }
+
+  async function handleDeleteDocument() {
+    if (!documentToDelete) return;
+
+    try {
+      if (documentToDelete.type === "required" && documentToDelete.fieldKey) {
+        // Delete required document
+        const updateData: any = {
+          BKPRegistration: {
+            [documentToDelete.fieldKey]: null,
+          },
+        };
+
+        await $updateBKPMutation.mutateAsync({
+          where: { id: bkpId },
+          data: updateData,
+        });
+
+        toast.success("Document deleted successfully!");
+      } else if (documentToDelete.type === "additional") {
+        // Remove from additional documents array
+        const updatedAdditional = additionalDocuments.filter(
+          (doc) => doc.id !== documentToDelete!.id
+        );
+        additionalDocuments = updatedAdditional;
+
+        await $updateBKPMutation.mutateAsync({
+          where: { id: bkpId },
+          data: {
+            BKPRegistration: {
+              additionalDocuments: updatedAdditional.map((v) => ({
+                key: v.key,
+                name: v.name,
+                notes: v.notes,
+              })),
+            },
+          },
+        });
+
+        toast.success("Additional document deleted successfully!");
+      }
+
+      deleteModal?.close();
+      documentToDelete = null;
+      $bkpQ.refetch();
+    } catch (error) {
+      console.error("Error deleting document:", error);
+      toast.error("Failed to delete document");
+    }
   }
 
   function handleFileChange(docId: string, event: Event) {
@@ -361,7 +420,9 @@
                       <Icon icon="mdi:comment-alert-outline" class="h-4 w-4" />
                       Rejection Reason:
                     </h4>
-                    <p class="mt-1 text-xs whitespace-pre-wrap">{bkp.RegistrationApproval.reviewerNotes}</p>
+                    <p class="mt-1 text-xs whitespace-pre-wrap">
+                      {bkp.RegistrationApproval.reviewerNotes}
+                    </p>
                   </div>
                 </div>
               {/if}
@@ -542,10 +603,31 @@
                     {/if}
                   </div>
 
-                  {#if hasFile}
-                    <div class="mb-3 rounded bg-base-200 p-2 text-xs">
+                  {#if hasFile && bkp.BKPRegistration[doc.fieldKey]}
+                    <div class="mb-3 rounded bg-base-200 p-3">
                       <div class="flex items-center justify-between">
-                        <span class="font-semibold">{existingKey}</span>
+                        <span class="text-xs font-semibold">{existingKey}</span>
+                      </div>
+                      <div class="mt-2 flex gap-2">
+                        <a
+                          href={getFileUrl(bkp.BKPRegistration[doc.fieldKey]!)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="btn gap-2 btn-outline btn-sm"
+                        >
+                          <Icon icon="mdi:eye-outline" class="h-4 w-4" />
+                          View
+                        </a>
+                        {#if canEdit}
+                          <button
+                            type="button"
+                            class="btn gap-2 btn-outline btn-sm btn-error"
+                            onclick={() => openDeleteModal("required", doc.id, doc.fieldKey)}
+                          >
+                            <Icon icon="mdi:delete" class="h-4 w-4" />
+                            Delete
+                          </button>
+                        {/if}
                       </div>
                     </div>
                   {/if}
@@ -619,10 +701,31 @@
                     </div>
                   </div>
 
-                  {#if hasFile}
-                    <div class="mb-3 rounded bg-base-200 p-2 text-xs">
+                  {#if hasFile && doc.key}
+                    <div class="mb-3 rounded bg-base-200 p-3">
                       <div class="flex items-center justify-between">
-                        <span class="font-semibold">{existingFileName}</span>
+                        <span class="text-xs font-semibold">{existingFileName}</span>
+                      </div>
+                      <div class="mt-2 flex gap-2">
+                        <a
+                          href={getFileUrl(doc.key)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="btn gap-2 btn-outline btn-sm"
+                        >
+                          <Icon icon="mdi:eye-outline" class="h-4 w-4" />
+                          View
+                        </a>
+                        {#if canEdit}
+                          <button
+                            type="button"
+                            class="btn gap-2 btn-outline btn-sm btn-error"
+                            onclick={() => openDeleteModal("additional", doc.id)}
+                          >
+                            <Icon icon="mdi:delete" class="h-4 w-4" />
+                            Delete
+                          </button>
+                        {/if}
                       </div>
                     </div>
                   {/if}
@@ -762,3 +865,24 @@
     </div>
   {/snippet}
 </Query>
+
+<!-- Delete Confirmation Modal -->
+<dialog bind:this={deleteModal} class="modal">
+  <div class="modal-box">
+    <form method="dialog">
+      <button class="btn absolute top-2 right-2 btn-circle btn-ghost btn-sm">✕</button>
+    </form>
+    <h3 class="mb-4 text-lg font-bold">Delete Document</h3>
+    <p class="mb-4">Are you sure you want to delete this document? This action cannot be undone.</p>
+
+    <div class="modal-action">
+      <form method="dialog">
+        <button class="btn btn-ghost">Cancel</button>
+      </form>
+      <button class="btn btn-error" onclick={handleDeleteDocument}>Delete</button>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>

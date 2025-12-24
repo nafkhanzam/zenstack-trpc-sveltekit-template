@@ -1,10 +1,13 @@
 <script lang="ts">
   import { page } from "$app/state";
+  import { resolve } from "$app/paths";
   import Icon from "@iconify/svelte";
   import { client } from "$lib/client.svelte";
   import Query from "$lib/components/Query.svelte";
   import { setActiveStep, STEP_LABELS } from "../bkp-step.svelte";
-    import type { BKP, Course } from "$lib/zenstack/models";
+  import { user } from "$lib/stores/user.svelte";
+  import { toast } from "$lib";
+  import type { BKP, Course } from "$lib/zenstack/models";
 
   $effect(() => {
     setActiveStep(STEP_LABELS.GRADING);
@@ -20,6 +23,19 @@
       Grading__User: true,
     },
   });
+
+  // Update mutation
+  const updateBKPMutation = client.bKP.useUpdate();
+
+  // Check if user is admin or superadmin
+  const isAdminOrSuperAdmin = $derived(["ADMIN", "SUPERADMIN"].includes(user().role));
+
+  // State for completing
+  let isCompleting = $state(false);
+
+  // State for editing grades
+  let editingGrades = $state<Record<string, { score: number | null; comments: string }>>({});
+  let isSavingGrades = $state(false);
 
   // Fetch all courses to get details
   const coursesQf = (courseIds: string[]) => client.course.useFindMany({
@@ -106,6 +122,74 @@
 
     return totalSks > 0 ? (totalWeightedScore / totalSks) * 100 : 0;
   }
+
+  function areAllGradesFilled(components: BKP["Grading"]["components"]): boolean {
+    if (components.length === 0) return false;
+    return components.every((comp) => comp.score !== null && comp.score !== undefined);
+  }
+
+  async function handleSaveGrades(bkp: BKP) {
+    isSavingGrades = true;
+    try {
+      // Update components with new grades
+      const updatedComponents = bkp.Grading.components.map((comp) => {
+        const edit = editingGrades[comp.courseId!];
+        if (edit) {
+          return {
+            ...comp,
+            score: edit.score,
+            grade: edit.score !== null ? getGradeLetter(edit.score) : null,
+            graderComments: edit.comments,
+            gradedAt: new Date().toISOString(),
+          };
+        }
+        return comp;
+      });
+
+      await $updateBKPMutation.mutateAsync({
+        where: { id: bkpId },
+        data: {
+          Grading: {
+            ...bkp.Grading,
+            components: updatedComponents.map(v => ({
+              ...v,
+              gradedAt: v.gradedAt ? new Date(v.gradedAt) : null,
+            })),
+          },
+        },
+      });
+
+      toast.success("Grades saved successfully!");
+      editingGrades = {};
+      $bkpQ.refetch();
+    } catch (error) {
+      console.error("Error saving grades:", error);
+      toast.error("Failed to save grades");
+    } finally {
+      isSavingGrades = false;
+    }
+  }
+
+  async function handleMarkAsCompleted() {
+    isCompleting = true;
+    try {
+      await $updateBKPMutation.mutateAsync({
+        where: { id: bkpId },
+        data: {
+          status: "COMPLETED",
+          Grading__UserId: user().id,
+        },
+      });
+
+      toast.success("BKP marked as completed successfully!");
+      $bkpQ.refetch();
+    } catch (error) {
+      console.error("Error marking BKP as completed:", error);
+      toast.error("Failed to mark BKP as completed");
+    } finally {
+      isCompleting = false;
+    }
+  }
 </script>
 
 <Query q={bkpQ}>
@@ -130,13 +214,48 @@
         })}
         {@const totalSks = courseDetails.reduce((sum, item) => sum + (item.course?.sks || 0), 0)}
         {@const weightedScore = calculateWeightedScore(components, allCourses)}
+        {@const allGradesFilled = areAllGradesFilled(components)}
+        {@const canMarkAsCompleted =
+          isAdminOrSuperAdmin && allGradesFilled && bkp.status === "GRADING"}
+        {@const canEditGrades =
+          isAdminOrSuperAdmin && ["GRADING", "PENDING_GRADING"].includes(bkp.status)}
+        {@const hasUnsavedChanges = Object.keys(editingGrades).length > 0}
 
         <div class="max-w-5xl">
           <!-- Header -->
           <div class="mb-6">
             <h1 class="mb-2 text-xl font-bold">BKP Grading</h1>
-            <p class="text-xs text-base-content/70">View your BKP assessment and final grade</p>
+            <p class="text-xs text-base-content/70">
+              {#if canEditGrades}
+                Grade each course and provide feedback for the student
+              {:else}
+                View your BKP assessment and final grade
+              {/if}
+            </p>
           </div>
+
+          <!-- Admin Grading Instructions -->
+          {#if canEditGrades}
+            <div class="card mb-4 bg-primary/10 shadow-xl">
+              <div class="card-body p-4">
+                <div class="flex items-start gap-3">
+                  <div
+                    class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/20"
+                  >
+                    <Icon icon="mdi:clipboard-text-outline" class="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-bold">Grading Instructions</h3>
+                    <p class="mt-1 text-xs text-base-content/70">
+                      Enter a score (0-100) and optional comments for each course. The grade letter
+                      will be automatically calculated. After grading all courses, you can mark the
+                      BKP as completed.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {/if}
 
           <!-- Status Card -->
           <div class="card mb-4 bg-base-100 shadow-xl">
@@ -253,6 +372,7 @@
                   {#each courseDetails as item (item.component.courseId)}
                     {@const hasScore =
                       item.component.score !== null && item.component.score !== undefined}
+                    {@const courseId = item.component.courseId!}
                     <div
                       class="rounded-lg border-2 border-base-300 p-3 transition-all hover:border-primary/50"
                     >
@@ -299,25 +419,106 @@
                         </div>
                       </div>
 
-                      {#if showGrades && hasScore}
-                        <progress
-                          class="progress mt-2 w-full progress-primary"
-                          value={item.component.score}
-                          max={100}
-                        ></progress>
-                      {/if}
-
-                      {#if showGrades && item.component.graderComments}
-                        <div class="mt-2 rounded bg-base-200 p-2">
-                          <p class="text-xs font-semibold">Comments:</p>
-                          <p class="text-xs text-base-content/70">
-                            {item.component.graderComments}
-                          </p>
+                      {#if canEditGrades}
+                        <!-- Admin grading inputs -->
+                        <div class="mt-3 space-y-2 rounded-lg bg-base-200 p-3">
+                          <div class="flex items-center gap-3">
+                            <div class="flex-1">
+                              <label class="label py-0">
+                                <span class="label-text text-xs font-semibold">Score (0-100)</span>
+                              </label>
+                              <input
+                                type="number"
+                                min="0"
+                                max="100"
+                                class="input input-sm w-full input-bordered"
+                                placeholder="Enter score"
+                                value={editingGrades[courseId]?.score ?? item.component.score ?? ""}
+                                oninput={(e) => {
+                                  const value = e.currentTarget.value;
+                                  const score = value === "" ? null : Number(value);
+                                  editingGrades[courseId] = {
+                                    score,
+                                    comments:
+                                      editingGrades[courseId]?.comments ||
+                                      item.component.graderComments ||
+                                      "",
+                                  };
+                                }}
+                              />
+                            </div>
+                            {#if editingGrades[courseId]?.score !== null && editingGrades[courseId]?.score !== undefined}
+                              {@const currentScore = editingGrades[courseId]?.score ?? 0}
+                              <div class="text-center">
+                                <div class="text-xs text-base-content/70">Grade</div>
+                                <div class="text-lg font-bold {getGradeColor(currentScore)}">
+                                  {getGradeLetter(currentScore)}
+                                </div>
+                              </div>
+                            {/if}
+                          </div>
+                          <div>
+                            <label class="label py-0">
+                              <span class="label-text text-xs font-semibold"
+                                >Comments (Optional)</span
+                              >
+                            </label>
+                            <textarea
+                              class="textarea textarea-sm w-full textarea-bordered"
+                              placeholder="Add grading comments..."
+                              rows="2"
+                              value={editingGrades[courseId]?.comments ??
+                                item.component.graderComments ??
+                                ""}
+                              oninput={(e) => {
+                                const currentScore =
+                                  editingGrades[courseId]?.score ?? item.component.score;
+                                editingGrades[courseId] = {
+                                  score: currentScore ?? null,
+                                  comments: e.currentTarget.value,
+                                };
+                              }}
+                            ></textarea>
+                          </div>
                         </div>
+                      {:else}
+                        {#if showGrades && hasScore}
+                          <progress
+                            class="progress mt-2 w-full progress-primary"
+                            value={item.component.score}
+                            max={100}
+                          ></progress>
+                        {/if}
+
+                        {#if showGrades && item.component.graderComments}
+                          <div class="mt-2 rounded bg-base-200 p-2">
+                            <p class="text-xs font-semibold">Comments:</p>
+                            <p class="text-xs text-base-content/70">
+                              {item.component.graderComments}
+                            </p>
+                          </div>
+                        {/if}
                       {/if}
                     </div>
                   {/each}
                 </div>
+                {#if canEditGrades}
+                  <div class="mt-3 flex justify-end gap-2">
+                    <button
+                      class="btn gap-2 btn-primary"
+                      onclick={() => handleSaveGrades(bkp)}
+                      disabled={isSavingGrades}
+                    >
+                      {#if isSavingGrades}
+                        <span class="loading loading-spinner loading-sm"></span>
+                        Saving Grades...
+                      {:else}
+                        <Icon icon="mdi:content-save-outline" class="h-5 w-5" />
+                        Save Grades
+                      {/if}
+                    </button>
+                  </div>
+                {/if}
               {:else}
                 <div class="alert alert-info">
                   <Icon icon="mdi:information-outline" class="h-5 w-5 shrink-0" />
@@ -372,6 +573,73 @@
                 </div>
               </div>
             </div>
+          </div>
+
+          <!-- Admin Actions -->
+          {#if canMarkAsCompleted}
+            <div class="card mb-4 bg-base-100 shadow-xl">
+              <div class="card-body p-4">
+                <h2 class="card-title text-base">
+                  <div class="flex h-8 w-8 items-center justify-center rounded-full bg-success/10">
+                    <Icon icon="mdi:shield-check-outline" class="h-5 w-5 text-success" />
+                  </div>
+                  Admin Actions
+                </h2>
+                <div class="divider my-2"></div>
+
+                {#if hasUnsavedChanges}
+                  <div class="alert alert-warning">
+                    <Icon icon="mdi:alert-outline" class="h-5 w-5 shrink-0" />
+                    <div>
+                      <h3 class="text-sm font-bold">Unsaved Changes</h3>
+                      <p class="text-xs">
+                        Please save your grade changes before marking the BKP as completed.
+                      </p>
+                    </div>
+                  </div>
+                {:else}
+                  <div class="alert alert-success">
+                    <Icon icon="mdi:information-outline" class="h-5 w-5 shrink-0" />
+                    <div>
+                      <h3 class="text-sm font-bold">All Grades Filled</h3>
+                      <p class="text-xs">
+                        All course grades have been entered. You can mark this BKP as completed.
+                      </p>
+                    </div>
+                  </div>
+                {/if}
+
+                <div class="mt-3 flex justify-end">
+                  <button
+                    class="btn gap-2 btn-success"
+                    onclick={handleMarkAsCompleted}
+                    disabled={isCompleting || hasUnsavedChanges}
+                  >
+                    {#if isCompleting}
+                      <span class="loading loading-spinner loading-sm"></span>
+                      Marking as Completed...
+                    {:else}
+                      <Icon icon="mdi:check-circle-outline" class="h-5 w-5" />
+                      Mark as Completed
+                    {/if}
+                  </button>
+                </div>
+              </div>
+            </div>
+          {/if}
+
+          <!-- Navigation Action Buttons -->
+          <div class="mt-8 flex flex-wrap justify-center gap-4">
+            <a href={resolve(`/bkp/${bkpId}/field-assessment`)} class="btn gap-2 btn-outline">
+              <Icon icon="mdi:arrow-left" class="h-5 w-5" />
+              Back to Field Assessment
+            </a>
+            {#if gradingStatus === "completed"}
+              <a href={resolve("/bkp")} class="btn gap-2 btn-primary">
+                <Icon icon="mdi:check-circle-outline" class="h-5 w-5" />
+                Back to BKP List
+              </a>
+            {/if}
           </div>
         </div>
       {/snippet}
